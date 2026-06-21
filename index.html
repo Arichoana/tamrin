@@ -771,6 +771,31 @@ const API='https://tamrin-api.arichoana.workers.dev';
  ];
  ref.innerHTML=REF.map(c=>'<div class="refcat">'+c[0]+'</div>'+c[1].map(i=>'<div class="refitem">• '+i+'</div>').join('')).join('');
 })();
+
+/* ---------- 🔄 سینک بین دستگاه‌ها (آخرین تغییر برنده) ---------- */
+(function(){
+ const U='arman';
+ const _set=localStorage.setItem.bind(localStorage), _rem=localStorage.removeItem.bind(localStorage);
+ const snap=()=>{const o={}; for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i); if(k.indexOf('bf_')===0)o[k]=localStorage.getItem(k);} return o;};
+ const canon=o=>{o=o||{}; return JSON.stringify(Object.keys(o).sort().reduce((a,k)=>(a[k]=o[k],a),{}));};
+ let ready=false, t;
+ const push=()=>{ try{ fetch(API+'/sync?u='+U,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(snap())}).catch(()=>{}); }catch(e){} };
+ const sched=()=>{ if(!ready)return; clearTimeout(t); t=setTimeout(push,700); };
+ localStorage.setItem=function(k,v){ _set(k,v); if((''+k).indexOf('bf_')===0 && k!=='bf_t'){ _set('bf_t',''+Date.now()); sched(); } };
+ localStorage.removeItem=function(k){ _rem(k); if((''+k).indexOf('bf_')===0 && k!=='bf_t'){ _set('bf_t',''+Date.now()); sched(); } };
+ (async function(){
+   let remote=null;
+   try{ remote=await (await fetch(API+'/sync?u='+U)).json(); }catch(e){}
+   const local=snap(), lt=+(local['bf_t']||0), rt=+((remote&&remote['bf_t'])||0);
+   if(remote && typeof remote==='object' && rt>lt && canon(local)!==canon(remote)){
+     Object.keys(local).forEach(k=>_rem(k));
+     Object.keys(remote).forEach(k=>_set(k,remote[k]));
+     location.reload(); return;
+   }
+   ready=true;
+   if(canon(local)!==canon(remote||{})){ if(!local['bf_t']) _set('bf_t',''+Date.now()); push(); }
+ })();
+})();
 </script>
 </body>
 </html>
