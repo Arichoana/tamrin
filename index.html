@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ff6a00">
+<title>برنامه تمرین — Basic-Fit Essen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--orange:#ff6a00; --bg:#0f1115; --card:#1b1e25; --line:#2c313b; --txt:#eef1f6; --mut:#9aa3b2;
+    --push:#ff6a00; --pull:#3da5ff; --legs:#34c759; --fail:#ff4d4d; --pyr:#ffb02e;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  body{margin:0; font-family:'Vazirmatn',Tahoma,'Segoe UI',sans-serif; background:var(--bg); color:var(--txt); line-height:1.7; padding-bottom:40px}
+  a{color:inherit; text-decoration:none}
+  .wrap{max-width:560px; margin:0 auto}
+  header{background:linear-gradient(135deg,#16181d,#202531); padding:18px 16px 16px; border-bottom:3px solid var(--orange)}
+  .brand{display:flex; align-items:center; gap:8px; font-weight:800; font-size:15px}
+  .brand .dot{background:var(--orange); color:#000; padding:2px 8px; border-radius:6px; font-size:13px}
+  h1{font-size:20px; margin:10px 0 2px; font-weight:800}
+  .sub{color:var(--mut); font-size:13px}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px}
+  .chip{background:#0e1117; border:1px solid var(--line); color:var(--mut); font-size:12px; padding:4px 9px; border-radius:20px}
+  .chip b{color:var(--txt)}
+  .banner{margin:12px 16px 0; background:rgba(255,106,0,.12); border:1px solid rgba(255,106,0,.4); color:#ffd9bf; border-radius:12px; padding:10px 12px; font-size:12.5px}
+  .banner b{color:#ffb27a}
+  .dailycard{margin:12px 16px 0; background:linear-gradient(135deg,#1a2330,#181c24); border:1px solid #2c3340; border-inline-start:3px solid #3da5ff; border-radius:14px; padding:13px 15px}
+  .dailycard .dl{font-size:11px; color:#7fb3e8; font-weight:700; margin-bottom:5px}
+  .dailycard .dm{font-size:14px; line-height:2.1; color:#e6edf6}
+  .dailycard .dmore{margin-top:8px; background:transparent; border:none; color:#7fb3e8; font-family:inherit; font-size:12px; cursor:pointer; padding:0}
+  details.prog{margin:12px 16px 0; background:var(--card); border:1px solid var(--line); border-radius:12px}
+  details.prog summary{padding:12px 14px; font-weight:700; cursor:pointer; list-style:none; font-size:14px}
+  details.prog summary::-webkit-details-marker{display:none}
+  details.prog summary::after{content:'▾'; float:left; color:var(--mut)} details.prog[open] summary::after{content:'▴'}
+  .progbody{padding:2px 14px 14px}
+  .wtin{display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap}
+  .wtin input{width:80px; background:#23262e; border:1px solid var(--line); color:var(--txt); border-radius:8px; padding:8px; font-family:inherit; font-size:15px; text-align:center; font-weight:700}
+  .wtin input::placeholder{color:#5d6675; font-weight:400}
+  .wtin button{background:var(--legs); color:#04210d; border:none; font-family:inherit; font-weight:700; font-size:13px; padding:9px 14px; border-radius:10px; cursor:pointer}
+  .wtin label{font-size:13px; color:var(--mut)}
+  .chartwrap{background:#0e1117; border:1px solid var(--line); border-radius:12px; padding:10px}
+  .chartwrap svg{width:100%; height:160px; display:block}
+  .progstat{font-size:12.5px; color:#b9c2d0; line-height:1.95; margin-top:10px} .progstat b{color:var(--txt)}
+  .badbtn{margin-top:10px; background:transparent; border:1px solid #8a3030; color:#ff9b9b; font-family:inherit; font-size:12px; padding:7px 12px; border-radius:20px; cursor:pointer}
+  .goalcard{margin:12px 16px 0; background:linear-gradient(135deg,#16261b,#141b16); border:1px solid #234a2f; border-radius:14px; padding:12px 14px}
+  .goalcard-top{font-size:13px; font-weight:700} .goalcard-top b{color:#34c759; font-size:15px}
+  .gbar{height:9px; background:#0e1117; border-radius:6px; margin:9px 0 7px; overflow:hidden}
+  .gbar>div{height:100%; width:0; background:linear-gradient(90deg,#34c759,#a3e635); transition:width .4s}
+  .goalcard-msg{font-size:12px; color:#a7e9bd; line-height:1.8}
+  .block{margin:12px 16px 0; background:linear-gradient(135deg,#1d2530,#191c22); border:1px solid var(--line); border-radius:14px; padding:12px 14px}
+  .block-top{display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; font-weight:700}
+  .block-top b{color:var(--orange); font-size:15px}
+  .block-btn{background:transparent; border:1px solid var(--line); color:var(--mut); font-family:inherit; font-size:12px; padding:6px 10px; border-radius:9px; cursor:pointer; white-space:nowrap}
+  .bar{height:8px; background:#0e1117; border-radius:6px; margin:10px 0 8px; overflow:hidden}
+  .bar>div{height:100%; background:linear-gradient(90deg,var(--orange),var(--pyr)); width:16%; transition:width .3s}
+  .block-note{font-size:12px; color:var(--mut)}
+  .block-note.warn{color:#ffd27a; font-weight:700}
+  details.zones{margin:12px 16px 0; background:var(--card); border:1px solid var(--line); border-radius:12px}
+  details.zones summary{padding:12px 14px; font-weight:700; cursor:pointer; list-style:none; font-size:14px}
+  details.zones summary::-webkit-details-marker{display:none}
+  details.zones summary::after{content:'▾'; float:left; color:var(--mut)}
+  details.zones[open] summary::after{content:'▴'}
+  .zlist{padding:0 14px 12px; font-size:12.5px; color:var(--mut)}
+  .zlist div{padding:6px 0; border-top:1px solid var(--line)}
+  .zlist b{color:var(--txt)}
+  .reflist{padding:0 14px 14px}
+  .refcat{font-weight:800; font-size:13px; color:#ffb27a; margin:8px 0 4px; padding-top:11px; border-top:1px solid var(--line)}
+  .refitem{font-size:12px; color:#b9c2d0; padding:3px 0}
+  .tabs{position:sticky; top:0; z-index:20; display:flex; gap:6px; padding:10px 16px; background:rgba(15,17,21,.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line)}
+  .tab{flex:1; text-align:center; padding:9px 0; border-radius:12px; font-weight:700; font-size:13px; background:var(--card); border:1px solid var(--line); color:var(--mut); cursor:pointer; line-height:1.4}
+  .tab.on[data-day="push"]{background:var(--push); color:#000; border-color:var(--push)}
+  .tab.on[data-day="pull"]{background:var(--pull); color:#000; border-color:var(--pull)}
+  .tab.on[data-day="legs"]{background:var(--legs); color:#000; border-color:var(--legs)}
+  .tab.on[data-day="diet"]{background:#c084fc; color:#1a1020; border-color:#c084fc}
+  .totcard{background:linear-gradient(135deg,#241c30,#191620); border:1px solid #3a2f4a; border-radius:14px; padding:13px 14px; margin-bottom:14px}
+  .totcard .t1{font-size:13px; font-weight:700} .totcard .t1 b{color:#d8b4fe}
+  .totnow{font-size:12.5px; color:var(--mut); margin-top:6px} .totnow b{color:var(--txt)}
+  .totbar{height:8px; background:#0e1117; border-radius:6px; margin-top:8px; overflow:hidden}
+  .totbar>div{height:100%; width:0; background:linear-gradient(90deg,#22c55e,#a3e635); transition:width .3s}
+  .totbar>div.over{background:linear-gradient(90deg,#f59e0b,#ef4444)}
+  .estcard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:14px; font-size:12.5px; color:#b9c2d0}
+  .estcard h4{margin:0 0 6px; font-size:13px; color:var(--txt)} .estcard ul{margin:0; padding-inline-start:18px} .estcard li{margin:3px 0}
+  .daynote{font-size:12px; color:var(--mut); margin:0 2px 12px; line-height:1.6}
+  .meal{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:12px}
+  .meal-h{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap}
+  .meal .mt{font-weight:800; font-size:15px} .meal .mcal{font-size:12px; color:var(--mut)} .meal .mcal b{color:#ffd27a}
+  .meal .mopt{font-size:14px; margin:8px 0 6px; font-weight:600; line-height:1.6}
+  .meal .mtip{font-size:11.5px; color:#9aa3b2; margin-bottom:8px; line-height:1.6}
+  .meal .swap{background:#0e1117; border:1px solid var(--line); color:var(--txt); font-family:inherit; font-size:12px; padding:7px 12px; border-radius:20px; cursor:pointer}
+  .meal.cheat{border-color:#7a5a2a; background:linear-gradient(135deg,#2a2113,#1d1810)} .meal.cheat .mt{color:#ffcf66}
+  .gl{color:#d8b4fe; font-weight:700; cursor:pointer; border-bottom:1px dashed rgba(216,180,254,.5)}
+  .gl i{font-style:normal; font-size:11px; opacity:.85}
+  #glpop{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:60; padding:24px}
+  #glpop.show{display:flex}
+  .glcard{background:var(--card); border:1px solid var(--line); border-radius:16px; max-width:330px; width:100%; padding:16px; text-align:center; max-height:85vh; overflow:auto}
+  .glcard img{width:100%; max-height:180px; object-fit:cover; border-radius:12px; margin-bottom:10px; background:#0e1117; display:block}
+  .glcard h4{margin:0; font-size:18px; font-weight:800}
+  .glcard .orig{color:var(--mut); font-size:12px; margin-top:2px}
+  .glcard p{font-size:13.5px; color:#cdd5e0; margin:10px 0 0; line-height:1.9; text-align:right}
+  .glcard .glclose{margin-top:14px; background:#c084fc; border:none; color:#1a1020; padding:9px 18px; border-radius:20px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer}
+  #rfab{position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:55; background:linear-gradient(135deg,#ef4444,#f59e0b); color:#fff; border:none; font-family:inherit; font-weight:800; font-size:13px; padding:11px 18px; border-radius:30px; box-shadow:0 6px 20px rgba(0,0,0,.5); cursor:pointer}
+  #rescue{position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; z-index:70; align-items:flex-end; justify-content:center}
+  #rescue.show{display:flex}
+  .rcard{background:var(--bg); border-top:3px solid #ef4444; border-radius:18px 18px 0 0; width:100%; max-width:560px; max-height:90vh; overflow:auto}
+  .rhead{position:sticky; top:0; background:var(--bg); display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--line); font-weight:800; font-size:16px; z-index:2}
+  .rclose{background:#0e1117; border:1px solid var(--line); color:var(--txt); width:32px; height:32px; border-radius:50%; font-size:14px; cursor:pointer}
+  .rmenu{display:flex; gap:6px; flex-wrap:wrap; padding:12px 16px 4px}
+  .rmenu button{flex:1 1 45%; background:var(--card); border:1px solid var(--line); color:var(--txt); font-family:inherit; font-size:12.5px; font-weight:700; padding:10px 8px; border-radius:11px; cursor:pointer}
+  .rmenu button.on{background:#ef4444; color:#fff; border-color:#ef4444}
+  .rbody{padding:8px 16px 26px; font-size:13.5px; color:#cdd5e0; line-height:1.9}
+  .rbody h5{color:var(--txt); font-size:14px; margin:12px 0 6px}
+  .rbody ul{padding-inline-start:18px; margin:6px 0} .rbody li{margin:5px 0}
+  .rlead{color:var(--mut); font-size:13px; margin:6px 0}
+  .jrow{display:flex; align-items:center; gap:8px; padding:8px 0; border-top:1px solid var(--line)}
+  .jn{flex:1; font-size:13px} .jc{display:flex; align-items:center; gap:8px}
+  .jc button{width:28px; height:28px; border-radius:8px; background:#0e1117; border:1px solid var(--line); color:var(--txt); font-size:16px; cursor:pointer; line-height:1}
+  .jc b{min-width:20px; text-align:center} .jk{min-width:48px; text-align:left; color:#ffd27a; font-size:12px}
+  .calctot{margin-top:12px; font-size:15px; font-weight:800} .calctot b{color:#ffd27a}
+  .verd{margin-top:10px; padding:11px 12px; border-radius:12px; font-size:13px; background:#0e1117; border:1px solid var(--line); line-height:1.8}
+  .verd.ok{border-color:#2e7d46; color:#a7e9bd} .verd.warn{border-color:#8a6d2a; color:#ffd27a} .verd.bad{border-color:#8a3030; color:#ffb0b0}
+  .rtips{margin-top:14px; border-top:1px solid var(--line); padding-top:6px}
+  .rhint{color:var(--mut); font-size:13px; padding:6px 2px; line-height:1.8} .rhint b{color:#ffb27a}
+  .rsec-t{font-weight:800; font-size:14px; color:#ff8a3d; margin:8px 0 2px; padding-top:12px; border-top:1px solid var(--line)}
+  .burnbox{margin-top:10px; padding:11px 12px; border-radius:12px; background:rgba(61,165,255,.08); border:1px solid rgba(61,165,255,.3); font-size:12.5px; line-height:1.95; color:#cfe3ff}
+  .burnbox b{color:#9ecbff}
+  .panel{display:none; padding:14px 16px 0}
+  .panel.on{display:block}
+  .dayhead{font-size:12.5px; color:var(--mut); margin:0 2px 10px; background:var(--card); border:1px solid var(--line); padding:9px 11px; border-radius:10px}
+  .sess{display:flex; align-items:center; gap:10px; justify-content:space-between; background:linear-gradient(135deg,#1d2530,#191c22); border:1px solid var(--line); border-radius:14px; padding:11px 13px; margin-bottom:14px}
+  .sess-info{font-size:12.5px; color:var(--mut)} .sess-info b{color:var(--txt); font-size:15px}
+  .sess-btn{background:var(--legs); color:#04210d; border:none; font-family:inherit; font-weight:800; font-size:13px; padding:10px 13px; border-radius:11px; cursor:pointer}
+  .sess-btn.done{background:#1f3a26; color:#7fe39b}
+  .ex{background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden; margin-bottom:14px}
+  .ex.checked{border-color:var(--legs); box-shadow:0 0 0 1px var(--legs) inset}
+  .media{position:relative; height:220px; background:#fff; display:flex; align-items:center; justify-content:center}
+  .media img{width:100%; height:100%; object-fit:contain; display:block}
+  .media.noimg{background:linear-gradient(135deg,#262b36,#1a1d24)}
+  .media.noimg img{display:none}
+  .media iframe.vidframe{position:absolute; inset:0; width:100%; height:100%; border:0; z-index:5}
+  .ph{position:absolute; inset:0; display:none; align-items:center; justify-content:center; font-size:64px}
+  .media.noimg .ph{display:flex}
+  .closevid{position:absolute; inset-inline-end:8px; top:8px; z-index:6; background:rgba(0,0,0,.72); color:#fff; border:none; border-radius:20px; padding:6px 11px; font-family:inherit; font-size:12px; cursor:pointer}
+  .num{position:absolute; inset-inline-end:10px; top:10px; width:30px; height:30px; border-radius:50%; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; color:#fff; z-index:3}
+  .playbtn{position:absolute; inset-inline-start:10px; bottom:10px; background:rgba(255,0,0,.92); color:#fff; font-weight:700; font-size:12px; padding:8px 13px; border-radius:30px; border:none; cursor:pointer; z-index:4; box-shadow:0 3px 12px rgba(0,0,0,.4)}
+  .ytlink{position:absolute; inset-inline-end:10px; bottom:10px; background:rgba(0,0,0,.5); color:#fff; font-weight:700; font-size:11px; padding:6px 10px; border-radius:20px; z-index:3}
+  .media.playing img,.media.playing .num,.media.playing .playbtn,.media.playing .ytlink{display:none}
+  .body{padding:12px 14px 14px}
+  .rowtop{display:flex; align-items:flex-start; justify-content:space-between; gap:8px}
+  .name{font-size:17px; font-weight:800}
+  .en{color:var(--mut); font-size:12px; font-weight:600}
+  .done{display:flex; align-items:center; gap:5px; font-size:12px; color:var(--mut); white-space:nowrap; cursor:pointer; user-select:none}
+  .done input{width:17px; height:17px; accent-color:var(--legs)}
+  .badges{display:flex; gap:6px; flex-wrap:wrap; margin:8px 0}
+  .b{font-size:11px; padding:3px 9px; border-radius:20px; font-weight:700}
+  .b.zone{background:#0e1117; border:1px solid var(--line); color:var(--mut)}
+  .b.mus{background:rgba(255,106,0,.15); color:#ffb27a}
+  .b.pyr{background:rgba(255,176,46,.16); color:var(--pyr)}
+  .b.fail{background:rgba(255,77,77,.16); color:var(--fail)}
+  .sr{font-size:13.5px; font-weight:700; margin:2px 0 3px}
+  .sr .rest{color:var(--mut); font-weight:400; font-size:12px}
+  .why{font-size:12px; color:#b9c2d0; margin-bottom:4px}
+  .tip{font-size:12px; color:var(--mut); margin-bottom:8px}
+  .deline{font-size:11.5px; color:#9aa3b2; margin-bottom:9px; line-height:1.85; background:#0e1117; border:1px solid var(--line); border-radius:9px; padding:7px 10px} .deline b{color:#cdd5e0}
+  details.adv{margin-bottom:9px}
+  details.adv summary{font-size:11.5px; color:#7fb3e8; cursor:pointer; list-style:none; font-weight:600}
+  details.adv summary::-webkit-details-marker{display:none}
+  details.adv>div{font-size:12px; color:#b9c2d0; line-height:1.9; margin-top:6px; background:#0e1117; border:1px solid var(--line); border-radius:9px; padding:8px 10px}
+  .logtitle{font-size:11.5px; color:#aab3c2; font-weight:700; margin:8px 0 5px}
+  .log{display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:#0e1117; border:1px solid var(--line); border-radius:12px; padding:9px 10px}
+  .log label{font-size:12px; color:var(--mut)}
+  .log input{width:60px; background:#23262e; border:1px solid var(--line); color:var(--txt); border-radius:8px; padding:7px; font-family:inherit; font-size:15px; text-align:center; font-weight:700}
+  .log input::placeholder{color:#5d6675; font-weight:400}
+  .log .ok{font-size:11px; color:var(--legs); margin-inline-start:auto; opacity:0; transition:.2s}
+  .log .ok.show{opacity:1}
+  .targets{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; font-size:12px}
+  .targets .last{color:var(--mut)} .targets .next{color:#ffd27a; font-weight:700}
+  footer{padding:18px 16px; color:var(--mut); font-size:13px}
+  footer h3{color:var(--txt); font-size:15px; margin:14px 0 6px}
+  footer ul{margin:0; padding-inline-start:18px}
+  footer li{margin:5px 0}
+  .reset{margin-top:14px; width:100%; padding:10px; background:transparent; border:1px solid var(--line); color:var(--mut); border-radius:10px; font-family:inherit; font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="dot">BASIC-FIT</span><span>Essen · Frohnhauser Str. 71</span></div>
+    <h1>برنامه تمرین — Push / Pull / Legs</h1>
+    <div class="sub">۳ روز در هفته · مقاومتی · هدف: کات + عضله</div>
+    <div class="chips">
+      <span class="chip"><b>۱۷۸</b> سانت</span><span class="chip"><b>۱۰۵</b> کیلو</span>
+      <span class="chip"><b>۴۱</b> سال</span><span class="chip">هدف: <b>−۲۰ کیلو</b></span>
+      <span class="chip">جلسات کل: <b id="cnt-all">۰</b></span>
+    </div>
+  </header>
+  <div class="dailycard"><div class="dl">💬 یه حرف برای امروز · <span id="ddate"></span></div><div class="dm" id="dmsg"></div></div>
+  <div class="banner">🔑 <b>راز معجزه = Progressive Overload.</b> وزنه/تکرار واقعیت رو ثبت کن؛ پایین هر حرکت <b>«هدف بعدی»</b> رو نشونت می‌ده. 🎬 دکمه‌ی <b>«▶ ویدیوی فرم»</b> گوشه‌ی هر گیف، ویدیو رو همونجا پلی می‌کنه.</div>
+
+  <div class="block">
+    <div class="block-top"><span>📅 دوره‌ی تمرین — هفته‌ی <b id="wkNow">۱</b> از ۶</span>
+      <button class="block-btn" id="newBlock">🔄 بلوک جدید</button></div>
+    <div class="bar"><div id="wkBar"></div></div>
+    <div class="block-note" id="wkNote"></div>
+  </div>
+
+  <div class="goalcard">
+    <div class="goalcard-top">🎯 مسیر به هیکلِ ایده‌آل — جلسه‌ی <b id="gsN">۰</b> از ۱۴۴ · <b id="gsP">۰٪</b></div>
+    <div class="gbar"><div id="gsBar"></div></div>
+    <div class="goalcard-msg" id="gsMsg"></div>
+  </div>
+
+  <details class="prog"><summary>📈 پیشرفتِ من</summary><div class="progbody" id="progbody"></div></details>
+
+  <details class="zones"><summary>🏟️ همه‌ی دستگاه‌های باشگاه (مرجع آلمانی)</summary>
+    <div class="reflist" id="machineref"></div>
+  </details>
+
+  <details class="zones"><summary>🚲 هوازی (Cardio)</summary>
+    <div class="zlist">
+      <div><b>کِی:</b> ۲۰ دقیقه کراس‌ترینر — صبح خونه، یا بعد از وزنه تو باشگاه (نه قبلش که انرژیت رو نخوره).</div>
+      <div><b>چقدر:</b> ضربانِ متوسط — طوری که بتونی حرف بزنی ولی نفست یه‌کم بند بیاد.</div>
+      <div><b>چی:</b> کراس‌ترینر بهترینه (کم‌فشار رو زانو)، تردمیل با شیب هم خوبه. <a href="https://www.youtube.com/results?search_query=elliptical+cross+trainer+proper+form" target="_blank" rel="noopener" style="color:#3da5ff">▶ ویدیوی فرم</a></div>
+      <div>📌 هوازی برای کات لازم نیست ولی کمک می‌کنه — اصلِ چربی‌سوزی رژیمه، هوازی یه بونوسه.</div>
+    </div>
+  </details>
+  <div class="tabs">
+    <div class="tab on" data-day="push">🟠 Push<br>سینه/سرشانه</div>
+    <div class="tab" data-day="pull">🔵 Pull<br>پشت/بازو</div>
+    <div class="tab" data-day="legs">🟢 Legs<br>پا/شکم</div>
+    <div class="tab" data-day="diet">🍽️ تغذیه<br>رژیم روزانه</div>
+  </div>
+  <div class="panel on" id="push"><div class="dayhead">🔥 گرم‌کردن: ۵ دقیقه کراس‌ترینر سبک. ترتیب: از سنگین به سبک.</div></div>
+  <div class="panel" id="pull"><div class="dayhead">🔥 گرم‌کردن: ۵ دقیقه کراس‌ترینر + ۱ ست سبک زیربغل.</div></div>
+  <div class="panel" id="legs"><div class="dayhead">🔥 گرم‌کردن: ۵ دقیقه کراس‌ترینر + ۱ ست سبک پرس‌پا. (هیپ‌تراست، ساق و داخل/خارج ران تازه اضافه شدن — اگه وقت کم بود، ساق و داخل/خارج ران رو می‌تونی حذف کنی.)</div></div>
+  <div class="panel" id="diet"></div>
+  <footer>
+    <h3>🎯 پلکانی یا تا ناتوانی؟</h3>
+    <ul>
+      <li><b style="color:var(--pyr)">پلکانی ↗</b> (سنگینِ چندمفصلی): هر ست وزنه بالاتر، تکرار کمتر؛ ست آخر <b>یک تکرار مونده به ناتوانی</b>.</li>
+      <li><b style="color:var(--fail)">تا ناتوانی 🔥</b> (ایزوله): وزنه ثابت، ست آخر تا جایی که <b>دیگه نتونی</b> با فرم درست.</li>
+    </ul>
+    <h3>📅 چرخه‌ی ۶ هفته‌ای</h3>
+    <ul><li>حرکت‌ها ۶ هفته ثابت، فقط وزنه/تکرار بالا.</li><li>هفته ۶ = Deload (سبک). بعدش «بلوک جدید» بزن و برای عوض‌کردن ۲–۳ حرکت بهم بگو.</li></ul>
+    <h3>🚲 هوازی</h3>کراس‌ترینر ۲۰ دقیقه — صبح خونه. تو کلوب هم بعد وزنه می‌تونی.
+    <button class="reset" onclick="if(confirm('همه‌ی رکوردها، جلسات و دوره پاک بشن؟')){Object.keys(localStorage).filter(k=>k.indexOf('bf_')===0).forEach(k=>localStorage.removeItem(k));location.reload()}">🗑️ پاک کردن داده‌های من</button>
+    <p style="margin-top:14px; font-size:11px; color:#5a6373">ساخته‌شده برای آرمان · دستگاه‌های واقعی کلوب Frohnhauser Str. 71 · گیف: fitnessprogramer.com · ویدیو: YouTube</p>
+  </footer>
+</div>
+<script>
+const FA='۰۱۲۳۴۵۶۷۸۹', faNum=s=>(''+s).replace(/\d/g,d=>FA[+d]);
+const today=()=>new Date().toISOString().slice(0,10);
+const GIF='https://fitnessprogramer.com/wp-content/uploads/';
+const STILL='https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
+const DATA={push:[
+ {id:'push1',n:'پرس سینه',en:'Chest Press',zone:'Strength (Matrix)',mus:'سینه',mode:'pyr',scheme:'۴ ست: ۱۲ ← ۱۰ ← ۸ ← ۶ تکرار · هر ست سنگین‌تر',rest:'۹۰ ثانیه',why:'گرم کن و تا ست آخرِ سنگین برو (یک تکرار مونده به ناتوانی).',tip:'تکرار آخر سخت باشه، ولی فرم خراب نشه.',w:30,step:2.5,ph:'🏋️',gif:'2021/02/Chest-Press-Machine.gif',still:'Dumbbell_Bench_Press',vid:'rY0B8UFdne0',de:'Brustpresse',alt:'پرس سینه همگرا (Konvergierende Brustpresse)، پرس دمبل روی نیمکت، یا اسمیت (Smith)',adv:'آرنج‌ها رو ~۴۵ درجه از بدن باز کن (نه ۹۰ درجه) تا فشار از شونه برداشته شه. قفسه‌ی سینه رو جلو بده، کتف‌ها عقب و پایین.'},
+ {id:'push2',n:'پرس سرشانه',en:'Shoulder Press',zone:'Strength (Matrix)',mus:'سرشانه',mode:'pyr',scheme:'۳ ست: ۱۲ ← ۱۰ ← ۸ تکرار · هر ست سنگین‌تر',rest:'۹۰ ثانیه',why:'گرم کن، ست آخر سنگین و کنترل‌شده.',tip:'کمر چسبیده به پشتی، قوس نده.',w:20,step:2.5,ph:'🛡️',gif:'2021/02/Dumbbell-Shoulder-Press.gif',still:'Arnold_Dumbbell_Press',vid:'3R14MnZbcpw',de:'Schulterpresse',alt:'پرس سرشانه دمبل، یا اسمیت (Smith-Maschine)'},
+ {id:'push3',n:'قفسه سینه (پک‌دک)',en:'Pec Deck Fly',zone:'Strength (Matrix)',mus:'سینه',mode:'fail',scheme:'۳×۱۲–۱۵ · وزنه ثابت · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'ایزوله‌س؛ ست آخر تا جایی که دیگه نتونی.',tip:'آروم، تو فشار سینه رو فشرده کن.',w:25,step:2.5,ph:'🦋',gif:'2021/02/Pec-Deck-Fly.gif',still:'Butterfly',vid:'hZ0CGRaKwbQ',de:'Butterfly / Pec Deck',alt:'فلای کابل (Cable Crossover)، یا پروانه دوحالته',adv:'زاویه‌ی نشستن، قسمتِ سینه رو عوض می‌کنه: صاف‌تر بشین + آرنج پایین‌تر → سینه‌ی پایین؛ صندلی بالاتر + آرنج بالاتر → سینه‌ی بالا. باسن و کمر چسبیده، قفسه‌سینه جلو.'},
+ {id:'push4',n:'پشت‌بازو سیم‌کش',en:'Triceps Pushdown',zone:'Functional (کابل)',mus:'پشت‌بازو',mode:'fail',scheme:'۳×۱۲–۱۵ · وزنه ثابت · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'ایزوله‌س؛ ست آخر تا ناتوانی برو.',tip:'آرنج چسبیده به بدن، فقط ساعد حرکت کنه.',w:20,step:2.5,ph:'💪',gif:'2021/02/Pushdown.gif',still:'Triceps_Pushdown',vid:'_w-HpW70nSQ',de:'Trizepsmaschine / Kabelzug',alt:'دیپ (Dip)، دیپ کمکی، یا پوش‌داون با دستگیره‌ی کابل'}
+],pull:[
+ {id:'pull1',n:'زیربغل سیم‌کش',en:'Lat Pulldown',zone:'Strength (Matrix)',mus:'پشت',mode:'pyr',scheme:'۴ ست: ۱۲ ← ۱۰ ← ۸ ← ۶ تکرار · هر ست سنگین‌تر',rest:'۹۰ ثانیه',why:'گرم کن، تا ست آخرِ سنگین برو.',tip:'میله به سینه، نه پشت گردن. شونه‌ها پایین.',w:40,step:2.5,ph:'🧗',gif:'2021/02/Lat-Pulldown.gif',still:'Wide-Grip_Lat_Pulldown',vid:'j9jtjL8FhPI',de:'Latzugmaschine',alt:'لت صفحه‌ای (Plate Loaded)، یا بارفیکس کمکی (Klimmzug-Assistent)',adv:'اول کتف‌ها رو پایین بیار، بعد آرنج‌ها رو بکش (نه با بازو). میله رو به بالای سینه بکش نه پشتِ گردن؛ سینه رو بده جلو.'},
+ {id:'pull2',n:'قایقی نشسته',en:'Seated Row',zone:'Strength / کابل',mus:'پشت',mode:'pyr',scheme:'۳ ست: ۱۲ ← ۱۰ ← ۸ تکرار · هر ست سنگین‌تر',rest:'۹۰ ثانیه',why:'گرم کن، ست آخر سنگین.',tip:'کتف‌ها رو به هم نزدیک کن، کمر صاف.',w:40,step:2.5,ph:'🚣',gif:'2021/02/Seated-Cable-Row.gif',still:'Seated_Cable_Rows',vid:'sP_4vybjVJs',de:'Sitzendes Rudern / Low Row',alt:'تی‌بار رو (T-Bar Row)، یا روئینگ صفحه‌ای (Plate Loaded)'},
+ {id:'pull3',n:'نشر خم / دلتوئید پشتی',en:'Rear Delt',zone:'Strength (Matrix)',mus:'سرشانه پشتی',mode:'fail',scheme:'۳×۱۵–۲۰ · وزنه سبک · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'عضله کوچیکه؛ تکرار بالا تا ناتوانی.',tip:'وزنه سبک، زور نزن، تقلب نکن.',w:15,step:2.5,ph:'🔙',gif:'2021/02/Rear-Delt-Machine-Flys.gif',still:'Reverse_Machine_Flyes',vid:'v0rJuhEa59c',de:'Reverse Butterfly',alt:'نشر معکوس با کابل، یا نشر خم دمبل'},
+ {id:'pull4',n:'جلوبازو دمبل',en:'Biceps Curl',zone:'Free weight',mus:'جلوبازو',mode:'fail',scheme:'۳×۱۰–۱۲ · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'ست آخر تا جایی که دیگه نتونی بالا بیاری.',tip:'آرنج ثابت، با تاب دادن تقلب نکن.',w:10,step:2,ph:'💪',gif:'2021/02/Dumbbell-Curl.gif',still:'Dumbbell_Bicep_Curl',vid:'XE_pHwbst04',de:'Bizepsmaschine',alt:'هالتر خم (SZ-Stange)، دمبل، یا جلوبازو با کابل'}
+],legs:[
+ {id:'legs1',n:'پرس پا',en:'Leg Press',zone:'Strength (۴۵° Matrix)',mus:'کل پا',mode:'pyr',scheme:'۴ ست: ۱۲ ← ۱۰ ← ۸ ← ۸ تکرار · هر ست سنگین‌تر',rest:'۱۲۰ ثانیه',why:'گرم کن، تا ست آخرِ سنگین برو.',tip:'زانو رو کامل قفل نکن. پایین کنترل‌شده.',w:60,step:5,ph:'🦵',gif:'2015/11/Leg-Press.gif',still:'Leg_Press',vid:'K5n2vg3oZa4',de:'Beinpresse (۴۵° یا نشسته)',alt:'هک‌اسکوات (Hack Squat)، یا اسکوات با اسمیت/پاوررک',adv:'جای پاها روی صفحه عضله رو عوض می‌کنه: پاها بالاتر → باسن و پشتِ ران بیشتر؛ پایین‌تر → جلوی ران؛ بازتر → داخلِ ران. زانو رو کامل قفل نکن.'},
+ {id:'legs2',n:'جلو پا',en:'Leg Extension',zone:'Strength (Matrix)',mus:'جلوی ران',mode:'fail',scheme:'۳×۱۲–۱۵ · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'ایزوله‌س؛ ست آخر بسوزون.',tip:'بالا یه مکث و فشار؛ پایین آروم.',w:30,step:2.5,ph:'🦿',gif:'2021/02/LEG-EXTENSION.gif',still:'Leg_Extensions',vid:'TJQmtXUEzNk',de:'Beinstrecker',alt:'جایگزین مستقیم نداره؛ با هک‌اسکوات یا پرس‌پا جبرانش کن'},
+ {id:'legs3',n:'پشت پا',en:'Leg Curl',zone:'Strength (Matrix)',mus:'همسترینگ',mode:'fail',scheme:'۳×۱۲–۱۵ · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'ایزوله‌س؛ ست آخر تا ناتوانی.',tip:'باسن رو بلند نکن؛ کنترل‌شده پایین.',w:25,step:2.5,ph:'🦵',gif:'2021/02/Leg-Curl.gif',still:'Lying_Leg_Curls',vid:'vl5nUdE9mWM',de:'Beinbeuger (نشسته یا خوابیده)',alt:'هر کدوم خالی بود — نشسته (sitzend) یا خوابیده (liegend)'},
+ {id:'legs4',n:'ددلیفت رومانیایی',en:'Romanian Deadlift',zone:'Free weight',mus:'پشت پا/باسن',mode:'pyr',scheme:'۳ ست: ۱۲ ← ۱۰ ← ۸ تکرار · فرم مهم‌تر از وزنه',rest:'۹۰ ثانیه',why:'دو تکرار مونده به ناتوانی وایسا؛ کمر نباید قوس بگیره.',tip:'کمر صاف، باسن عقب، دمبل نزدیک پا.',w:12,step:2,ph:'🏋️',gif:'2021/02/Dumbbell-Romanian-Deadlift.gif',still:'Romanian_Deadlift',vid:'QFbZevA7dps',de:'Langhantel / Kurzhanteln',alt:'ددلیفت با اسمیت، فیله کمر (Hyperextension)، یا هیپ‌تراست (Hip-Thrust)',adv:'حرکت از لولای باسنه نه خم‌شدنِ کمر. باسن رو عقب بفرست، زانو فقط کمی خم، دمبل چسبیده به پا، کششِ پشتِ ران رو حس کن. کمر هیچ‌وقت گرد نشه.'},
+ {id:'legs7',n:'هیپ‌تراست',en:'Hip Thrust',zone:'Strength (باسن)',mus:'باسن / گلوت',mode:'fail',scheme:'۳×۱۲–۱۵ · ست آخر تا ناتوانی 🔥',rest:'۹۰ ثانیه',why:'باسن رو بالا کامل فشار بده و یه لحظه نگه دار.',tip:'چونه به سینه، کمر قوس نگیره، فشار از پاشنه.',w:40,step:5,ph:'🍑',gif:'2021/02/Barbell-Hip-Thrust.gif',still:'Barbell_Hip_Thrust',vid:'pBH7pKHn-dI',de:'Hip-Thrust / Glute-Drive-Maschine',alt:'هیپ‌تراست با هالتر روی نیمکت، یا فیله کمر (Hyperextension)'},
+ {id:'legs8',n:'ساق پا',en:'Calf Raise',zone:'Strength (ساق)',mus:'ساق',mode:'fail',scheme:'۴×۱۵–۲۰ · ست آخر تا ناتوانی 🔥',rest:'۴۵ ثانیه',why:'بالا کامل روی پنجه، پایین کششِ کامل.',tip:'آروم، تو اوج یه مکثِ کوتاه.',w:40,step:5,ph:'🦶',gif:'2021/09/Bench-Press-Machine-Standing-Calf-Raise.gif',still:'Standing_Calf_Raises',vid:'SVtg-1loH4c',de:'Wadenheber (ایستاده یا نشسته)',alt:'ساق با پرس‌پا (پنجه روی لبه)، یا ساق با دمبل'},
+ {id:'legs9',n:'داخل / خارج ران',en:'Adductor / Abductor',zone:'Strength',mus:'داخل و خارج ران',mode:'fail',scheme:'هر کدوم ۳×۱۵ · ست آخر تا ناتوانی 🔥',rest:'۴۵ ثانیه',why:'هم داخل ران (Adduktoren) هم خارج ران (Abduktoren) رو بزن.',tip:'کنترل‌شده باز و بسته کن، با تنه تقلب نکن.',w:40,step:5,ph:'🦵',gif:'2021/02/HiP-ABDUCTION-MACHINE.gif',still:'Thigh_Abductor',vid:'mP-FfS2HC9Q',de:'Adduktoren + Abduktoren',alt:'هر دو دستگاه پشت سر هم (داخل ران + خارج ران)'},
+ {id:'legs5',n:'شکم (کرانچ)',en:'Crunch',zone:'Strength / Stretch',mus:'شکم',mode:'fail',scheme:'۳×۱۵–۲۰ · ست آخر تا ناتوانی 🔥',rest:'۴۵ ثانیه',why:'با شکم جمع کن، نه با گردن.',tip:'دستگاه شکم یا روی مت.',w:'',step:0,ph:'🧎',gif:'2015/11/Crunch.gif',still:'Ab_Crunch_Machine',vid:'0OxOI3sAIrM',de:'Bauchmaschine / Crunch',alt:'نیمکت شکم (Bauchbank)، کرانچ کابل، یا چرخش تنه (Rotary Torso) برای پهلو'},
+ {id:'legs6',n:'پلانک',en:'Plank',zone:'Stretch (مت)',mus:'کُر',mode:'fail',scheme:'۳ ست نگه‌داشتن · ست آخر تا جایی که می‌تونی 🔥',rest:'۴۵ ثانیه',why:'بدن صاف مثل تخته، شکم سفت.',tip:'باسن نه بالا نه پایین.',w:30,step:5,unit:'s',wlabel:'ثانیه',ph:'🧘',gif:'2021/02/plank.gif',still:'Plank',vid:'mwlp75MS6Rg',de:'Matte (Stretch zone)',alt:'TRX، یا نیمکت شکم'}
+]};
+
+function targets(e){
+  const w=localStorage.getItem('bf_'+e.id+'w'), r=localStorage.getItem('bf_'+e.id+'r');
+  const U=e.unit==='s'?' ث':'kg';
+  let last=(w||r)?('🔼 آخرین: '+(w?faNum(w)+U:'—')+(r?' × '+faNum(r)+' تکرار':'')):'🔼 هنوز رکوردی ثبت نشده';
+  let next='';
+  if(w && e.step>0) next='🎯 هدف بعدی: '+faNum(+w+e.step)+U+' (یا +۱ تکرار)';
+  else if(r) next='🎯 هدف بعدی: +۱ تکرار';
+  return {last,next};
+}
+function card(e){
+  const wlab=e.wlabel||'وزنه', U=e.unit==='s'?'s':'kg', mb=e.mode==='pyr'?'<span class="b pyr">پلکانی ↗</span>':'<span class="b fail">تا ناتوانی 🔥</span>';
+  const lt = e.id==='legs6' ? '📊 بهترین زمانِ ست آخرت رو ثبت کن (هرچی واقعاً نگه داشتی):'
+    : (e.mode==='pyr' ? '📊 فقط «ست آخرِ سنگین» رو ثبت کن — وزنه‌اش + چندتا واقعاً زدی:'
+    : '📊 فقط «ست آخر (تا ناتوانی)» رو ثبت کن — وزنه‌اش + چندتا تونستی:');
+  const t=targets(e);
+  return `<div class="ex" id="ex-${e.id}">
+    <div class="media" data-vid="${e.vid}">
+      <img loading="lazy" src="${GIF}${e.gif}" data-still="${STILL}${e.still}/0.jpg"
+        onerror="if(!this.dataset.f){this.dataset.f=1;this.src=this.dataset.still}else{this.closest('.media').classList.add('noimg')}" alt="">
+      <span class="ph">${e.ph}</span>
+      <span class="num">${e.num}</span>
+      <button class="playbtn" type="button">▶ ویدیوی فرم</button>
+      <a class="ytlink" target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=${e.vid}">یوتیوب ↗</a>
+    </div>
+    <div class="body">
+      <div class="rowtop">
+        <div class="name">${e.n} <span class="en">${e.en}</span></div>
+        <label class="done"><input type="checkbox" data-done="${e.id}"> تموم</label>
+      </div>
+      <div class="badges"><span class="b zone">${e.zone}</span><span class="b mus">${e.mus}</span>${mb}</div>
+      <div class="sr">${e.scheme} <span class="rest">· استراحت ${e.rest}</span></div>
+      <div class="why">💡 ${e.why}</div>
+      <div class="tip">${e.tip}</div>
+      <div class="deline">🏷️ دستگاه: <b>${e.de}</b><br>🔁 شلوغ بود؟ ${e.alt}</div>
+      ${e.adv?'<details class="adv"><summary>💡 نکته‌ی فرم (پیشرفته) — بزن تا باز شه</summary><div>'+e.adv+'</div></details>':''}
+      <div class="logtitle">${lt}</div>
+      <div class="log">
+        <label>${wlab}</label><input type="number" inputmode="numeric" data-k="${e.id}w" data-step="${e.step}" placeholder="${e.w}"><label>${U}</label>
+        <label>× چند تکرار</label><input type="number" inputmode="numeric" data-k="${e.id}r"><span class="ok">✓ ذخیره</span>
+      </div>
+      <div class="targets"><span class="last" id="last-${e.id}">${t.last}</span><span class="next" id="next-${e.id}">${t.next}</span></div>
+    </div>
+  </div>`;
+}
+const META={};
+['push','pull','legs'].forEach(day=>{
+  let i=1, html=`<div class="sess">
+    <div class="sess-info">جلسات این روز: <b id="cnt-${day}">۰</b><br><span id="ld-${day}" style="font-size:11px">آخرین بار: —</span></div>
+    <button class="sess-btn" data-sess="${day}">✅ امروز این جلسه رو زدم</button>
+  </div>`;
+  DATA[day].forEach(e=>{e.num=i++; META[e.id]=e; html+=card(e);});
+  document.getElementById(day).insertAdjacentHTML('beforeend',html);
+});
+
+// inline video: only the small playbtn opens it; gif stays fully visible
+document.addEventListener('click',ev=>{
+  const close=ev.target.closest('.closevid');
+  if(close){const m=close.closest('.media'); const f=m.querySelector('.vidframe'); if(f)f.remove(); close.remove(); m.classList.remove('playing'); return;}
+  const pb=ev.target.closest('.playbtn');
+  if(pb){const m=pb.closest('.media'); if(m.classList.contains('playing'))return; m.classList.add('playing');
+    m.insertAdjacentHTML('beforeend',
+      `<iframe class="vidframe" src="https://www.youtube-nocookie.com/embed/${m.dataset.vid}?autoplay=1&rel=0&playsinline=1&modestbranding=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`+
+      `<button class="closevid" type="button">✕ گیف</button>`);
+  }
+});
+
+// tabs
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on'); document.getElementById(t.dataset.day).classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}));
+
+// weight/rep log + live targets
+document.querySelectorAll('input[data-k]').forEach(inp=>{
+  const key='bf_'+inp.dataset.k, saved=localStorage.getItem(key);
+  if(saved!==null) inp.value=saved;
+  inp.addEventListener('input',()=>{
+    localStorage.setItem(key,inp.value);
+    const ok=inp.parentNode.querySelector('.ok'); if(ok){ok.classList.add('show'); clearTimeout(ok._t); ok._t=setTimeout(()=>ok.classList.remove('show'),1100);}
+    const id=inp.dataset.k.slice(0,-1), e=META[id]; if(e){const t=targets(e); document.getElementById('last-'+id).textContent=t.last; document.getElementById('next-'+id).textContent=t.next;}
+  });
+});
+
+// per-exercise "done today"
+document.querySelectorAll('input[data-done]').forEach(cb=>{
+  const id=cb.dataset.done, key='bf_done_'+id;
+  if(localStorage.getItem(key)===today()){cb.checked=true; document.getElementById('ex-'+id).classList.add('checked');}
+  cb.addEventListener('change',()=>{
+    if(cb.checked){localStorage.setItem(key,today()); document.getElementById('ex-'+id).classList.add('checked');}
+    else{localStorage.removeItem(key); document.getElementById('ex-'+id).classList.remove('checked');}
+  });
+});
+
+// session counter
+function refreshSess(){
+  let all=0;
+  ['push','pull','legs'].forEach(day=>{
+    const c=+(localStorage.getItem('bf_sess_'+day)||0); all+=c;
+    document.getElementById('cnt-'+day).textContent=faNum(c);
+    const ld=localStorage.getItem('bf_sessdate_'+day);
+    document.getElementById('ld-'+day).textContent='آخرین بار: '+(ld?faNum(ld):'—');
+  });
+  document.getElementById('cnt-all').textContent=faNum(all);
+  const GS=144, pct=Math.min(all/GS*100,100);
+  const gN=document.getElementById('gsN'), gP=document.getElementById('gsP'), gB=document.getElementById('gsBar'), gM=document.getElementById('gsMsg');
+  if(gN){gN.textContent=faNum(all); gP.textContent=faNum(Math.round(pct))+'٪'; gB.style.width=pct+'%'; gM.textContent=gsMessage(all,pct);}
+}
+function gsMessage(all,pct){
+  if(all===0) return 'هنوز شروع نکردی — اولین جلسه‌ت بزرگ‌ترین قدمه.';
+  if(pct<8) return 'تازه گرم شدی — بدنت داره عادت می‌سازه (newbie gains). 💪';
+  if(pct<25) return 'داری جا می‌افتی — کم‌کم خودتم تغییرو حس می‌کنی.';
+  if(pct<50) return 'نزدیکِ نیمه‌ی راه — قوی‌تر شدی، تو آینه پیداست. ادامه بده.';
+  if(pct<75) return 'از نصف گذشتی! تفاوت دیگه واضحه — عقب‌نشینی نکن.';
+  if(pct<100) return 'نزدیکِ هیکلِ ایده‌آلی — آخرین تیکه‌ها سخت‌ترن، ولی از پسش برمیای.';
+  return '🏆 رسیدی به ۱۴۴ جلسه! حالا نوبتِ نگه‌داری و لذت بردنه.';
+}
+document.querySelectorAll('button[data-sess]').forEach(b=>b.addEventListener('click',()=>{
+  const day=b.dataset.sess, key='bf_sess_'+day;
+  localStorage.setItem(key,(+(localStorage.getItem(key)||0))+1);
+  localStorage.setItem('bf_sessdate_'+day,today());
+  refreshSess();
+  let all=0; ['push','pull','legs'].forEach(d=>all+=(+(localStorage.getItem('bf_sess_'+d)||0)));
+  const pct=Math.min(Math.round(all/144*100),100);
+  b.textContent='✅ جلسه‌ی '+faNum(all)+' — '+faNum(pct)+'٪ تا هدف! 💪'; b.classList.add('done');
+  setTimeout(()=>{b.textContent='✅ امروز این جلسه رو زدم'; b.classList.remove('done');},2600);
+}));
+refreshSess();
+
+// 6-week block tracker + deload reminder
+const BK='bf_blockstart';
+if(!localStorage.getItem(BK)) localStorage.setItem(BK,today());
+function refreshBlock(){
+  const bs=localStorage.getItem(BK)||today();
+  const days=Math.floor((new Date(today())-new Date(bs))/86400000);
+  const wk=Math.max(1,Math.floor(days/7)+1);
+  document.getElementById('wkNow').textContent=faNum(wk>6?'+۶':wk);
+  document.getElementById('wkBar').style.width=(Math.min(wk,6)/6*100)+'%';
+  const note=document.getElementById('wkNote');
+  if(wk<6){note.textContent='حرکت‌ها ثابت بمونن — فقط وزنه/تکرار رو یه پله ببر بالا.'; note.className='block-note';}
+  else if(wk===6){note.textContent='🟡 هفته‌ی Deload: وزنه‌ها رو ~۴۰٪ کم کن، تکرارها همون. بذار بدنت ریکاوری کنه.'; note.className='block-note warn';}
+  else{note.textContent='✅ بلوک ۶ هفته‌ایت تموم شد! یه هفته سبک بزن، برای عوض‌کردن ۲–۳ حرکت بهم بگو، بعد «بلوک جدید» رو بزن.'; note.className='block-note warn';}
+}
+document.getElementById('newBlock').addEventListener('click',()=>{
+  if(confirm('بلوک جدید شروع بشه؟ شمارش هفته از ۱ شروع می‌شه.')){localStorage.setItem(BK,today()); refreshBlock();}
+});
+refreshBlock();
+
+/* ---------- 💬 پیام روزانه ---------- */
+const MSGS=[
+ 'قهرمانیِ تو تو یه روزِ عالی نیست — تو اینه که فردا، حتی وقتی حسش نیست، بازم میای. همین که داری اینو می‌خونی، یعنی هنوز نباختی.',
+ 'باشگاه شلوغه؟ مهم نیست. تو نیومدی با کسی رقابت کنی، اومدی با آدمِ دیروزِ خودت. یه دستگاهِ خالی پیدا کن، کارتو بکن، برو. بقیه حواسشون به خودشونه، نه به تو.',
+ 'اون کاپلی که اذیتت می‌کنه — تو واقعاً اونا رو نمی‌بینی، داری به چیزی که هنوز نداری نگاه می‌کنی. سرتو بنداز پایین، وزنه‌تو بزن. نوبتِ تو هم میاد، فقط دیرتر و محکم‌تر.',
+ 'خسته‌ای؟ پس امروز قهرمان‌بازی نکن — فقط بیا و نصفِ برنامه رو بزن. ۵۰٪ بودن، از صفر بودن خیلی جلوتره. بدنت خستگی رو فراموش می‌کنه، ولی «اومدنت» یادش می‌مونه.',
+ 'بعضی روزا سنگینن، و این عیب نیست. لازم نیست امروز خوشحال باشی که حرکت کنی — گاهی حرکت کردنه که آروم‌آروم خوشحالی رو برمی‌گردونه. فقط یه قدمِ کوچیک، همین کافیه.',
+ 'غربت یعنی هر روز یه‌کم بیشتر از چیزِ آشنا فاصله می‌گیری. ولی این بدن، این نظم، این برنامه — اینا «خونه»ای‌ان که هر جای دنیا با خودت می‌بری. داری برای خودت یه جای امن می‌سازی.',
+ '۴۱ سالگی، تنها، تو خونه‌ی ساکتِ یه شهرِ غریب — این آسون نیست، و تو بازم بلند می‌شی و کار می‌کنی. این ضعف نیست، از خیلیا قوی‌تره. فقط یادت باشه: یه ارتباطِ کوچیکِ انسانی هم بزرگه، دنبالش برو.',
+ 'وقتی مغزت داره با افسردگی می‌جنگه و تو بازم می‌ری باشگاه و درست غذا می‌خوری، یعنی داری دو برابرِ بقیه تلاش می‌کنی. قرصت ضعف نیست، یه ابزاره مثلِ وزنه. به خودت سخت نگیر، داری خوب پیش می‌ری.',
+ 'اینکه هنوز سختته با یه دختر حرف بزنی، یعنی برات مهمه، نه اینکه عرضه نداری. اعتمادبه‌نفس یه عضله‌ست؛ مثلِ همین وزنه‌ها با تکرارهای کوچیک ساخته می‌شه. از یه «سلام»ِ ساده شروع می‌شه، نه از یه هیکلِ کامل.',
+ 'از هیکلت خجالت می‌کشی؟ همین بدنی که ازش خجالت می‌کشی، داره هر روز برات می‌جنگه و عوض می‌شه. باهاش مهربون باش — اون دشمنت نیست، اولین رفیقیه که داره پابه‌پات تغییر می‌کنه.',
+ 'صبر نکن تا «هیکلت درست شه» بعد به خودت برسی. یه لباسِ ساده‌ی تمیز که الان خوب تنت بشینه، یه پیامه به خودت: «من همین الان ارزششو دارم.» این حس، خودش انگیزه‌ی فرداست.',
+ 'عینک عیب نیست، بخشی از صورتِ توئه. خیلیا که الان مطمئن به نظر می‌رسن، یه‌زمانی دقیقاً سرِ همین چیزای کوچیک می‌لرزیدن. اعتمادبه‌نفس از «بی‌نقص بودن» نمیاد، از «اوکی بودن با خودت» میاد.',
+ 'تنهایی مثلِ گشنگیه — یه سیگناله، نه یه حُکم. می‌گه وقتشه یه قدم به سمتِ آدما برداری. لازم نیست یهو اجتماعی‌ترین آدم بشی؛ یه پیام، یه قهوه با یه نفر. کوچیک شروع کن.',
+ 'نتیجه رو هر روز تو آینه نمی‌بینی، ولی بدنت داره می‌شماره. هر جلسه، هر وعده‌ی درست، یه آجره. یه روز برمی‌گردی و می‌بینی یه دیوارِ محکم ساختی، بی‌اینکه بفهمی کِی.',
+ 'دیروز خراب شد؟ خب شد. تو آدمی، نه ربات. فرقِ کسی که می‌رسه با کسی که نمی‌رسه، تو «خراب‌نکردن» نیست — تو «زود برگشتن»ه. امروز یه صفحه‌ی نوئه.',
+ 'یه آرمانِ شش‌ماهه: یه مردِ سبک‌تر، محکم‌تر، که راحت‌تر تو جمع نفس می‌کشه و راحت‌تر لبخند می‌زنه. اون آدم همین الان داره ساخته می‌شه، با همین کارایی که امروز می‌کنی. بهش وفادار بمون.'
+];
+(function(){
+ const dn=Math.floor((+new Date(today()))/86400000);
+ let mi=((dn%MSGS.length)+MSGS.length)%MSGS.length;
+ const el=document.getElementById('dmsg'); if(!el) return;
+ const show=()=>{el.textContent=MSGS[mi];};
+ const mb=document.getElementById('dmore'); if(mb) mb.addEventListener('click',()=>{mi=(mi+1)%MSGS.length; show();});
+ show();
+})();
+function toJalali(gy,gm,gd){var g=[0,31,59,90,120,151,181,212,243,273,304,334];var jy=(gy<=1600)?0:979;gy-=(gy<=1600)?621:1600;var gy2=(gm>2)?(gy+1):gy;var days=365*gy+parseInt((gy2+3)/4)-parseInt((gy2+99)/100)+parseInt((gy2+399)/400)-80+gd+g[gm-1];jy+=33*parseInt(days/12053);days%=12053;jy+=4*parseInt(days/1461);days%=1461;jy+=parseInt((days-1)/365);if(days>365)days=(days-1)%365;var jm=(days<186)?1+parseInt(days/31):7+parseInt((days-186)/30);var jd=1+((days<186)?(days%31):((days-186)%30));return [jy,jm,jd];}
+(function(){var d=new Date();var j=toJalali(d.getFullYear(),d.getMonth()+1,d.getDate());var WD=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];var MN=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];var de=document.getElementById('ddate');if(de)de.textContent=WD[d.getDay()]+' '+faNum(j[2])+' '+MN[j[1]-1]+' '+faNum(j[0]);})();
+
+/* ---------- 📈 نمودار پیشرفت (وزن + روزای خراب) ---------- */
+(function(){
+ const body=document.getElementById('progbody'); if(!body) return;
+ const START=105, GOAL=85;
+ const getWt=()=>{try{return JSON.parse(localStorage.getItem('bf_wt')||'[]');}catch(e){return [];}};
+ const getBad=()=>{try{return JSON.parse(localStorage.getItem('bf_bad')||'[]');}catch(e){return [];}};
+ body.innerHTML='<div class="wtin"><label>وزن امروز:</label><input type="number" inputmode="decimal" id="wtval" placeholder="'+START+'"><label>kg</label><button id="wtsave" type="button">ثبت</button></div>'+
+   '<div class="chartwrap"><svg id="wtsvg" viewBox="0 0 320 160" preserveAspectRatio="none"></svg></div>'+
+   '<div class="progstat" id="pstat"></div>'+
+   '<button class="badbtn" id="badbtn" type="button">🔻 امروز یه روز خراب بود (علامت بزن)</button>';
+ function draw(){
+   const wt=getWt().slice().sort((a,b)=>a.d<b.d?-1:1), bad=getBad();
+   const W=320,H=160,pad=24, ws=wt.map(p=>p.w);
+   const top=Math.max(START,(ws.length?Math.max.apply(null,ws):START))+1;
+   const bot=Math.min(GOAL,(ws.length?Math.min.apply(null,ws):GOAL))-1;
+   const yOf=w=>H-pad-((w-bot)/(top-bot))*(H-2*pad);
+   let xOf;
+   if(wt.length<=1){ xOf=()=>W/2; }
+   else { const t0=+new Date(wt[0].d), t1=+new Date(wt[wt.length-1].d), span=(t1-t0)||1; xOf=d=>pad+((+new Date(d)-t0)/span)*(W-2*pad); }
+   let s='';
+   s+='<line x1="'+pad+'" y1="'+yOf(GOAL).toFixed(1)+'" x2="'+(W-pad)+'" y2="'+yOf(GOAL).toFixed(1)+'" stroke="#34c759" stroke-dasharray="4 4" stroke-width="1"/>';
+   s+='<text x="'+(W-pad)+'" y="'+(yOf(GOAL)-4).toFixed(1)+'" fill="#34c759" font-size="9" text-anchor="end">هدف '+faNum(GOAL)+'</text>';
+   if(wt.length){
+     if(wt.length>1) s+='<polyline points="'+wt.map(p=>xOf(p.d).toFixed(1)+','+yOf(p.w).toFixed(1)).join(' ')+'" fill="none" stroke="#3da5ff" stroke-width="2"/>';
+     wt.forEach(p=>{s+='<circle cx="'+xOf(p.d).toFixed(1)+'" cy="'+yOf(p.w).toFixed(1)+'" r="3.5" fill="#3da5ff"/>';});
+     const last=wt[wt.length-1]; s+='<text x="'+xOf(last.d).toFixed(1)+'" y="'+(yOf(last.w)-8).toFixed(1)+'" fill="#eef1f6" font-size="11" text-anchor="middle">'+faNum(last.w)+'</text>';
+   }
+   bad.forEach(d=>{ const x=xOf(d); s+='<polygon points="'+x.toFixed(1)+','+(H-7)+' '+(x-4).toFixed(1)+','+H+' '+(x+4).toFixed(1)+','+H+'" fill="#ef4444"/>'; });
+   document.getElementById('wtsvg').innerHTML=s;
+   const lastW=wt.length?wt[wt.length-1].w:null;
+   let st;
+   if(lastW!=null){ const lost=(START-lastW), togo=(lastW-GOAL);
+     st='<b>شروع:</b> '+faNum(START)+' → <b>الان:</b> '+faNum(lastW)+' kg · <b>کم‌کرده:</b> '+faNum(lost.toFixed(1))+' kg · <b>تا هدف:</b> '+faNum(togo.toFixed(1))+' kg';
+   } else st='هنوز وزنی ثبت نکردی — یه عدد بزن تا نمودارت شروع شه. 🎯';
+   if(bad.length) st+='<br>🔻 <b>'+faNum(bad.length)+'</b> روزِ خراب داشتی و بازم ادامه دادی — <b>این</b> همون چیزیه که برنده‌ت می‌کنه. 💪';
+   document.getElementById('pstat').innerHTML=st;
+   document.getElementById('badbtn').textContent = bad.indexOf(today())>=0 ? '↩️ نه، امروز خراب نبود' : '🔻 امروز یه روز خراب بود (علامت بزن)';
+ }
+ document.getElementById('wtsave').addEventListener('click',()=>{
+   const v=parseFloat(document.getElementById('wtval').value); if(!v||v<30||v>300) return;
+   const wt=getWt().filter(p=>p.d!==today()); wt.push({d:today(),w:v}); localStorage.setItem('bf_wt',JSON.stringify(wt)); document.getElementById('wtval').value=''; draw();
+ });
+ document.getElementById('badbtn').addEventListener('click',()=>{
+   let bad=getBad(); if(bad.indexOf(today())>=0) bad=bad.filter(d=>d!==today()); else bad.push(today()); localStorage.setItem('bf_bad',JSON.stringify(bad)); draw();
+ });
+ draw();
+})();
+
+/* ---------- واژه‌نامه / تولتیپ خوراکی‌ها ---------- */
+const GLOSS={
+ skyr:{name:'اسکیر',orig:'Skyr — ماستِ ایسلندی',emoji:'🥛',img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Icelandic_Skyr.jpg/500px-Icelandic_Skyr.jpg',desc:'یه ماستِ صاف‌شده‌ی ایسلندی، سفت و کم‌چرب با پروتئینِ خیلی بالا (هر ۱۵۰گ حدود ۲۰گ پروتئین). طعمش ملایمه. تو Lidl/Aldi/Edeka هست — عالی برای صبحانه یا میان‌وعده.'},
+ magerquark:{name:'ماگرکوارک',orig:'Magerquark — کوارکِ کم‌چرب',emoji:'🧀',img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Magerquark.jpg/960px-Magerquark.jpg',desc:'پنیرِ تازه‌ی نرمِ آلمانی، خیلی کم‌چرب و پادشاهِ پروتئین (هر ۲۵۰گ حدود ۲۸گ پروتئین، فقط ~۱۵۰ کالری). یه‌کم ترشه؛ با عسل یا کاکائوی بدون‌قند خوش‌طعم می‌شه.'},
+ huttenkase:{name:'پنیر کاتیج',orig:'Hüttenkäse — Cottage Cheese',emoji:'🧀',img:'https://upload.wikimedia.org/wikipedia/commons/a/a1/Cottage_Cheese.jpg',desc:'پنیرِ دانه‌دانه‌ی کم‌چرب و پرپروتئین، کم‌کالری و سیرکننده. با سبزیجات یا روی نون می‌خورن.'},
+ hahnchen:{name:'مرغ (Hähnchen)',orig:'Hähnchen — مرغ به آلمانی',emoji:'🍗',img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Grilled_chicken_breast%2C_Santo_Domingo%2C_La_Palma.jpg/960px-Grilled_chicken_breast%2C_Santo_Domingo%2C_La_Palma.jpg',desc:'یعنی «مرغ». معمولاً منظور سینه یا رانِ مرغِ گریله (Hähnchenbrust = سینه مرغ). منبعِ اصلیِ پروتئینِ کم‌چرب.'},
+ hummus:{name:'هوموس',orig:'Hummus',emoji:'🥣',img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Lebanese_style_hummus.jpg/330px-Lebanese_style_hummus.jpg',desc:'خمیرِ نخود با کنجد (طحینی)، آبلیمو و سیر. پروتئین و فیبر داره. با هویج و خیار به‌جای چیپس عالیه.'}
+};
+function glossify(t){
+ [['Skyr','skyr'],['Magerquark','magerquark'],['Hüttenkäse','huttenkase'],['Hähnchen','hahnchen'],['هوموس','hummus']].forEach(p=>{
+   if(t.indexOf(p[0])>=0) t=t.replace(p[0],'<span class="gl" data-g="'+p[1]+'">'+p[0]+' <i>ⓘ</i></span>');
+ });
+ return t;
+}
+(function(){
+ const pop=document.createElement('div'); pop.id='glpop';
+ pop.innerHTML='<div class="glcard"><img id="glimg" alt=""><h4 id="glname"></h4><div class="orig" id="glorig"></div><p id="gldesc"></p><button class="glclose" type="button">باشه، فهمیدم</button></div>';
+ document.body.appendChild(pop);
+ const img=pop.querySelector('#glimg');
+ document.addEventListener('click',ev=>{
+   const g=ev.target.closest('.gl');
+   if(g){const d=GLOSS[g.dataset.g]; if(d){
+     img.onerror=()=>{img.style.display='none';};
+     if(d.img){img.style.display='block'; img.src=d.img;} else img.style.display='none';
+     pop.querySelector('#glname').textContent=d.emoji+' '+d.name;
+     pop.querySelector('#glorig').textContent=d.orig;
+     pop.querySelector('#gldesc').textContent=d.desc;
+     pop.classList.add('show');
+   } return;}
+   if(ev.target.closest('.glclose') || ev.target.id==='glpop') pop.classList.remove('show');
+ });
+})();
+
+/* ---------- تغذیه / رژیم روزانه ---------- */
+(function(){
+  const WD=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+  const dayNum=Math.floor((+new Date(today()))/86400000);
+  const TARGET=2100;
+  const MEALS=[
+    {icon:'🌅',time:'صبحانه',tip:'',opts:[
+      {n:'۳ تخم‌مرغ + ۱ تیکه نون سنگک + قهوه',kcal:350,pro:22},
+      {n:'Skyr ۲۰۰گ + یه مشت گردو + کمی عسل',kcal:320,pro:24},
+      {n:'املت ۳ تخم‌مرغ با قارچ و گوجه + پنیر کم‌چرب',kcal:380,pro:28},
+      {n:'Magerquark ۲۵۰گ + کاکائوی بدون‌قند + موز',kcal:330,pro:30}
+    ]},
+    {icon:'🍎',time:'میان‌وعده / میوه',tip:'بهترین زمان میوه: صبح یا قبل تمرین — نه شبِ دیر.',opts:[
+      {n:'یه سیب یا پرتقال + ۱۰ تا بادام',kcal:180,pro:5},
+      {n:'Skyr کوچیک + توت‌فرنگی',kcal:130,pro:15},
+      {n:'هویج و خیار + کمی هوموس',kcal:150,pro:5},
+      {n:'یه گلابی + ماست یونانی',kcal:160,pro:12}
+    ]},
+    {icon:'🍽️',time:'ناهار',tip:'',opts:[
+      {n:'مرغ گریل (Hähnchen) + برنج کم + سالاد',kcal:550,pro:45},
+      {n:'دونر بدون نون (یا نون کم)، سس و سیب‌زمینی کم',kcal:500,pro:42},
+      {n:'سالاد تن‌ماهی (۲ قوطی) + تخم‌مرغ + ذرت کم',kcal:470,pro:45},
+      {n:'کاسه‌ی مرغ و سبزیجات (chicken bowl)',kcal:540,pro:42},
+      {n:'قورمه‌سبزی + برنج کم + سالاد (روغنشو کم بگیر)',kcal:620,pro:35},
+      {n:'قیمه + برنج کم + ماست (روغنشو کم بگیر)',kcal:650,pro:32},
+      {n:'زرشک‌پلو با مرغ',kcal:600,pro:40}
+    ]},
+    {icon:'⚡',time:'قبل تمرین',tip:'۳۰–۶۰ دقیقه قبل. قهوه (کافئین) هم انرژی و تمرکز می‌ده.',opts:[
+      {n:'یه موز + قهوه',kcal:120,pro:1},
+      {n:'یه تیکه نون + کمی عسل',kcal:150,pro:4},
+      {n:'Skyr + یه مشت جوِ پرک',kcal:200,pro:16}
+    ]},
+    {icon:'💪',time:'بعد تمرین',tip:'بهترین زمانِ شیر پروتئین همینجاست (پروتئین + کمی کربوهیدرات). کراتین ۵گ رو هم همینجا بزن.',opts:[
+      {n:'شیر پروتئین + موز',kcal:250,pro:27},
+      {n:'تن‌ماهی + یه تیکه نون',kcal:300,pro:30},
+      {n:'Magerquark ۲۵۰گ + کمی عسل',kcal:230,pro:30},
+      {n:'۳ تخم‌مرغ آب‌پز + نون',kcal:300,pro:21}
+    ]},
+    {icon:'🌙',time:'شام (سبک‌تر، کم‌کربوهیدرات)',tip:'',opts:[
+      {n:'سینه مرغ + سالاد بزرگ',kcal:400,pro:45},
+      {n:'۲ تخم‌مرغ + Hüttenkäse + سبزیجات',kcal:350,pro:35},
+      {n:'تن‌ماهی + سالاد + کمی آووکادو',kcal:400,pro:33},
+      {n:'سوپ عدس یا مرغ + ماست',kcal:420,pro:28},
+      {n:'کته + خورشتِ کم‌روغن + ماست',kcal:480,pro:28}
+    ]}
+  ];
+  const idx=MEALS.map((m,i)=>((dayNum+i)%m.opts.length));
+  const host=document.getElementById('diet');
+  const mc=(m,i)=>{const o=m.opts[idx[i]]; return `<div class="meal" data-meal="${i}">
+    <div class="meal-h"><span class="mt">${m.icon} ${m.time}</span><span class="mcal"><b>${faNum(o.kcal)}</b> کالری · <b>${faNum(o.pro)}</b>گ پروتئین</span></div>
+    <div class="mopt">${glossify(o.n)}</div>
+    ${m.tip?`<div class="mtip">⏰ ${m.tip}</div>`:''}
+    <button class="swap" data-meal="${i}">🔄 یه گزینه‌ی دیگه</button></div>`;};
+  let html='';
+  html+=`<div class="totcard"><div class="t1">🎯 هدف امروز: <b>~۱۹۰۰ کالری</b> · پروتئین <b>۱۶۰–۱۸۰گ</b> · آب ۳ لیتر</div>
+    <div class="totnow">جمع گزینه‌های الان: <b id="totkcal">—</b> کالری · <b id="totpro">—</b>گ پروتئین</div>
+    <div class="totbar"><div id="totfill"></div></div>
+    <div class="totnow" style="margin-top:5px; font-size:11px">پروتئین زیر ۱۶۰ موند؟ یه Magerquark یا شیر پروتئین اضافه کن.</div></div>`;
+  html+=`<div class="estcard"><h4>📈 پیش‌بینی واقع‌بینانه (اگه پایبند بمونی)</h4><ul>
+    <li><b>این هفته:</b> ~۰.۵ تا ۱ کیلو چربی ↓ + کمی عضله ↑</li>
+    <li><b>این ماه:</b> ~۲ تا ۴ کیلو ↓</li>
+    <li><b>۶ ماه:</b> ~۱۵ تا ۲۰ کیلو ↓ + فرم ورزشکاری</li></ul>
+    <div style="margin-top:6px">چون اضافه‌وزن + تازه‌کاری، همزمان چربی می‌سوزونی و عضله می‌سازی (recomp) — این فرصت طلاییته. 💪</div></div>`;
+  html+=`<div class="daynote">📅 برنامه‌ی امروز (${WD[new Date().getDay()]}) — گزینه‌ها هر روز خودکار عوض می‌شن. هر وعده سخت بود یا حسش نبود، «🔄 یه گزینه‌ی دیگه» رو بزن.</div>`;
+  MEALS.forEach((m,i)=>{html+=mc(m,i);});
+  html+=`<div class="meal cheat"><div class="meal-h"><span class="mt">🍫 وعده‌ی چیت</span><span class="mcal">هفته‌ای ۱ بار · ~<b>۸۰۰–۱۲۰۰</b> کالری</span></div>
+    <div class="mopt">بعد از سنگین‌ترین تمرین (روز پا) یه وعده‌ی آزاد بخور — پیتزا، برگر، هرچی دلت خواست. <b>یه وعده، نه یه روز کامل.</b></div>
+    <div class="mtip">⏰ این برای روحیه و هورمون‌ها (لپتین) خوبه و باعث می‌شه کلِ هفته راحت‌تر پایبند بمونی. بعدش برگرد سر برنامه.</div></div>`;
+  html+=`<div class="daynote" style="margin-top:2px">⏱️ ترتیب: صبحانه ← میوه ← ناهار ← (قبل تمرین) ← تمرین ← (بعد تمرین + شیر پروتئین) ← شام. روز استراحت، شیر پروتئین رو هر وعده‌ای که پروتئینت کم موند بگیر.</div>`;
+  host.insertAdjacentHTML('beforeend',html);
+  const renderMeal=i=>{const o=MEALS[i].opts[idx[i]], el=host.querySelector('.meal[data-meal="'+i+'"]');
+    el.querySelector('.mopt').innerHTML=glossify(o.n);
+    el.querySelector('.mcal').innerHTML='<b>'+faNum(o.kcal)+'</b> کالری · <b>'+faNum(o.pro)+'</b>گ پروتئین';};
+  const total=()=>{let k=0,p=0; MEALS.forEach((m,i)=>{k+=m.opts[idx[i]].kcal; p+=m.opts[idx[i]].pro;});
+    document.getElementById('totkcal').textContent=faNum(k);
+    document.getElementById('totpro').textContent=faNum(p);
+    const f=document.getElementById('totfill'); f.style.width=Math.min(k/TARGET,1)*100+'%'; f.className=(k>2050?'over':'');};
+  host.addEventListener('click',ev=>{const b=ev.target.closest('.swap'); if(!b)return; const i=+b.dataset.meal; idx[i]=(idx[i]+1)%MEALS[i].opts.length; renderMeal(i); total();});
+  total();
+})();
+
+/* ---------- 🆘 پنل نجات و جبران ---------- */
+(function(){
+ const JUNK=[
+  {n:'چیپس (بسته متوسط)',k:500},{n:'بستنی (۲ اسکوپ)',k:300},{n:'پیتزا (هر اسلایس)',k:285},
+  {n:'شکلات (نصف تخته)',k:270},{n:'نوشابه (یه قوطی)',k:140},{n:'برگر',k:550},
+  {n:'سیب‌زمینی سرخ‌کرده (یه پرس)',k:380},{n:'آجیل/تخمه‌ی شور (یه مشت)',k:200},
+  {n:'بیسکویت/کوکی (۳ تا)',k:150},{n:'نون و پنیر/کره‌ی اضافه',k:230},
+  {n:'برنجِ پرروغن (بشقاب اضافه)',k:450},{n:'خورشِ چربِ قیمه/قورمه (پرروغن)',k:400},
+  {n:'سوسیس و تخم‌مرغِ پرروغن',k:600},{n:'ته‌دیگ',k:300},{n:'نونِ اضافه (چند تیکه)',k:250}
+ ];
+ const RESC={
+  gym:'<h5>آروم باش — یه جلسه چیزی رو خراب نمی‌کنه.</h5>نتیجه از ثباتِ هفته‌ها میاد، نه یه روز. اینا رو بکن:'+
+   '<ul><li><b>جابه‌جاش کن:</b> همون تمرین رو فردا بزن، بقیه رو یه روز بنداز جلو. یا این هفته ۲ جلسه به‌جای ۳ (بهتر از صفره).</li>'+
+   '<li><b>اگه اصلاً نشد بری:</b> یه تمرینِ خونگیِ کوتاه — اسکوات بدن، شنا، پلانک + ۲۰ دقیقه کراس‌ترینر. فقط حرکت داشته باش.</li>'+
+   '<li><b>رژیم رو اون روز سفت‌تر بگیر:</b> چون کالریِ تمرین نسوختی، یه‌کم کمتر بخور یا یه پیاده‌رویِ اضافه برو.</li></ul>'+
+   '<h5>لازمه تو اپ علامت بزنم؟</h5>نه. شمارنده‌ی جلسات فقط چیزی که <b>واقعاً زدی</b> رو می‌شمره. اگه جا انداختی، کافیه «تیک جلسه» رو نزنی — به چرخه‌ی ۶ هفته‌ای هم لطمه نمی‌زنه.',
+  under:'<h5>یه روز کم‌خوری اشکالی نداره — حتی به ضررت نیست.</h5>کالریِ کمتر یعنی کسریِ بیشتر؛ برای کات بد نیست. فقط این دو تا:'+
+   '<ul><li><b>پروتئین رو حتماً بزن</b> حتی بی‌اشتها — یه شیر پروتئین یا Magerquark راحت پایین می‌ره و عضله‌تو حفظ می‌کنه.</li>'+
+   '<li><b>آب و مایعات</b> رو نگه دار.</li></ul>'+
+   '<h5>کِی نگران شو؟</h5>اگه <b>چند روز پشت‌سرهم</b> بی‌اشتها بودی یا ضعف/سرگیجه داشتی، یه‌کم بیشتر بخور. کم‌خوریِ مزمن، متابولیسم و عضله رو می‌زنه و نتیجه‌ی برعکس می‌ده.',
+  pro:'<h5>پروتئین مهم‌ترین چیز برای حفظ عضله‌ست.</h5>اگه امروز کم شد، فاجعه نیست — جبرانش ساده‌ست:'+
+   '<ul><li><b>قبل خواب</b> یه شیر پروتئین یا Magerquark/Skyr بزن (پروتئینِ آهسته، شب عالیه).</li>'+
+   '<li>فردا یه وعده‌ی پرپروتئینِ اضافه (تن‌ماهی، تخم‌مرغ، مرغ).</li></ul>'+
+   '<h5>قانون کلی</h5>نذار <b>چند روز پشت‌سرهم</b> زیر ~۱۲۰گ بمونه. یه روزِ تکی مهم نیست؛ میانگینِ هفته مهمه. یه Magerquark در روز به‌تنهایی ~۲۸گ می‌ده.'
+ };
+ const OVER_TIPS='<h5>🧠 قانون‌های طلایی</h5>'+
+   '<ul><li><b>یه روز پرخوری چاقت نمی‌کنه</b> — مثل یه روز رژیم که لاغرت نمی‌کنه. چربیِ واقعی از هفته‌ها میاد.</li>'+
+   '<li><b>فردا تلافیِ با گرسنگیِ شدید نکن</b> — خودش باعث پرخوریِ بعدی می‌شه. فقط برگرد به برنامه‌ی عادی + کراس‌ترینرِ اضافه + آب زیاد.</li>'+
+   '<li>همین وعده‌های آزاد رو می‌تونی <b>«وعده‌ی چیتِ هفتگی»</b> حساب کنی — برنامه‌ریزی‌شده، نه گناه.</li></ul>'+
+   '<h5>💑 وقتی دوست‌دخترت میاد</h5>'+
+   '<ul><li><b>قبلش سیر شو:</b> یه وعده‌ی پرپروتئین بخور (Skyr، تخم‌مرغ، مرغ) که گشنه نباشی — سیر بودن، کششِ به هله‌هوله رو نصف می‌کنه.</li>'+
+   '<li><b>جایگزینِ باهوش:</b> چیپس → آجیلِ کم‌نمک/ذرتِ بوداده؛ بستنی → نصفش یا ماستِ یونانیِ منجمد؛ نوشابه → نسخه‌ی زیرو.</li>'+
+   '<li><b>بشقابِ کوچیک‌تر</b> بردار و آروم بخور؛ مجبور نیستی پابه‌پای اون بخوری.</li>'+
+   '<li>یه <b>پیاده‌رویِ بعدِ غذا</b> با هم برید — هم خوبه هم قند خون رو کنترل می‌کنه.</li></ul>';
+ function verdict(t){
+   if(t===0) return {c:'',t:'هرچی خوردی رو با دکمه‌ی + بزن تا حساب کنم.'};
+   if(t<500) return {c:'ok',t:'~'+faNum(t)+' کالری — کمه! تو حدِ یه میان‌وعده‌ست. عادی ادامه بده. 👍'};
+   if(t<1000) return {c:'ok',t:'~'+faNum(t)+' کالری — متوسط. فردا یه کراس‌ترینرِ اضافه + پروتئین بالا، جبران می‌شه.'};
+   if(t<1800) return {c:'warn',t:'~'+faNum(t)+' کالری — زیاد بود ولی فاجعه نیست. همینو «وعده‌ی چیتِ این هفته» حساب کن و فردا عادی برگرد؛ رژیمِ سفت نگیر.'};
+   return {c:'bad',t:'~'+faNum(t)+' کالری 😅 حسابی ترکوندی! ولی یه شب، حداکثر ~'+faNum(Math.round(t/7.7))+' گرم چربیه که با ۲–۳ روز برمی‌گرده. فردا گرسنگی نکش، فقط برگرد سر برنامه + یه پیاده‌رویِ اضافه.'};
+ }
+ function burn(t){
+   if(!t) return '';
+   const walk=Math.round(t/6), cross=Math.round(t/10);
+   let s='<div class="burnbox"><b>🔥 جبران (کاملاً اختیاری):</b><br>';
+   if(t<=600) s+='🏋️ ~'+faNum(cross)+' دقیقه کراس‌ترینر یا 🚶 ~'+faNum(walk)+' دقیقه پیاده‌روی، و کاملاً بی‌حساب می‌شه. 👍';
+   else if(t<=1200) s+='🏋️ ~'+faNum(cross)+' دقیقه کراس‌ترینر یا 🚶 ~'+faNum(walk)+' دقیقه پیاده‌روی. لازم نیست همه‌شو امروز در بیاری — همینقدر که یه حرکتی بکنی کافیه.';
+   else s+='اینقدر زیاده که نمی‌شه همه‌شو با ورزش سوزوند (~'+faNum(walk)+' دقیقه پیاده‌روی می‌خواد!). <b>سعی نکن جبرانش کنی</b> — فقط یه پیاده‌رویِ ۳۰–۴۵ دقیقه‌ای برو و بقیه‌شو بسپار به برنامه‌ی عادی.';
+   s+='<br><br>😌 <b>یا اصلاً ولش کن:</b> یه روز هیچی رو خراب نمی‌کنه. احساسِ گناه بدتر از خودِ کالریه — فردا فقط برگرد سر برنامه. تو هفته‌ها قهرمان می‌شی، نه تو یه شب. 💪</div>';
+   return s;
+ }
+ const fab=document.createElement('button'); fab.id='rfab'; fab.type='button'; fab.textContent='🆘 امروز خراب شد؟';
+ document.body.appendChild(fab);
+ const ov=document.createElement('div'); ov.id='rescue';
+ ov.innerHTML='<div class="rcard"><div class="rhead"><span>🆘 نجات و جبران</span><button class="rclose" type="button">✕</button></div>'+
+   '<div class="rmenu"><button data-sc="gym" type="button">🏋️ نرفتم باشگاه</button><button data-sc="over" type="button">🍕 زیادی خوردم</button>'+
+   '<button data-sc="under" type="button">🥗 کم خوردم</button><button data-sc="pro" type="button">🥩 پروتئین کم شد</button></div><div class="rbody"></div></div>';
+ document.body.appendChild(ov);
+ const body=ov.querySelector('.rbody');
+ const sec=(id,title,html)=>'<div class="rsec" data-sec="'+id+'" style="display:none"><div class="rsec-t">'+title+'</div>'+html+'</div>';
+ const overHTML='<p class="rlead">هرچی <b>اضافه‌بر برنامه</b> خوردی رو با + بزن. ⚠️ این <b>کالریِ کلِ روزت نیست</b> — فقط همینایی که اینجا می‌زنی (یعنی اضافه‌ای که خوردی).</p><div id="calc"></div>'+
+   '<div class="calctot">کالریِ این چیزا: <b id="ctot">۰</b> کالری</div><div class="verd" id="cverd"></div><div id="cburn"></div><div class="rtips">'+OVER_TIPS+'</div>';
+ body.innerHTML='<div class="rhint" id="rhint">یکی یا <b>چندتا</b> از حالت‌های بالا رو بزن 👆 (مثلاً هم «نرفتم باشگاه»، هم «زیادی خوردم» — راهکارِ همه‌شو با هم می‌چینم).</div>'+
+   sec('gym','🏋️ نرفتم باشگاه',RESC.gym)+sec('over','🍕 زیادی خوردم',overHTML)+
+   sec('under','🥗 کم خوردم',RESC.under)+sec('pro','🥩 پروتئین کم شد',RESC.pro);
+ const calc=body.querySelector('#calc'), qty=JUNK.map(()=>0);
+ calc.innerHTML=JUNK.map((j,i)=>'<div class="jrow"><span class="jn">'+j.n+' <span style="color:#6b7280">(~'+faNum(j.k)+')</span></span><span class="jc"><button class="jm" data-i="'+i+'" type="button">−</button><b data-q="'+i+'">۰</b><button class="jp" data-i="'+i+'" type="button">+</button></span><span class="jk" data-k="'+i+'">۰</span></div>').join('');
+ const upd=()=>{let t=0; JUNK.forEach((j,i)=>{const s=qty[i]*j.k; t+=s; calc.querySelector('[data-q="'+i+'"]').textContent=faNum(qty[i]); calc.querySelector('[data-k="'+i+'"]').textContent=qty[i]?faNum(s):'۰';});
+   body.querySelector('#ctot').textContent=faNum(t); const v=verdict(t); const vd=body.querySelector('#cverd'); vd.textContent=v.t; vd.className='verd '+v.c;
+   body.querySelector('#cburn').innerHTML=burn(t);};
+ calc.addEventListener('click',ev=>{const p=ev.target.closest('.jp'),m=ev.target.closest('.jm'); if(p){qty[+p.dataset.i]++;upd();} else if(m){const i=+m.dataset.i; if(qty[i]>0){qty[i]--;upd();}}});
+ upd();
+ const refreshHint=()=>{ body.querySelector('#rhint').style.display=ov.querySelector('.rmenu button.on')?'none':'block'; };
+ fab.addEventListener('click',()=>{ov.classList.add('show');});
+ ov.addEventListener('click',ev=>{
+   if(ev.target.closest('.rclose')||ev.target===ov){ov.classList.remove('show'); return;}
+   const mb=ev.target.closest('.rmenu button');
+   if(mb){ mb.classList.toggle('on'); const s=body.querySelector('.rsec[data-sec="'+mb.dataset.sc+'"]'); if(s) s.style.display=mb.classList.contains('on')?'block':'none'; refreshHint(); }
+ });
+})();
+
+/* ---------- 📋 مرجع کامل دستگاه‌های باشگاه ---------- */
+(function(){
+ const ref=document.getElementById('machineref'); if(!ref) return;
+ const REF=[
+  ['🏃 هوازی / Cardio',['تردمیل — Laufband','روئینگ / قایقی — Rudergerät','الپتیکال / کراس‌تراینر — Crosstrainer','دوچرخه ثابت — Ergometer','دوچرخه نشسته — Liegeergometer','استپر / پله‌نورد — Stepper']],
+  ['🦵 پا و باسن',['جلو پا — Beinstrecker','پشت پا نشسته — Beinbeuger sitzend','پشت پا خوابیده — Beinbeuger liegend','پرس پا نشسته — Sitzende Beinpresse','پرس پا ۴۵° — 45-Grad-Beinpresse','هک‌اسکوات — Hackenschmidt / Hack Squat','داخل ران — Adduktoren','خارج ران — Abduktoren','هیپ‌تراست — Hip-Thrust / Glute-Drive','ساق ایستاده — Stehende Wadenheber','ساق نشسته — Sitzende Wadenheber']],
+  ['💪 سینه',['پرس سینه نشسته — Brustpresse','پرس سینه همگرا — Konvergierende Brustpresse','پروانه / پک‌دک — Butterfly / Pec Deck','نیمکت پرس هالتر — Bankdrücken','نیمکت صاف — Flachbank','نیمکت شیب‌دار — Verstellbare Schrägbank']],
+  ['🔙 پشت و زیربغل',['لت از بالا — Latzugmaschine','لت صفحه‌ای — Plate Loaded Latzug','پارویی نشسته — Sitzendes Rudern','قایقی سیم‌کش — Low Row / Kabelrudern','تی‌بار رو — T-Bar Row','روئینگ صفحه‌ای — Plate Loaded Ruder','فیله کمر — Rückenstrecker / Hyperextension']],
+  ['🤷 سرشانه و پشت شانه',['پرس سرشانه — Schulterpresse','نشر معکوس / پشت شانه — Reverse Butterfly','پروانه دوحالته — Butterfly / Reverse']],
+  ['💪 بازو',['جلوبازو — Bizepsmaschine','پشت‌بازو — Trizepsmaschine','هالتر خم — SZ-Stange / Curlstange','دستگیره‌های کابل — Kabelzuggriffe']],
+  ['🧎 شکم و میان‌تنه',['شکم / کرانچ — Bauchmaschine','چرخش تنه — Rotary Torso / Rumpfdrehmaschine','نیمکت شکم شیب‌دار — Bauchbank','فیله کمر — Hyperextension']],
+  ['🔗 سیم‌کش و چندکاره',['سیم‌کش چندکاره — Functional Trainer','کراس‌اور — Cable Crossover','سیم‌کش دوتایی — Dual Adjustable Pulley','بارفیکس روی کابل — Klimmzugstation','بارفیکس / دیپ کمکی — Klimmzug- und Dip-Assistent','دستگیره دیپ — Dip-Station']],
+  ['🏋️ وزنه آزاد و رک',['پاور رک — Power Rack','نیم‌رک — Half Rack','اسمیت ماشین — Smith-Maschine','سکوی وزنه‌برداری — Gewichtheberplattform','هالتر المپیک — Olympische Langhantel','صفحه وزنه — Hantelscheiben','دمبل — Kurzhanteln','کتل‌بل — Kettlebell']],
+  ['🤸 فانکشنال',['رک فانکشنال — Functional Rack','TRX / بند معلق — Schlingentrainer','بتل‌روپ — Battle Rope','سورتمه تمرینی — Trainingsschlitten','مدیسن‌بال / وال‌بال — Medizinball / Wall Ball']],
+  ['🧖 ریکاوری و جانبی',['صندلی ماساژ — Massagesessel','آنالیز بدن — Body Analyzer','ضدعفونی — Hygienestation','لاکر — Spind / Schließfach']]
+ ];
+ ref.innerHTML=REF.map(c=>'<div class="refcat">'+c[0]+'</div>'+c[1].map(i=>'<div class="refitem">• '+i+'</div>').join('')).join('');
+})();
+</script>
+</body>
+</html>
