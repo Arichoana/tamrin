@@ -82,6 +82,20 @@
   .estcard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:14px; font-size:12.5px; color:#b9c2d0}
   .estcard h4{margin:0 0 6px; font-size:13px; color:var(--txt)} .estcard ul{margin:0; padding-inline-start:18px} .estcard li{margin:3px 0}
   .daynote{font-size:12px; color:var(--mut); margin:0 2px 12px; line-height:1.6}
+  .foodlog{background:linear-gradient(135deg,#241c30,#191620); border:1px solid #3a2f4a; border-radius:14px; padding:12px 14px; margin-bottom:14px}
+  .fl-top{display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:14px; font-weight:700}
+  .fl-top button{background:#c084fc; color:#1a1020; border:none; font-family:inherit; font-weight:800; font-size:12px; padding:8px 12px; border-radius:10px; cursor:pointer; white-space:nowrap}
+  .fl-today{font-size:12.5px; color:#cdd5e0; margin-top:8px; line-height:1.95} .fl-today b{color:#d8b4fe}
+  #foodmodal{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:80; padding:20px}
+  #foodmodal.show{display:flex}
+  .fmcard{background:var(--card); border:1px solid var(--line); border-radius:16px; width:100%; max-width:370px; padding:16px}
+  .fmhead{display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:16px; margin-bottom:10px}
+  .fmclose{background:#0e1117; border:1px solid var(--line); color:var(--txt); width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:14px}
+  #fminput{width:100%; min-height:92px; background:#0e1117; border:1px solid var(--line); color:var(--txt); border-radius:10px; padding:10px; font-family:inherit; font-size:14px; resize:vertical; line-height:1.9}
+  .fmbtn{margin-top:10px; width:100%; background:#c084fc; color:#1a1020; border:none; font-family:inherit; font-weight:800; font-size:14px; padding:11px; border-radius:11px; cursor:pointer}
+  .fmbtn.add{background:var(--legs); color:#04210d}
+  .fmresult{margin-top:10px; font-size:13px}
+  .fmest{background:#0e1117; border:1px solid var(--line); border-radius:10px; padding:11px; line-height:1.95} .fmest b{color:#ffd27a} .fmest span{color:var(--mut); font-size:12px}
   .meal{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:12px}
   .meal-h{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap}
   .meal .mt{font-weight:800; font-size:15px} .meal .mcal{font-size:12px; color:var(--mut)} .meal .mcal b{color:#ffd27a}
@@ -588,7 +602,7 @@ function glossify(t){
     ${m.tip?`<div class="mtip">⏰ ${m.tip}</div>`:''}
     <button class="swap" data-meal="${i}">🔄 یه گزینه‌ی دیگه</button></div>`;};
   let html='';
-  html+=`<div class="totcard"><div class="t1">🎯 هدف امروز: <b>~۱۹۰۰ کالری</b> · پروتئین <b>۱۶۰–۱۸۰گ</b> · آب ۳ لیتر</div>
+  html+=`<div class="foodlog"><div class="fl-top"><span>🤖 امروز چی خوردی؟</span><button id="flopen" type="button">+ ثبت با AI</button></div><div class="fl-today" id="fltoday"></div></div><div class="totcard"><div class="t1">🎯 هدف امروز: <b>~۱۹۰۰ کالری</b> · پروتئین <b>۱۶۰–۱۸۰گ</b> · آب ۳ لیتر</div>
     <div class="totnow">جمع گزینه‌های الان: <b id="totkcal">—</b> کالری · <b id="totpro">—</b>گ پروتئین</div>
     <div class="totbar"><div id="totfill"></div></div>
     <div class="totnow" style="margin-top:5px; font-size:11px">پروتئین زیر ۱۶۰ موند؟ یه Magerquark یا شیر پروتئین اضافه کن.</div></div>`;
@@ -694,6 +708,49 @@ function glossify(t){
    const mb=ev.target.closest('.rmenu button');
    if(mb){ mb.classList.toggle('on'); const s=body.querySelector('.rsec[data-sec="'+mb.dataset.sc+'"]'); if(s) s.style.display=mb.classList.contains('on')?'block':'none'; refreshHint(); }
  });
+})();
+
+/* ---------- 🤖 ثبت غذا با AI (Gemini) + کالری هفته/ماه ---------- */
+const API='https://tamrin-api.arichoana.workers.dev';
+(function(){
+ const m=document.createElement('div'); m.id='foodmodal';
+ m.innerHTML='<div class="fmcard"><div class="fmhead"><span>🤖 ثبتِ غذای امروز</span><button class="fmclose" type="button">✕</button></div>'+
+   '<textarea id="fminput" placeholder="امروز چی خوردی؟ بنویس...&#10;مثلاً: ناهار چلوکباب با دوغ، عصر دو تا بیسکویت و قهوه"></textarea>'+
+   '<button id="fmcalc" type="button" class="fmbtn">🧮 حساب کن با AI</button>'+
+   '<div id="fmresult" class="fmresult"></div></div>';
+ document.body.appendChild(m);
+ const getCal=()=>{try{return JSON.parse(localStorage.getItem('bf_cal')||'{}');}catch(e){return {};}};
+ const avg=(c,n)=>{let k=0,d=0; const cut=new Date(today()); cut.setDate(cut.getDate()-n+1);
+   Object.keys(c).forEach(dt=>{ if(new Date(dt)>=cut){k+=(c[dt].kcal||0); d++;} }); return d?Math.round(k/d):0; };
+ function refreshToday(){
+   const c=getCal(), t=c[today()]||{kcal:0,protein:0}, el=document.getElementById('fltoday'); if(!el) return;
+   let s='امروز تا حالا: <b>'+faNum(t.kcal)+'</b> کالری · <b>'+faNum(t.protein)+'</b>گ پروتئین';
+   const w=avg(c,7), mo=avg(c,30); if(w||mo) s+='<br>📊 میانگین: هفته ~<b>'+faNum(w)+'</b> · ماه ~<b>'+faNum(mo)+'</b> کالری در روز';
+   el.innerHTML=s;
+ }
+ document.addEventListener('click',ev=>{
+   if(ev.target.closest('#flopen')){ document.getElementById('fmresult').innerHTML=''; m.classList.add('show'); return; }
+   if(ev.target.closest('.fmclose')||ev.target===m){ m.classList.remove('show'); return; }
+ });
+ document.getElementById('fmcalc').addEventListener('click',async()=>{
+   const txt=(document.getElementById('fminput').value||'').trim(); if(!txt) return;
+   const res=document.getElementById('fmresult'); res.innerHTML='⏳ دارم حساب می‌کنم...';
+   try{
+     const r=await fetch(API+'/food',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt})});
+     const d=await r.json();
+     if(d==null||d.kcal==null){ res.innerHTML='❌ نشد حساب کنم، یه‌بار دیگه امتحان کن.'; return; }
+     res.innerHTML='<div class="fmest">≈ <b>'+faNum(d.kcal)+'</b> کالری · <b>'+faNum(d.protein)+'</b>گ پروتئین<br><span>'+(d.note||'')+'</span></div>'+
+       '<button id="fmadd" type="button" class="fmbtn add">➕ اضافه به امروز</button>';
+     document.getElementById('fmadd').onclick=()=>{
+       const c=getCal(), t=today(); if(!c[t])c[t]={kcal:0,protein:0,items:[]};
+       c[t].kcal+=(+d.kcal||0); c[t].protein+=(+d.protein||0); (c[t].items=c[t].items||[]).push(txt);
+       localStorage.setItem('bf_cal',JSON.stringify(c));
+       document.getElementById('fminput').value=''; res.innerHTML='✅ به امروز اضافه شد!';
+       refreshToday(); setTimeout(()=>m.classList.remove('show'),1000);
+     };
+   }catch(e){ res.innerHTML='❌ اتصال برقرار نشد — اینترنت رو چک کن.'; }
+ });
+ refreshToday();
 })();
 
 /* ---------- 📋 مرجع کامل دستگاه‌های باشگاه ---------- */
