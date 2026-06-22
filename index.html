@@ -391,6 +391,8 @@ function refreshSess(){
     document.getElementById('cnt-'+day).textContent=faNum(c);
     const ld=localStorage.getItem('bf_sessdate_'+day);
     document.getElementById('ld-'+day).textContent='آخرین بار: '+(ld?faNum(ld):'—');
+    const sb=document.querySelector('button[data-sess="'+day+'"]');
+    if(sb && !sb._flash){ const dn=(ld===today()); sb.textContent=dn?'✅ امروز ثبت شده — بزن تا حذف شه':'✅ امروز این جلسه رو زدم'; sb.classList.toggle('done',dn); }
   });
   document.getElementById('cnt-all').textContent=faNum(all);
   const GS=144, pct=Math.min(all/GS*100,100);
@@ -407,14 +409,19 @@ function gsMessage(all,pct){
   return '🏆 رسیدی به ۱۴۴ جلسه! حالا نوبتِ نگه‌داری و لذت بردنه.';
 }
 document.querySelectorAll('button[data-sess]').forEach(b=>b.addEventListener('click',()=>{
-  const day=b.dataset.sess, key='bf_sess_'+day;
-  localStorage.setItem(key,(+(localStorage.getItem(key)||0))+1);
-  localStorage.setItem('bf_sessdate_'+day,today());
-  refreshSess();
-  let all=0; ['push','pull','legs'].forEach(d=>all+=(+(localStorage.getItem('bf_sess_'+d)||0)));
-  const pct=Math.min(Math.round(all/144*100),100);
-  b.textContent='✅ جلسه‌ی '+faNum(all)+' — '+faNum(pct)+'٪ تا هدف! 💪'; b.classList.add('done');
-  setTimeout(()=>{b.textContent='✅ امروز این جلسه رو زدم'; b.classList.remove('done');},2600);
+  const day=b.dataset.sess, key='bf_sess_'+day, dkey='bf_sessdate_'+day, c=+(localStorage.getItem(key)||0);
+  if(localStorage.getItem(dkey)===today()){
+    // امروز قبلاً ثبت شده → حذف (undo)
+    localStorage.setItem(key,Math.max(0,c-1)); localStorage.removeItem(dkey);
+    b._flash=true; b.textContent='↩️ حذف شد'; b.classList.remove('done'); refreshSess();
+    setTimeout(()=>{b._flash=false; refreshSess();},1400);
+  } else {
+    localStorage.setItem(key,c+1); localStorage.setItem(dkey,today()); refreshSess();
+    let all=0; ['push','pull','legs'].forEach(d=>all+=(+(localStorage.getItem('bf_sess_'+d)||0)));
+    const pct=Math.min(Math.round(all/144*100),100);
+    b._flash=true; b.textContent='✅ جلسه‌ی '+faNum(all)+' — '+faNum(pct)+'٪! 💪'; b.classList.add('done'); refreshSess();
+    setTimeout(()=>{b._flash=false; refreshSess();},2400);
+  }
 }));
 refreshSess();
 
