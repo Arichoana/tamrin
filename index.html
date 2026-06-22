@@ -810,13 +810,14 @@ const API='https://tamrin-api.arichoana.workers.dev';
  const snap=()=>{const o={}; for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i); if(k.indexOf('bf_')===0)o[k]=localStorage.getItem(k);} return o;};
  const canon=o=>{o=o||{}; return JSON.stringify(Object.keys(o).sort().reduce((a,k)=>(a[k]=o[k],a),{}));};
  let ready=false, t;
- const push=()=>{ try{ fetch(API+'/sync?u='+U,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(snap())}).catch(()=>{}); }catch(e){} };
+ const ftimeout=(u,opt,ms)=>{ const ac=new AbortController(); const to=setTimeout(()=>ac.abort(),ms||6000); return fetch(u,Object.assign({},opt||{},{signal:ac.signal})).finally(()=>clearTimeout(to)); };
+ const push=()=>{ try{ ftimeout(API+'/sync?u='+U,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(snap())},6000).catch(()=>{}); }catch(e){} };
  const sched=()=>{ if(!ready)return; clearTimeout(t); t=setTimeout(push,700); };
  localStorage.setItem=function(k,v){ _set(k,v); if((''+k).indexOf('bf_')===0 && k!=='bf_t'){ _set('bf_t',''+Date.now()); sched(); } };
  localStorage.removeItem=function(k){ _rem(k); if((''+k).indexOf('bf_')===0 && k!=='bf_t'){ _set('bf_t',''+Date.now()); sched(); } };
  (async function(){
    let remote=null;
-   try{ remote=await (await fetch(API+'/sync?u='+U)).json(); }catch(e){}
+   try{ remote=await (await ftimeout(API+'/sync?u='+U,{},6000)).json(); }catch(e){}
    const local=snap(), lt=+(local['bf_t']||0), rt=+((remote&&remote['bf_t'])||0);
    if(remote && typeof remote==='object' && rt>lt && canon(local)!==canon(remote)){
      Object.keys(local).forEach(k=>_rem(k));
