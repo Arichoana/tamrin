@@ -145,6 +145,11 @@
   .sess-info{font-size:12.5px; color:var(--mut)} .sess-info b{color:var(--txt); font-size:15px}
   .sess-btn{background:var(--legs); color:#04210d; border:none; font-family:inherit; font-weight:800; font-size:13px; padding:10px 13px; border-radius:11px; cursor:pointer}
   .sess-btn.done{background:#1f3a26; color:#7fe39b}
+  .cardiobar{background:#12161e; border:1px solid var(--line); border-radius:12px; padding:11px 13px; margin:0 0 14px}
+  .rhythm{font-size:12.5px; color:#cdd5e0; margin-bottom:9px; line-height:1.7}
+  .cardio-btn{background:#15384a; color:#7fd6f0; border:1px solid #2c6a82; font-family:inherit; font-weight:800; font-size:12.5px; padding:9px 14px; border-radius:10px; cursor:pointer}
+  .cardio-btn.done{background:#0e2a18; color:#7fe39b; border-color:#2c8a4a}
+  .cardio-cnt{font-size:11.5px; color:var(--mut); margin-inline-start:9px}
   .ex{background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden; margin-bottom:14px}
   .ex.checked{border-color:var(--legs); box-shadow:0 0 0 1px var(--legs) inset}
   .media{position:relative; height:220px; background:#fff; display:flex; align-items:center; justify-content:center}
@@ -244,6 +249,11 @@
       <div>📌 هوازی برای کات لازم نیست ولی کمک می‌کنه — اصلِ چربی‌سوزی رژیمه، هوازی یه بونوسه.</div>
     </div>
   </details>
+  <div class="cardiobar">
+    <div class="rhythm" id="rhythm">🔄 ریتمِ امروزت اینجا میاد…</div>
+    <button class="cardio-btn" id="cardioBtn" type="button">🚲 امروز کراس‌ترینر زدم</button>
+    <span class="cardio-cnt" id="cardioCnt"></span>
+  </div>
   <div class="tabs">
     <div class="tab on" data-day="push">🟠 Push<br>سینه/سرشانه</div>
     <div class="tab" data-day="pull">🔵 Pull<br>پشت/بازو</div>
@@ -422,6 +432,7 @@ function refreshSess(){
   const GS=144, pct=Math.min(all/GS*100,100);
   const gN=document.getElementById('gsN'), gP=document.getElementById('gsP'), gB=document.getElementById('gsBar'), gM=document.getElementById('gsMsg');
   if(gN){gN.textContent=faNum(all); gP.textContent=faNum(Math.round(pct))+'٪'; gB.style.width=pct+'%'; gM.textContent=gsMessage(all,pct);}
+  if(typeof refreshCardio==='function') refreshCardio();
 }
 function gsMessage(all,pct){
   if(all===0) return 'هنوز شروع نکردی — اولین جلسه‌ت بزرگ‌ترین قدمه.';
@@ -448,6 +459,39 @@ document.querySelectorAll('button[data-sess]').forEach(b=>b.addEventListener('cl
   }
 }));
 refreshSess();
+
+// 🚲 تیکِ کراس‌ترینرِ خونه + ریتمِ هوشمندِ باشگاه/هوازی (از روی آخرین کاری که ثبت کردی، نه تقویمِ ثابت)
+function refreshCardio(){
+  const c=+(localStorage.getItem('bf_cardio')||0);
+  const done=localStorage.getItem('bf_cardiodate')===today();
+  const btn=document.getElementById('cardioBtn'), cnt=document.getElementById('cardioCnt'), r=document.getElementById('rhythm');
+  if(btn && !btn._flash){ btn.textContent=done?'✅ امروز زدی — بزن تا حذف':'🚲 امروز کراس‌ترینر زدم'; btn.classList.toggle('done',done); }
+  if(cnt) cnt.textContent='جمعاً '+faNum(c)+' بار';
+  if(!r) return;
+  const gymDates=['push','pull','legs'].map(d=>localStorage.getItem('bf_sessdate_'+d)).filter(Boolean).sort();
+  const lastGym=gymDates.length?gymDates[gymDates.length-1]:null;
+  const lastCardio=localStorage.getItem('bf_cardiodate')||null;
+  const T=today(); let msg;
+  if(lastGym===T) msg='💪 امروز باشگاه رفتی — آفرین! فردا روزِ کراس‌ترینره 🚲';
+  else if(lastCardio===T) msg='🚲 امروز کراس‌ترینر زدی — عالی! فردا روزِ باشگاهه 🏋️';
+  else if(!lastGym && !lastCardio) msg='🔄 بزن بریم — امروز یه روزِ خوب برای باشگاهه 🏋️';
+  else if(!lastCardio || (lastGym && lastGym>lastCardio)) msg='🔄 آخرین‌بار باشگاه بودی → امروز روزِ کراس‌ترینره 🚲';
+  else msg='🔄 آخرین‌بار کراس‌ترینر زدی → امروز روزِ باشگاهه 🏋️';
+  r.textContent=msg;
+}
+document.getElementById('cardioBtn').addEventListener('click',function(){
+  const b=this, c=+(localStorage.getItem('bf_cardio')||0);
+  if(localStorage.getItem('bf_cardiodate')===today()){
+    localStorage.setItem('bf_cardio',Math.max(0,c-1)); localStorage.removeItem('bf_cardiodate');
+    b._flash=true; b.textContent='↩️ حذف شد'; b.classList.remove('done'); refreshCardio();
+    setTimeout(()=>{b._flash=false; refreshCardio();},1400);
+  } else {
+    localStorage.setItem('bf_cardio',c+1); localStorage.setItem('bf_cardiodate',today());
+    b._flash=true; b.textContent='🚲 ثبت شد — دمت گرم! 🔥'; b.classList.add('done'); refreshCardio();
+    setTimeout(()=>{b._flash=false; refreshCardio();},2000);
+  }
+});
+refreshCardio();
 
 // 6-week block tracker + deload reminder
 const BK='bf_blockstart';
