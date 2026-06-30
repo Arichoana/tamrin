@@ -858,6 +858,7 @@ const API='https://tamrin-api.arichoana.workers.dev';
  let ready=false, t, ts=loadTS();
  const ftimeout=(u,opt,ms)=>{ const ac=new AbortController(); const to=setTimeout(()=>ac.abort(),ms||6000); return fetch(u,Object.assign({},opt||{},{signal:ac.signal})).finally(()=>clearTimeout(to)); };
  const push=()=>{ try{ ftimeout(API+'/sync?u='+U,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({v:2,data:snap(),ts:ts})},6000).catch(()=>{}); }catch(e){} };
+ const flush=()=>{ try{ clearTimeout(t); fetch(API+'/sync?u='+U,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({v:2,data:snap(),ts:ts}),keepalive:true}).catch(()=>{}); }catch(e){} };  // ذخیره‌ی فوریِ آخرین تغییر موقعِ بستن/بک‌گراند (keepalive)
  const sched=()=>{ if(!ready)return; clearTimeout(t); t=setTimeout(push,700); };
  const stamp=k=>{ if(isBF(k)){ ts[k]=Date.now(); saveTS(ts); sched(); } };
  localStorage.setItem=function(k,v){ _set(k,v); stamp(k); };
@@ -866,7 +867,7 @@ const API='https://tamrin-api.arichoana.workers.dev';
  function norm(r){ if(!r||typeof r!=='object') return {data:{},ts:{}};
    if(r.data && r.ts) return {data:r.data||{}, ts:r.ts||{}};
    const rt=+(r['bf_t']||0), d={}, s={}; Object.keys(r).forEach(k=>{ if(isBF(k)){ d[k]=r[k]; s[k]=rt; } }); return {data:d,ts:s}; }
- (async function(){
+ async function syncIn(allowReload){
    try{
      const base=+(_get('bf_t')||0);                                  // مهاجرت: کلیدای قدیمیِ بدون‌زمان، زمانِ گلوبالِ قبلی رو می‌گیرن
      Object.keys(snap()).forEach(k=>{ if(ts[k]==null) ts[k]=base; }); saveTS(ts);
@@ -882,9 +883,12 @@ const API='https://tamrin-api.arichoana.workers.dev';
        }
      });
      saveTS(ts); ready=true; push();                                 // پوش کن (کلیدایی که محلی برنده شدن هم می‌رن)
-     if(changed && !sessionStorage.getItem('bf_merged')){ sessionStorage.setItem('bf_merged','1'); setTimeout(function(){ location.reload(); }, 500); }
+     if(changed && allowReload){ const last=+(sessionStorage.getItem('bf_rl')||0); if(Date.now()-last>2500){ sessionStorage.setItem('bf_rl',''+Date.now()); setTimeout(function(){ location.reload(); }, 400); } }
    }catch(e){ ready=true; }
- })();
+ }
+ syncIn(true);                                                       // باز شدن → آخرین تغییراتِ دستگاهِ دیگه رو بکش
+ window.addEventListener('pagehide',flush); window.addEventListener('beforeunload',flush);   // بستنِ تب/اپ → ذخیره‌ی فوری
+ document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') flush(); else syncIn(true); });  // بک‌گراند→ذخیره ، برگشتن→دوباره بکش
 })();
 </script>
 </body>
