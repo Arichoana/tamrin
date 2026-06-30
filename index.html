@@ -847,29 +847,43 @@ const API='https://tamrin-api.arichoana.workers.dev';
  ref.innerHTML=REF.map(c=>'<div class="refcat">'+c[0]+'</div>'+c[1].map(i=>'<div class="refitem">• '+i+'</div>').join('')).join('');
 })();
 
-/* ---------- 🔄 سینک بین دستگاه‌ها (آخرین تغییر برنده) ---------- */
+/* ---------- 🔄 سینک بین دستگاه‌ها (ادغامِ کلید‌به‌کلید — آخرین تغییرِ هر کلید برنده) ---------- */
 (function(){
- const U='arman';
- const _set=localStorage.setItem.bind(localStorage), _rem=localStorage.removeItem.bind(localStorage);
- const snap=()=>{const o={}; for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i); if(k.indexOf('bf_')===0)o[k]=localStorage.getItem(k);} return o;};
- const canon=o=>{o=o||{}; return JSON.stringify(Object.keys(o).sort().reduce((a,k)=>(a[k]=o[k],a),{}));};
- let ready=false, t;
+ const U='arman', TS='bf_ts';
+ const _set=localStorage.setItem.bind(localStorage), _rem=localStorage.removeItem.bind(localStorage), _get=localStorage.getItem.bind(localStorage);
+ const isBF=k=>!!k && k.indexOf('bf_')===0 && k!==TS && k!=='bf_t';
+ const loadTS=()=>{ try{ return JSON.parse(_get(TS)||'{}'); }catch(e){ return {}; } };
+ const saveTS=o=>_set(TS,JSON.stringify(o));
+ const snap=()=>{ const o={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(isBF(k)) o[k]=_get(k); } return o; };
+ let ready=false, t, ts=loadTS();
  const ftimeout=(u,opt,ms)=>{ const ac=new AbortController(); const to=setTimeout(()=>ac.abort(),ms||6000); return fetch(u,Object.assign({},opt||{},{signal:ac.signal})).finally(()=>clearTimeout(to)); };
- const push=()=>{ try{ ftimeout(API+'/sync?u='+U,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(snap())},6000).catch(()=>{}); }catch(e){} };
+ const push=()=>{ try{ ftimeout(API+'/sync?u='+U,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({v:2,data:snap(),ts:ts})},6000).catch(()=>{}); }catch(e){} };
  const sched=()=>{ if(!ready)return; clearTimeout(t); t=setTimeout(push,700); };
- localStorage.setItem=function(k,v){ _set(k,v); if((''+k).indexOf('bf_')===0 && k!=='bf_t'){ _set('bf_t',''+Date.now()); sched(); } };
- localStorage.removeItem=function(k){ _rem(k); if((''+k).indexOf('bf_')===0 && k!=='bf_t'){ _set('bf_t',''+Date.now()); sched(); } };
+ const stamp=k=>{ if(isBF(k)){ ts[k]=Date.now(); saveTS(ts); sched(); } };
+ localStorage.setItem=function(k,v){ _set(k,v); stamp(k); };
+ localStorage.removeItem=function(k){ _rem(k); stamp(k); };          // حذف = سنگِ‌قبر: کلید می‌ره ولی زمانش می‌مونه
+ // فرمتِ ریموت رو به {data,ts} استاندارد کن (بلوکِ تختِ قدیمی رو هم می‌فهمه)
+ function norm(r){ if(!r||typeof r!=='object') return {data:{},ts:{}};
+   if(r.data && r.ts) return {data:r.data||{}, ts:r.ts||{}};
+   const rt=+(r['bf_t']||0), d={}, s={}; Object.keys(r).forEach(k=>{ if(isBF(k)){ d[k]=r[k]; s[k]=rt; } }); return {data:d,ts:s}; }
  (async function(){
-   let remote=null;
-   try{ remote=await (await ftimeout(API+'/sync?u='+U,{},6000)).json(); }catch(e){}
-   const local=snap(), lt=+(local['bf_t']||0), rt=+((remote&&remote['bf_t'])||0);
-   if(remote && typeof remote==='object' && rt>lt && canon(local)!==canon(remote)){
-     Object.keys(local).forEach(k=>_rem(k));
-     Object.keys(remote).forEach(k=>_set(k,remote[k]));
-     location.reload(); return;
-   }
-   ready=true;
-   if(canon(local)!==canon(remote||{})){ if(!local['bf_t']) _set('bf_t',''+Date.now()); push(); }
+   try{
+     const base=+(_get('bf_t')||0);                                  // مهاجرت: کلیدای قدیمیِ بدون‌زمان، زمانِ گلوبالِ قبلی رو می‌گیرن
+     Object.keys(snap()).forEach(k=>{ if(ts[k]==null) ts[k]=base; }); saveTS(ts);
+     let remote=null; try{ remote=await (await ftimeout(API+'/sync?u='+U,{},6000)).json(); }catch(e){}
+     const R=norm(remote); let changed=false;
+     const keys=new Set([].concat(Object.keys(snap()),Object.keys(R.data),Object.keys(ts),Object.keys(R.ts)));
+     keys.forEach(k=>{ if(!isBF(k)) return;
+       const lt=+(ts[k]||0), rt=+(R.ts[k]||0);
+       if(rt>lt){
+         if(Object.prototype.hasOwnProperty.call(R.data,k)){ if(_get(k)!==R.data[k]){ _set(k,R.data[k]); changed=true; } }
+         else if(_get(k)!=null){ _rem(k); changed=true; }            // سنگِ‌قبرِ ریموت → حذفِ محلی
+         ts[k]=rt;
+       }
+     });
+     saveTS(ts); ready=true; push();                                 // پوش کن (کلیدایی که محلی برنده شدن هم می‌رن)
+     if(changed && !sessionStorage.getItem('bf_merged')){ sessionStorage.setItem('bf_merged','1'); setTimeout(function(){ location.reload(); }, 500); }
+   }catch(e){ ready=true; }
  })();
 })();
 </script>
