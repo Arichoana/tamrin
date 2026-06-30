@@ -96,6 +96,12 @@
   .fmbtn.add{background:var(--legs); color:#04210d}
   .fmresult{margin-top:10px; font-size:13px}
   .fmest{background:#0e1117; border:1px solid var(--line); border-radius:10px; padding:11px; line-height:1.95} .fmest b{color:#ffd27a} .fmest span{color:var(--mut); font-size:12px}
+  .fl-items{margin-top:10px; display:flex; flex-direction:column; gap:6px}
+  .fl-item{display:flex; align-items:center; justify-content:space-between; gap:8px; background:#0e1117; border:1px solid var(--line); border-radius:9px; padding:7px 10px; font-size:12px}
+  .fl-itxt{color:#cdd5e0; line-height:1.6; word-break:break-word} .fl-itxt em{color:var(--mut); font-style:normal; font-size:11px}
+  .fl-ibtns{display:flex; gap:4px; flex:none}
+  .fl-edit,.fl-del{background:#1a1f29; border:1px solid var(--line); color:#9aa3b2; border-radius:7px; padding:4px 9px; font-size:12px; cursor:pointer; font-family:inherit}
+  .fl-del{color:#e8917a; border-color:#5a2c2c} .fl-edit:active,.fl-del:active{transform:scale(.95)}
   .meal{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:12px}
   .meal-h{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap}
   .meal .mt{font-weight:800; font-size:15px} .meal .mcal{font-size:12px; color:var(--mut)} .meal .mcal b{color:#ffd27a}
@@ -797,15 +803,29 @@ const API='https://tamrin-api.arichoana.workers.dev';
  const getCal=()=>{try{return JSON.parse(localStorage.getItem('bf_cal')||'{}');}catch(e){return {};}};
  const avg=(c,n)=>{let k=0,d=0; const cut=new Date(today()); cut.setDate(cut.getDate()-n+1);
    Object.keys(c).forEach(dt=>{ if(new Date(dt)>=cut){k+=(c[dt].kcal||0); d++;} }); return d?Math.round(k/d):0; };
+ const esc=s=>(''+s).replace(/[<>&]/g,ch=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]));
+ const itxt=it=> typeof it==='string'? it : (it&&it.txt||'');
  function refreshToday(){
-   const c=getCal(), t=c[today()]||{kcal:0,protein:0}, el=document.getElementById('fltoday'); if(!el) return;
+   const c=getCal(), t=c[today()]||{kcal:0,protein:0,items:[]}, el=document.getElementById('fltoday'); if(!el) return;
    let s='امروز تا حالا: <b>'+faNum(t.kcal)+'</b> کالری · <b>'+faNum(t.protein)+'</b>گ پروتئین';
    const w=avg(c,7), mo=avg(c,30); if(w||mo) s+='<br>📊 میانگین: هفته ~<b>'+faNum(w)+'</b> · ماه ~<b>'+faNum(mo)+'</b> کالری در روز';
+   const its=t.items||[];
+   if(its.length){ s+='<div class="fl-items">';
+     its.forEach((it,i)=>{ const obj=typeof it!=='string'; s+='<div class="fl-item"><span class="fl-itxt">🍽️ '+esc(itxt(it))+(obj?' <em>(~'+faNum(it.kcal||0)+'kcal · '+faNum(it.protein||0)+'g)</em>':'')+'</span><span class="fl-ibtns"><button type="button" class="fl-edit" data-i="'+i+'" title="اصلاح">✏️</button><button type="button" class="fl-del" data-i="'+i+'" title="حذف">✕</button></span></div>'; });
+     s+='</div>'; }
    el.innerHTML=s;
  }
  document.addEventListener('click',ev=>{
    if(ev.target.closest('#flopen')){ document.getElementById('fmresult').innerHTML=''; m.classList.add('show'); return; }
    if(ev.target.closest('.fmclose')||ev.target===m){ m.classList.remove('show'); return; }
+   const del=ev.target.closest('.fl-del'), edit=ev.target.closest('.fl-edit');
+   if(del||edit){ const i=+(del||edit).dataset.i, c=getCal(), t=today(), day=c[t];
+     if(day&&day.items&&day.items[i]!=null){ const it=day.items[i];
+       if(typeof it!=='string'){ day.kcal=Math.max(0,(day.kcal||0)-(+it.kcal||0)); day.protein=Math.max(0,(day.protein||0)-(+it.protein||0)); }
+       day.items.splice(i,1); if(!day.items.length && !day.kcal && !day.protein) delete c[t];
+       localStorage.setItem('bf_cal',JSON.stringify(c)); refreshToday();
+       if(edit){ const inp=document.getElementById('fminput'); if(inp) inp.value=itxt(it); document.getElementById('fmresult').innerHTML=''; m.classList.add('show'); }   // اصلاح = حذف + متنش برمی‌گرده تو کادر که از نو با AI بزنی
+     } return; }
  });
  document.getElementById('fmcalc').addEventListener('click',async()=>{
    const txt=(document.getElementById('fminput').value||'').trim(); if(!txt) return;
@@ -818,7 +838,7 @@ const API='https://tamrin-api.arichoana.workers.dev';
        '<button id="fmadd" type="button" class="fmbtn add">➕ اضافه به امروز</button>';
      document.getElementById('fmadd').onclick=()=>{
        const c=getCal(), t=today(); if(!c[t])c[t]={kcal:0,protein:0,items:[]};
-       c[t].kcal+=(+d.kcal||0); c[t].protein+=(+d.protein||0); (c[t].items=c[t].items||[]).push(txt);
+       c[t].kcal+=(+d.kcal||0); c[t].protein+=(+d.protein||0); (c[t].items=c[t].items||[]).push({txt:txt,kcal:+d.kcal||0,protein:+d.protein||0});
        localStorage.setItem('bf_cal',JSON.stringify(c));
        document.getElementById('fminput').value=''; res.innerHTML='✅ به امروز اضافه شد!';
        refreshToday(); setTimeout(()=>m.classList.remove('show'),1000);
