@@ -805,9 +805,12 @@ const API='https://tamrin-api.arichoana.workers.dev';
    Object.keys(c).forEach(dt=>{ if(new Date(dt)>=cut){k+=(c[dt].kcal||0); d++;} }); return d?Math.round(k/d):0; };
  const esc=s=>(''+s).replace(/[<>&]/g,ch=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]));
  const itxt=it=> typeof it==='string'? it : (it&&it.txt||'');
+ const recalc=day=>{ let k=0,p=0; (day.items||[]).forEach(it=>{ if(typeof it!=='string'){ k+=(+it.kcal||0); p+=(+it.protein||0); } }); day.kcal=k; day.protein=p; };  // جمعِ روز = همیشه جمعِ آیتم‌های لیست
  function refreshToday(){
    const c=getCal(), t=c[today()]||{kcal:0,protein:0,items:[]}, el=document.getElementById('fltoday'); if(!el) return;
-   let s='امروز تا حالا: <b>'+faNum(t.kcal)+'</b> کالری · <b>'+faNum(t.protein)+'</b>گ پروتئین';
+   const _its=t.items||[]; let _sk=0,_sp=0,_hasN=false; _its.forEach(it=>{ if(typeof it!=='string'){ _sk+=(+it.kcal||0); _sp+=(+it.protein||0); _hasN=true; } });
+   const tk=_hasN?_sk:(t.kcal||0), tp=_hasN?_sp:(t.protein||0);   // نمایشِ جمع = جمعِ همین آیتم‌ها (نه شمارنده‌ی جدا)
+   let s='امروز تا حالا: <b>'+faNum(tk)+'</b> کالری · <b>'+faNum(tp)+'</b>گ پروتئین';
    const w=avg(c,7), mo=avg(c,30); if(w||mo) s+='<br>📊 میانگین: هفته ~<b>'+faNum(w)+'</b> · ماه ~<b>'+faNum(mo)+'</b> کالری در روز';
    const its=t.items||[];
    if(its.length){ s+='<div class="fl-items">';
@@ -821,8 +824,7 @@ const API='https://tamrin-api.arichoana.workers.dev';
    const del=ev.target.closest('.fl-del'), edit=ev.target.closest('.fl-edit');
    if(del||edit){ const i=+(del||edit).dataset.i, c=getCal(), t=today(), day=c[t];
      if(day&&day.items&&day.items[i]!=null){ const it=day.items[i];
-       if(typeof it!=='string'){ day.kcal=Math.max(0,(day.kcal||0)-(+it.kcal||0)); day.protein=Math.max(0,(day.protein||0)-(+it.protein||0)); }
-       day.items.splice(i,1); if(!day.items.length && !day.kcal && !day.protein) delete c[t];
+       day.items.splice(i,1); recalc(day); if(!day.items.length) delete c[t];
        localStorage.setItem('bf_cal',JSON.stringify(c)); refreshToday();
        if(edit){ const inp=document.getElementById('fminput'); if(inp) inp.value=itxt(it); document.getElementById('fmresult').innerHTML=''; m.classList.add('show'); }   // اصلاح = حذف + متنش برمی‌گرده تو کادر که از نو با AI بزنی
      } return; }
@@ -838,7 +840,7 @@ const API='https://tamrin-api.arichoana.workers.dev';
        '<button id="fmadd" type="button" class="fmbtn add">➕ اضافه به امروز</button>';
      document.getElementById('fmadd').onclick=()=>{
        const c=getCal(), t=today(); if(!c[t])c[t]={kcal:0,protein:0,items:[]};
-       c[t].kcal+=(+d.kcal||0); c[t].protein+=(+d.protein||0); (c[t].items=c[t].items||[]).push({txt:txt,kcal:+d.kcal||0,protein:+d.protein||0});
+       (c[t].items=c[t].items||[]).push({txt:txt,kcal:+d.kcal||0,protein:+d.protein||0}); recalc(c[t]);
        localStorage.setItem('bf_cal',JSON.stringify(c));
        document.getElementById('fminput').value=''; res.innerHTML='✅ به امروز اضافه شد!';
        refreshToday(); setTimeout(()=>m.classList.remove('show'),1000);
