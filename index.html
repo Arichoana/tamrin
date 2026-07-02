@@ -78,7 +78,8 @@
   .tab.on[data-day="tv"]{background:#ef4444; color:#fff; border-color:#ef4444}
   .tvwrap{position:relative; background:#000; border:1px solid var(--line); border-radius:14px; overflow:hidden; aspect-ratio:16/9; margin-bottom:10px; display:none}
   .tvwrap.on{display:block}
-  .tvwrap iframe{width:100%; height:100%; border:0; display:block}
+  .tvwrap iframe,.tvwrap video{width:100%; height:100%; border:0; display:block; background:#000}
+  .tvwrap video{display:none}
   .tvwrap:fullscreen{aspect-ratio:auto; border:0; border-radius:0}
   .tvbar{display:flex; gap:8px; margin-bottom:12px; display:none}
   .tvbar.on{display:flex}
@@ -932,31 +933,49 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  const host=document.getElementById('tv'); if(!host) return;
  const CH=[
   {n:'ایران اینترنشنال',c:'📰 خبر · ۲۴/۷',m:'yt',id:'UCat6bC0Wrqq9Bcq7EkH_yQw'},
-  {n:'BBC فارسی',c:'📰 خبر (بعضی برنامه‌ها حقِ پخش ندارن)',m:'yt',id:'UCHZk9MrT3DGWmVqdsj5y0EA'},
-  {n:'صدای آمریکا VOA',c:'📰 خبر و برنامه',m:'yt',id:'UCttfDeGMwUxPjnlsKagcwKw'},
+  {n:'انقلابِ ملیِ ایران',c:'📢 صدای انقلابِ ملی · پیام‌های شاهزاده رضا پهلوی',m:'hls',url:'https://hls.irannrtv.live/hls/stream.m3u8'},
+  {n:'کافه فیلم',c:'🎬 فیلم و سریال · ۲۴/۷',m:'hls',url:'https://cafefhls.wns.live/hls/stream.m3u8'},
   {n:'ITC — تلویزیون ایرانیان کانادا',c:'⚽ فوتبال و برنامه (جام جهانی ۲۰۲۶ رو هم می‌ده)',m:'site',url:'https://customer-2s5hvw3o3ubwoziv.cloudflarestream.com/a1164b0793a4e40e86563664132c26f7/iframe?autoplay=true'},
   {n:'طپش T2',c:'🎵 موزیک، شو و سریال (لس‌آنجلسی)',m:'site',url:'https://www.tapesh.com/t2tv.html'},
   {n:'MBC Persia ↗',c:'🎬 فیلمِ دوبله — تو تبِ جدا (اکانتِ رایگانِ Shahid می‌خواد)',m:'link',url:'https://shahid.mbc.net/en/livestream/MBC-Persia/livechannel-418308'},
   {n:'رادیو جوان TV ↗',c:'🎵 موزیک‌ویدیوی ۲۴/۷ — تو تبِ جدا',m:'link',url:'https://play.radiojavan.com/tv'}
  ];
  host.innerHTML='<div class="dayhead">📺 بزن رو کانال ← پخشِ زنده شروع می‌شه و خودش تمام‌صفحه/افقی می‌شه. برگشتی، دوباره «⛶ تمام‌صفحه» رو بزن.</div>'+
-   '<div class="tvwrap" id="tvwrap"><iframe id="tvframe" src="about:blank" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin"></iframe></div>'+
+   '<div class="tvwrap" id="tvwrap"><video id="tvvideo" playsinline controls></video><iframe id="tvframe" src="about:blank" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin"></iframe></div>'+
    '<div class="tvbar" id="tvbar"><button type="button" class="tvfull" id="tvfull">⛶ تمام‌صفحه</button><button type="button" id="tvstop">✕ قطع پخش</button></div>'+
    '<div class="tvgrid">'+CH.map((ch,i)=>'<button type="button" class="tvch" data-i="'+i+'"><div class="tn">'+ch.n+'</div><div class="tc">'+ch.c+'</div></button>').join('')+'</div>'+
-   '<div class="tvnote">🔗 پخش از یوتیوب/پلیرِ رسمیِ خودِ کانال‌هاست. 🎬 کافه‌فیلم متأسفانه پخشِ اینترنتیِ رسمی نداره — جاش MBC Persia فیلمِ دوبله داره. کانالِ دیگه‌ای خواستی، بگو اضافه کنم.</div>';
- const wrap=document.getElementById('tvwrap'), fr=document.getElementById('tvframe'), bar=document.getElementById('tvbar');
- async function goFull(){ try{ if(wrap.requestFullscreen) await wrap.requestFullscreen(); }catch(e){} try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){} }
- function stop(){ fr.src='about:blank'; wrap.classList.remove('on'); bar.classList.remove('on'); host.querySelectorAll('.tvch').forEach(b=>b.classList.remove('on')); }
+   '<div class="tvnote">🔗 پخش از پلیرِ رسمیِ خودِ کانال‌هاست (کافه‌فیلم و انقلابِ ملی استریمِ مستقیم). نتِ باشگاه ضعیف بود، خودِ پلیر کیفیتو کم می‌کنه. کانالِ دیگه‌ای خواستی، بگو اضافه کنم.</div>';
+ const wrap=document.getElementById('tvwrap'), fr=document.getElementById('tvframe'), vid=document.getElementById('tvvideo'), bar=document.getElementById('tvbar');
+ let hls=null, hlsP=null;
+ function ensureHls(){ if(window.Hls) return Promise.resolve(true); if(hlsP) return hlsP;   // hls.js فقط اولین بارِ TV لود می‌شه
+   hlsP=new Promise(res=>{ const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js'; s.onload=()=>res(true); s.onerror=()=>res(false); document.head.appendChild(s); }); return hlsP; }
+ function showFrame(){ vid.style.display='none'; fr.style.display='block'; }
+ function showVid(){ fr.style.display='none'; vid.style.display='block'; }
+ function killHls(){ if(hls){ try{hls.destroy()}catch(e){} hls=null; } try{ vid.pause(); vid.removeAttribute('src'); vid.load(); }catch(e){} }
+ async function goFull(){ try{ if(wrap.requestFullscreen) await wrap.requestFullscreen(); else if(vid.webkitEnterFullscreen && vid.style.display!=='none') vid.webkitEnterFullscreen(); }catch(e){} try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){} }
+ function stop(){ fr.src='about:blank'; killHls(); wrap.classList.remove('on'); bar.classList.remove('on'); host.querySelectorAll('.tvch').forEach(b=>b.classList.remove('on')); }
  async function play(ch,b){
    host.querySelectorAll('.tvch').forEach(x=>x.classList.toggle('on',x===b));
    wrap.classList.add('on'); bar.classList.add('on'); wrap.scrollIntoView({behavior:'smooth',block:'nearest'});
-   if(ch.m==='site'){ fr.src=ch.url; return; }
-   b.querySelector('.tc').textContent='⏳ در حالِ گرفتنِ پخشِ زنده…';
+   killHls(); fr.src='about:blank'; const tc=b.querySelector('.tc');
+   if(ch.m==='site'){ showFrame(); fr.src=ch.url; return; }
+   if(ch.m==='hls'){ showVid(); tc.textContent='⏳ در حالِ اتصال…'; await ensureHls();   // استریمِ مستقیم با hls.js (سمتِ کلاینت)
+     if(window.Hls && Hls.isSupported()){
+       hls=new Hls({liveSyncDurationCount:3,manifestLoadingMaxRetry:2}); hls.loadSource(ch.url); hls.attachMedia(vid);
+       hls.on(Hls.Events.MANIFEST_PARSED,()=>{ vid.play().catch(()=>{ vid.muted=true; vid.play().catch(()=>{}); }); tc.textContent=ch.c; });
+       let rec=0; hls.on(Hls.Events.ERROR,(e,d)=>{ if(!d||!d.fatal) return;
+         if(d.type==='networkError'&&rec<4){ rec++; setTimeout(()=>{try{hls.startLoad()}catch(x){}},1000); }
+         else if(d.type==='mediaError'&&rec<4){ rec++; try{hls.recoverMediaError()}catch(x){} }
+         else{ tc.textContent='😕 پخش قطع شد — دوباره بزن'; } });
+     } else if(vid.canPlayType('application/vnd.apple.mpegurl')){ vid.src=ch.url; vid.play().catch(()=>{}); tc.textContent=ch.c; }
+     else{ tc.textContent='❌ مرورگرت HLS نداره'; }
+     return; }
+   showFrame(); tc.textContent='⏳ در حالِ گرفتنِ پخشِ زنده…';                    // یوتیوب: آی‌دیِ لایوِ همین لحظه از Worker
    try{
-     const d=await (await fetch(API+'/tv?ch='+ch.id)).json();                    // آی‌دیِ لایوِ همین لحظه از Worker (کشِ ۳۰ دقیقه)
-     if(d&&d.videoId){ fr.src='https://www.youtube-nocookie.com/embed/'+d.videoId+'?autoplay=1&playsinline=1'; b.querySelector('.tc').textContent=ch.c; }
-     else{ b.querySelector('.tc').textContent='😕 الان لایو نیست — تو یوتیوب باز می‌کنم'; window.open('https://www.youtube.com/channel/'+ch.id+'/live','_blank'); }
-   }catch(e){ b.querySelector('.tc').textContent='❌ نت وصل نشد — دوباره بزن'; }
+     const d=await (await fetch(API+'/tv?ch='+ch.id)).json();
+     if(d&&d.videoId){ fr.src='https://www.youtube-nocookie.com/embed/'+d.videoId+'?autoplay=1&playsinline=1'; tc.textContent=ch.c; }
+     else{ tc.textContent='😕 الان لایو نیست — تو یوتیوب باز می‌کنم'; window.open('https://www.youtube.com/channel/'+ch.id+'/live','_blank'); }
+   }catch(e){ tc.textContent='❌ نت وصل نشد — دوباره بزن'; }
  }
  host.addEventListener('click',ev=>{
    const b=ev.target.closest('.tvch');
@@ -965,7 +984,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    if(ev.target.closest('#tvstop')){ stop(); return; }
  });
  document.addEventListener('fullscreenchange',()=>{ if(!document.fullscreenElement){ try{ screen.orientation.unlock(); }catch(e){} } });
- document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ if(t.dataset.day!=='tv' && fr.src!=='about:blank') stop(); }));   // رفتی سراغِ تمرین؟ پخش قطع شه که صداش مزاحم نشه
+ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ if(t.dataset.day!=='tv' && (fr.src!=='about:blank'||hls)) stop(); }));   // رفتی سراغِ تمرین؟ پخش قطع شه که صداش مزاحم نشه
 })();
 
 /* ---------- 🔄 سینک بین دستگاه‌ها (ادغامِ کلید‌به‌کلید — آخرین تغییرِ هر کلید برنده) ---------- */
