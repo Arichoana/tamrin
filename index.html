@@ -940,7 +940,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
   {n:'MBC Persia ↗',c:'🎬 فیلمِ دوبله — تو تبِ جدا (اکانتِ رایگانِ Shahid می‌خواد)',m:'link',url:'https://shahid.mbc.net/en/livestream/MBC-Persia/livechannel-418308'},
   {n:'رادیو جوان TV ↗',c:'🎵 موزیک‌ویدیوی ۲۴/۷ — تو تبِ جدا',m:'link',url:'https://play.radiojavan.com/tv'}
  ];
- host.innerHTML='<div class="dayhead">📺 بزن رو کانال ← پخشِ زنده شروع می‌شه و خودش تمام‌صفحه/افقی می‌شه. برگشتی، دوباره «⛶ تمام‌صفحه» رو بزن.</div>'+
+ host.innerHTML='<div class="dayhead">📺 بزن رو کانال ← همین‌جا <b>کوچیک</b> پخش می‌شه (بقیه‌ی اپ رو هم می‌بینی). <b>⛶ تمام‌صفحه</b> = بزرگ و افقی برای تردمیل · <b>🔳 کوچک</b> = پنجره‌ی شناور.</div>'+
    '<div class="tvwrap" id="tvwrap"><video id="tvvideo" playsinline controls></video><iframe id="tvframe" src="about:blank" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin"></iframe></div>'+
    '<div class="tvbar" id="tvbar"><button type="button" class="tvfull" id="tvfull">⛶ تمام‌صفحه</button><button type="button" id="tvfb" style="display:none;background:#3a2f14;border-color:#7a5a2a;color:#ffcf66">▶ پلیرِ اصلی</button><button type="button" id="tvpip">🔳 کوچک</button><button type="button" id="tvstop">✕ قطع پخش</button></div>'+
    '<div class="tvgrid">'+CH.map((ch,i)=>'<button type="button" class="tvch" data-i="'+i+'"><div class="tn">'+ch.n+'</div><div class="tc">'+ch.c+'</div></button>').join('')+'</div>'+
@@ -991,7 +991,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  }
  host.addEventListener('click',ev=>{
    const b=ev.target.closest('.tvch');
-   if(b){ const ch=CH[+b.dataset.i]; if(ch.m==='link'){ window.open(ch.url,'_blank'); return; } play(ch,b); goFull(); return; }
+   if(b){ const ch=CH[+b.dataset.i]; if(ch.m==='link'){ window.open(ch.url,'_blank'); return; } play(ch,b); return; }   // پیش‌فرض: کوچیک همون‌جا (پرتره). تمام‌صفحه فقط با دکمه‌ی ⛶
    if(ev.target.closest('#tvfull')){ goFull(); return; }
    if(ev.target.closest('#tvfb')){ if(curFb) window.open(curFb,'_blank'); return; }
    if(ev.target.closest('#tvpip')){ enterPip(); return; }
