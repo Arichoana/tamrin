@@ -940,9 +940,9 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
   {n:'MBC Persia ↗',c:'🎬 فیلمِ دوبله — تو تبِ جدا (اکانتِ رایگانِ Shahid می‌خواد)',m:'link',url:'https://shahid.mbc.net/en/livestream/MBC-Persia/livechannel-418308'},
   {n:'رادیو جوان TV ↗',c:'🎵 موزیک‌ویدیوی ۲۴/۷ — تو تبِ جدا',m:'link',url:'https://play.radiojavan.com/tv'}
  ];
- host.innerHTML='<div class="dayhead">📺 بزن رو کانال ← همین‌جا <b>کوچیک</b> پخش می‌شه (بقیه‌ی اپ رو هم می‌بینی). <b>⛶ تمام‌صفحه</b> = بزرگ و افقی برای تردمیل · <b>🔳 کوچک</b> = پنجره‌ی شناور.</div>'+
+ host.innerHTML='<div class="dayhead">📺 بزن رو کانال ← <b>بزرگ/افقی</b> پخش می‌شه. دکمه‌ی <b>خروجِ تمام‌صفحه</b>ی خودِ پلیر → برمی‌گرده به <b>کوچیکِ پرتره</b> که بقیه‌ی اپو ببینی. <b>🔳 شناور</b> = پنجره‌ی معلق.</div>'+
    '<div class="tvwrap" id="tvwrap"><video id="tvvideo" playsinline controls></video><iframe id="tvframe" src="about:blank" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin"></iframe></div>'+
-   '<div class="tvbar" id="tvbar"><button type="button" class="tvfull" id="tvfull">⛶ تمام‌صفحه</button><button type="button" id="tvfb" style="display:none;background:#3a2f14;border-color:#7a5a2a;color:#ffcf66">▶ پلیرِ اصلی</button><button type="button" id="tvpip">🔳 کوچک</button><button type="button" id="tvstop">✕ قطع پخش</button></div>'+
+   '<div class="tvbar" id="tvbar"><button type="button" class="tvfull" id="tvfull">⛶ تمام‌صفحه</button><button type="button" id="tvfb" style="display:none;background:#3a2f14;border-color:#7a5a2a;color:#ffcf66">▶ پلیرِ اصلی</button><button type="button" id="tvpip">🔳 شناور</button><button type="button" id="tvstop">✕ قطع پخش</button></div>'+
    '<div class="tvgrid">'+CH.map((ch,i)=>'<button type="button" class="tvch" data-i="'+i+'"><div class="tn">'+ch.n+'</div><div class="tc">'+ch.c+'</div></button>').join('')+'</div>'+
    '<div class="tvnote">🔗 پخش از پلیرِ رسمیِ خودِ کانال‌هاست. 🎬 کافه‌فیلم و انقلابِ ملی استریمِ مستقیمِ رایگانن و گاهی چند دقیقه لوس/قطع می‌شن — اون‌وقت دکمه‌ی <b style="color:#ffcf66">▶ پلیرِ اصلی</b> ظاهر می‌شه که تو تبِ جدا بازش می‌کنه. کانالِ دیگه‌ای خواستی، بگو.</div>';
  const wrap=document.getElementById('tvwrap'), fr=document.getElementById('tvframe'), vid=document.getElementById('tvvideo'), bar=document.getElementById('tvbar'), fbBtn=document.getElementById('tvfb');
@@ -952,8 +952,12 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  function showFrame(){ vid.style.display='none'; fr.style.display='block'; }
  function showVid(){ fr.style.display='none'; vid.style.display='block'; }
  function killHls(){ if(hls){ try{hls.destroy()}catch(e){} hls=null; } try{ vid.pause(); vid.removeAttribute('src'); vid.load(); }catch(e){} }
- async function goFull(){ try{ if(wrap.requestFullscreen) await wrap.requestFullscreen(); else if(vid.webkitEnterFullscreen && vid.style.display!=='none') vid.webkitEnterFullscreen(); }catch(e){} try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){} }
- function pipHint(msg){ const t=document.getElementById('tvpip'); if(t){ t.textContent=msg; setTimeout(()=>{t.textContent='🔳 کوچک';},2200); } }
+ async function goFull(){ const vm=(vid.style.display!=='none'), target=vm?vid:wrap;   // ویدیوی مستقیم رو مستقیم فول‌اسکرین کن تا دکمه‌ی خروجِ خودِ پلیر برگردونه به کوچیک
+   try{ if(vm && !vid.requestFullscreen && vid.webkitEnterFullscreen) vid.webkitEnterFullscreen();
+     else if(target.requestFullscreen) await target.requestFullscreen();
+     else if(target.webkitRequestFullscreen) target.webkitRequestFullscreen(); }catch(e){}
+   try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){} }
+ function pipHint(msg){ const t=document.getElementById('tvpip'); if(t){ t.textContent=msg; setTimeout(()=>{t.textContent='🔳 شناور';},2200); } }
  async function enterPip(){                                                     // پنجره‌ی شناورِ کوچیک (گوشی پرتره می‌مونه) — فقط برای ویدیوی مستقیم
    if(vid.style.display==='none'){ pipHint('فقط کافه‌فیلم/انقلابِ ملی'); return; }
    if(!document.pictureInPictureEnabled || vid.disablePictureInPicture){ pipHint('مرورگرت پشتیبانی نمی‌کنه'); return; }
@@ -991,7 +995,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  }
  host.addEventListener('click',ev=>{
    const b=ev.target.closest('.tvch');
-   if(b){ const ch=CH[+b.dataset.i]; if(ch.m==='link'){ window.open(ch.url,'_blank'); return; } play(ch,b); return; }   // پیش‌فرض: کوچیک همون‌جا (پرتره). تمام‌صفحه فقط با دکمه‌ی ⛶
+   if(b){ const ch=CH[+b.dataset.i]; if(ch.m==='link'){ window.open(ch.url,'_blank'); return; } play(ch,b); goFull(); return; }   // اولش بزرگ؛ دکمه‌ی خروجِ خودِ پلیر → برمی‌گرده به کوچیکِ پرتره
    if(ev.target.closest('#tvfull')){ goFull(); return; }
    if(ev.target.closest('#tvfb')){ if(curFb) window.open(curFb,'_blank'); return; }
    if(ev.target.closest('#tvpip')){ enterPip(); return; }
