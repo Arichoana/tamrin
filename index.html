@@ -942,15 +942,22 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    '<div class="tvgrid">'+CH.map((ch,i)=>'<button type="button" class="tvch" data-i="'+i+'"><div class="tn">'+ch.n+'</div><div class="tc">'+ch.c+'</div></button>').join('')+'</div>'+
    '<div class="tvnote">🔗 پخش از یوتیوب/سایتِ رسمیِ خودِ کانال‌هاست. اینترنتِ باشگاه ضعیف باشه، کیفیت رو خودِ پلیر کم می‌کنه. کانالِ دیگه‌ای خواستی، بهم بگو اضافه کنم.</div>';
  const wrap=document.getElementById('tvwrap'), fr=document.getElementById('tvframe'), bar=document.getElementById('tvbar');
- function src(ch){ return ch.m==='yt' ? 'https://www.youtube-nocookie.com/embed/live_stream?channel='+ch.id+'&autoplay=1&playsinline=1' : ch.url; }
  async function goFull(){ try{ if(wrap.requestFullscreen) await wrap.requestFullscreen(); }catch(e){} try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){} }
  function stop(){ fr.src='about:blank'; wrap.classList.remove('on'); bar.classList.remove('on'); host.querySelectorAll('.tvch').forEach(b=>b.classList.remove('on')); }
+ async function play(ch,b){
+   host.querySelectorAll('.tvch').forEach(x=>x.classList.toggle('on',x===b));
+   wrap.classList.add('on'); bar.classList.add('on'); wrap.scrollIntoView({behavior:'smooth',block:'nearest'});
+   if(ch.m==='site'){ fr.src=ch.url; return; }
+   b.querySelector('.tc').textContent='⏳ در حالِ گرفتنِ پخشِ زنده…';
+   try{
+     const d=await (await fetch(API+'/tv?ch='+ch.id)).json();                    // آی‌دیِ لایوِ همین لحظه از Worker (کشِ ۳۰ دقیقه)
+     if(d&&d.videoId){ fr.src='https://www.youtube-nocookie.com/embed/'+d.videoId+'?autoplay=1&playsinline=1'; b.querySelector('.tc').textContent=ch.c; }
+     else{ b.querySelector('.tc').textContent='😕 الان لایو نیست — تو یوتیوب باز می‌کنم'; window.open('https://www.youtube.com/channel/'+ch.id+'/live','_blank'); }
+   }catch(e){ b.querySelector('.tc').textContent='❌ نت وصل نشد — دوباره بزن'; }
+ }
  host.addEventListener('click',ev=>{
    const b=ev.target.closest('.tvch');
-   if(b){ const ch=CH[+b.dataset.i];
-     host.querySelectorAll('.tvch').forEach(x=>x.classList.toggle('on',x===b));
-     fr.src=src(ch); wrap.classList.add('on'); bar.classList.add('on');
-     wrap.scrollIntoView({behavior:'smooth',block:'nearest'}); goFull(); return; }
+   if(b){ play(CH[+b.dataset.i],b); goFull(); return; }
    if(ev.target.closest('#tvfull')){ goFull(); return; }
    if(ev.target.closest('#tvstop')){ stop(); return; }
  });
