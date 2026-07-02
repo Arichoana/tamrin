@@ -942,7 +942,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  ];
  host.innerHTML='<div class="dayhead">📺 بزن رو کانال ← پخشِ زنده شروع می‌شه و خودش تمام‌صفحه/افقی می‌شه. برگشتی، دوباره «⛶ تمام‌صفحه» رو بزن.</div>'+
    '<div class="tvwrap" id="tvwrap"><video id="tvvideo" playsinline controls></video><iframe id="tvframe" src="about:blank" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin"></iframe></div>'+
-   '<div class="tvbar" id="tvbar"><button type="button" class="tvfull" id="tvfull">⛶ تمام‌صفحه</button><button type="button" id="tvfb" style="display:none;background:#3a2f14;border-color:#7a5a2a;color:#ffcf66">▶ پلیرِ اصلی</button><button type="button" id="tvstop">✕ قطع پخش</button></div>'+
+   '<div class="tvbar" id="tvbar"><button type="button" class="tvfull" id="tvfull">⛶ تمام‌صفحه</button><button type="button" id="tvfb" style="display:none;background:#3a2f14;border-color:#7a5a2a;color:#ffcf66">▶ پلیرِ اصلی</button><button type="button" id="tvpip">🔳 کوچک</button><button type="button" id="tvstop">✕ قطع پخش</button></div>'+
    '<div class="tvgrid">'+CH.map((ch,i)=>'<button type="button" class="tvch" data-i="'+i+'"><div class="tn">'+ch.n+'</div><div class="tc">'+ch.c+'</div></button>').join('')+'</div>'+
    '<div class="tvnote">🔗 پخش از پلیرِ رسمیِ خودِ کانال‌هاست. 🎬 کافه‌فیلم و انقلابِ ملی استریمِ مستقیمِ رایگانن و گاهی چند دقیقه لوس/قطع می‌شن — اون‌وقت دکمه‌ی <b style="color:#ffcf66">▶ پلیرِ اصلی</b> ظاهر می‌شه که تو تبِ جدا بازش می‌کنه. کانالِ دیگه‌ای خواستی، بگو.</div>';
  const wrap=document.getElementById('tvwrap'), fr=document.getElementById('tvframe'), vid=document.getElementById('tvvideo'), bar=document.getElementById('tvbar'), fbBtn=document.getElementById('tvfb');
@@ -953,6 +953,15 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  function showVid(){ fr.style.display='none'; vid.style.display='block'; }
  function killHls(){ if(hls){ try{hls.destroy()}catch(e){} hls=null; } try{ vid.pause(); vid.removeAttribute('src'); vid.load(); }catch(e){} }
  async function goFull(){ try{ if(wrap.requestFullscreen) await wrap.requestFullscreen(); else if(vid.webkitEnterFullscreen && vid.style.display!=='none') vid.webkitEnterFullscreen(); }catch(e){} try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){} }
+ function pipHint(msg){ const t=document.getElementById('tvpip'); if(t){ t.textContent=msg; setTimeout(()=>{t.textContent='🔳 کوچک';},2200); } }
+ async function enterPip(){                                                     // پنجره‌ی شناورِ کوچیک (گوشی پرتره می‌مونه) — فقط برای ویدیوی مستقیم
+   if(vid.style.display==='none'){ pipHint('فقط کافه‌فیلم/انقلابِ ملی'); return; }
+   if(!document.pictureInPictureEnabled || vid.disablePictureInPicture){ pipHint('مرورگرت پشتیبانی نمی‌کنه'); return; }
+   try{ try{ if(document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen(); }catch(e){}
+     if(document.pictureInPictureElement) await document.exitPictureInPicture();
+     else await vid.requestPictureInPicture();
+   }catch(e){ pipHint('اول بذار پخش شروع شه'); }
+ }
  function stop(){ fr.src='about:blank'; killHls(); clearTimeout(wd); fbBtn.style.display='none'; wrap.classList.remove('on'); bar.classList.remove('on'); host.querySelectorAll('.tvch').forEach(b=>b.classList.remove('on')); }
  async function play(ch,b){
    host.querySelectorAll('.tvch').forEach(x=>x.classList.toggle('on',x===b));
@@ -985,6 +994,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    if(b){ const ch=CH[+b.dataset.i]; if(ch.m==='link'){ window.open(ch.url,'_blank'); return; } play(ch,b); goFull(); return; }
    if(ev.target.closest('#tvfull')){ goFull(); return; }
    if(ev.target.closest('#tvfb')){ if(curFb) window.open(curFb,'_blank'); return; }
+   if(ev.target.closest('#tvpip')){ enterPip(); return; }
    if(ev.target.closest('#tvstop')){ stop(); return; }
  });
  document.addEventListener('fullscreenchange',()=>{ if(!document.fullscreenElement){ try{ screen.orientation.unlock(); }catch(e){} } });
