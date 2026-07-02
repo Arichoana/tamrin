@@ -75,6 +75,20 @@
   .tab.on[data-day="pull"]{background:var(--pull); color:#000; border-color:var(--pull)}
   .tab.on[data-day="legs"]{background:var(--legs); color:#000; border-color:var(--legs)}
   .tab.on[data-day="diet"]{background:#c084fc; color:#1a1020; border-color:#c084fc}
+  .tab.on[data-day="tv"]{background:#ef4444; color:#fff; border-color:#ef4444}
+  .tvwrap{position:relative; background:#000; border:1px solid var(--line); border-radius:14px; overflow:hidden; aspect-ratio:16/9; margin-bottom:10px; display:none}
+  .tvwrap.on{display:block}
+  .tvwrap iframe{width:100%; height:100%; border:0; display:block}
+  .tvwrap:fullscreen{aspect-ratio:auto; border:0; border-radius:0}
+  .tvbar{display:flex; gap:8px; margin-bottom:12px; display:none}
+  .tvbar.on{display:flex}
+  .tvbar button{flex:1; background:var(--card); border:1px solid var(--line); color:var(--txt); font-family:inherit; font-size:12.5px; font-weight:700; padding:9px; border-radius:10px; cursor:pointer}
+  .tvbar .tvfull{background:#ef4444; border-color:#ef4444; color:#fff}
+  .tvgrid{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  .tvch{background:var(--card); border:1px solid var(--line); border-radius:13px; padding:11px 12px; cursor:pointer; font-family:inherit; color:var(--txt); text-align:right}
+  .tvch .tn{font-weight:800; font-size:13.5px} .tvch .tc{font-size:11px; color:var(--mut); margin-top:3px}
+  .tvch.on{border-color:#ef4444; box-shadow:0 0 0 1px #ef4444 inset}
+  .tvnote{font-size:11.5px; color:var(--mut); margin-top:12px; line-height:1.8}
   .totcard{background:linear-gradient(135deg,#241c30,#191620); border:1px solid #3a2f4a; border-radius:14px; padding:13px 14px; margin-bottom:14px}
   .totcard .t1{font-size:13px; font-weight:700} .totcard .t1 b{color:#d8b4fe}
   .totnow{font-size:12.5px; color:var(--mut); margin-top:6px} .totnow b{color:var(--txt)}
@@ -255,11 +269,13 @@
     <div class="tab" data-day="pull">🔵 Pull<br>پشت/بازو</div>
     <div class="tab" data-day="legs">🟢 Legs<br>پا/شکم</div>
     <div class="tab" data-day="diet">🍽️ تغذیه<br>رژیم روزانه</div>
+    <div class="tab" data-day="tv">📺 TV<br>زنده</div>
   </div>
   <div class="panel on" id="push"><div class="dayhead">🔥 گرم‌کردن: ۵ دقیقه کراس‌ترینر سبک. ترتیب: از سنگین به سبک.</div></div>
   <div class="panel" id="pull"><div class="dayhead">🔥 گرم‌کردن: ۵ دقیقه کراس‌ترینر + ۱ ست سبک زیربغل.</div></div>
   <div class="panel" id="legs"><div class="dayhead">🔥 گرم‌کردن: ۵ دقیقه کراس‌ترینر + ۱ ست سبک پرس پا. (هیپ‌تراست، ساق و داخل/خارج ران تازه اضافه شدن — اگه وقت کم بود، ساق و داخل/خارج ران رو می‌تونی حذف کنی.)</div></div>
   <div class="panel" id="diet"></div>
+  <div class="panel" id="tv"></div>
 
   <details class="prog"><summary>📈 پیشرفتِ من</summary><div class="progbody" id="progbody"></div></details>
 
@@ -909,6 +925,37 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
   ['🧖 ریکاوری و جانبی',['صندلی ماساژ — Massagesessel','آنالیز بدن — Body Analyzer','ضدعفونی — Hygienestation','لاکر — Spind / Schließfach']]
  ];
  ref.innerHTML=REF.map(c=>'<div class="refcat">'+c[0]+'</div>'+c[1].map(i=>'<div class="refitem">• '+i+'</div>').join('')).join('');
+})();
+
+/* ---------- 📺 تلویزیونِ زنده (برای تردمیل) ---------- */
+(function(){
+ const host=document.getElementById('tv'); if(!host) return;
+ const CH=[
+  {n:'ایران اینترنشنال',c:'📰 خبر · ۲۴/۷',m:'yt',id:'UCat6bC0Wrqq9Bcq7EkH_yQw'},
+  {n:'BBC فارسی',c:'📰 خبر (بعضی برنامه‌ها به‌خاطر حقِ پخش بسته‌ست)',m:'yt',id:'UCHZk9MrT3DGWmVqdsj5y0EA'},
+  {n:'صدای آمریکا VOA',c:'📰 خبر و برنامه',m:'yt',id:'UCttfDeGMwUxPjnlsKagcwKw'},
+  {n:'ITC — تلویزیون ایرانیان کانادا',c:'⚽ فوتبال و برنامه‌های عمومی',m:'site',url:'https://itctv.ca/live/'}
+ ];
+ host.innerHTML='<div class="dayhead">📺 بزن رو کانال ← پخشِ زنده شروع می‌شه و خودش تمام‌صفحه/افقی می‌شه. برگشتی، دوباره «⛶ تمام‌صفحه» رو بزن.</div>'+
+   '<div class="tvwrap" id="tvwrap"><iframe id="tvframe" src="about:blank" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin"></iframe></div>'+
+   '<div class="tvbar" id="tvbar"><button type="button" class="tvfull" id="tvfull">⛶ تمام‌صفحه</button><button type="button" id="tvstop">✕ قطع پخش</button></div>'+
+   '<div class="tvgrid">'+CH.map((ch,i)=>'<button type="button" class="tvch" data-i="'+i+'"><div class="tn">'+ch.n+'</div><div class="tc">'+ch.c+'</div></button>').join('')+'</div>'+
+   '<div class="tvnote">🔗 پخش از یوتیوب/سایتِ رسمیِ خودِ کانال‌هاست. اینترنتِ باشگاه ضعیف باشه، کیفیت رو خودِ پلیر کم می‌کنه. کانالِ دیگه‌ای خواستی، بهم بگو اضافه کنم.</div>';
+ const wrap=document.getElementById('tvwrap'), fr=document.getElementById('tvframe'), bar=document.getElementById('tvbar');
+ function src(ch){ return ch.m==='yt' ? 'https://www.youtube-nocookie.com/embed/live_stream?channel='+ch.id+'&autoplay=1&playsinline=1' : ch.url; }
+ async function goFull(){ try{ if(wrap.requestFullscreen) await wrap.requestFullscreen(); }catch(e){} try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){} }
+ function stop(){ fr.src='about:blank'; wrap.classList.remove('on'); bar.classList.remove('on'); host.querySelectorAll('.tvch').forEach(b=>b.classList.remove('on')); }
+ host.addEventListener('click',ev=>{
+   const b=ev.target.closest('.tvch');
+   if(b){ const ch=CH[+b.dataset.i];
+     host.querySelectorAll('.tvch').forEach(x=>x.classList.toggle('on',x===b));
+     fr.src=src(ch); wrap.classList.add('on'); bar.classList.add('on');
+     wrap.scrollIntoView({behavior:'smooth',block:'nearest'}); goFull(); return; }
+   if(ev.target.closest('#tvfull')){ goFull(); return; }
+   if(ev.target.closest('#tvstop')){ stop(); return; }
+ });
+ document.addEventListener('fullscreenchange',()=>{ if(!document.fullscreenElement){ try{ screen.orientation.unlock(); }catch(e){} } });
+ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ if(t.dataset.day!=='tv' && fr.src!=='about:blank') stop(); }));   // رفتی سراغِ تمرین؟ پخش قطع شه که صداش مزاحم نشه
 })();
 
 /* ---------- 🔄 سینک بین دستگاه‌ها (ادغامِ کلید‌به‌کلید — آخرین تغییرِ هر کلید برنده) ---------- */
