@@ -932,15 +932,18 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  const host=document.getElementById('tv'); if(!host) return;
  const CH=[
   {n:'ایران اینترنشنال',c:'📰 خبر · ۲۴/۷',m:'yt',id:'UCat6bC0Wrqq9Bcq7EkH_yQw'},
-  {n:'BBC فارسی',c:'📰 خبر (بعضی برنامه‌ها به‌خاطر حقِ پخش بسته‌ست)',m:'yt',id:'UCHZk9MrT3DGWmVqdsj5y0EA'},
+  {n:'BBC فارسی',c:'📰 خبر (بعضی برنامه‌ها حقِ پخش ندارن)',m:'yt',id:'UCHZk9MrT3DGWmVqdsj5y0EA'},
   {n:'صدای آمریکا VOA',c:'📰 خبر و برنامه',m:'yt',id:'UCttfDeGMwUxPjnlsKagcwKw'},
-  {n:'ITC — تلویزیون ایرانیان کانادا',c:'⚽ فوتبال و برنامه‌های عمومی',m:'site',url:'https://itctv.ca/live/'}
+  {n:'ITC — تلویزیون ایرانیان کانادا',c:'⚽ فوتبال و برنامه (جام جهانی ۲۰۲۶ رو هم می‌ده)',m:'site',url:'https://customer-2s5hvw3o3ubwoziv.cloudflarestream.com/a1164b0793a4e40e86563664132c26f7/iframe?autoplay=true'},
+  {n:'طپش T2',c:'🎵 موزیک، شو و سریال (لس‌آنجلسی)',m:'site',url:'https://www.tapesh.com/t2tv.html'},
+  {n:'MBC Persia ↗',c:'🎬 فیلمِ دوبله — تو تبِ جدا (اکانتِ رایگانِ Shahid می‌خواد)',m:'link',url:'https://shahid.mbc.net/en/livestream/MBC-Persia/livechannel-418308'},
+  {n:'رادیو جوان TV ↗',c:'🎵 موزیک‌ویدیوی ۲۴/۷ — تو تبِ جدا',m:'link',url:'https://play.radiojavan.com/tv'}
  ];
  host.innerHTML='<div class="dayhead">📺 بزن رو کانال ← پخشِ زنده شروع می‌شه و خودش تمام‌صفحه/افقی می‌شه. برگشتی، دوباره «⛶ تمام‌صفحه» رو بزن.</div>'+
    '<div class="tvwrap" id="tvwrap"><iframe id="tvframe" src="about:blank" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin"></iframe></div>'+
    '<div class="tvbar" id="tvbar"><button type="button" class="tvfull" id="tvfull">⛶ تمام‌صفحه</button><button type="button" id="tvstop">✕ قطع پخش</button></div>'+
    '<div class="tvgrid">'+CH.map((ch,i)=>'<button type="button" class="tvch" data-i="'+i+'"><div class="tn">'+ch.n+'</div><div class="tc">'+ch.c+'</div></button>').join('')+'</div>'+
-   '<div class="tvnote">🔗 پخش از یوتیوب/سایتِ رسمیِ خودِ کانال‌هاست. اینترنتِ باشگاه ضعیف باشه، کیفیت رو خودِ پلیر کم می‌کنه. کانالِ دیگه‌ای خواستی، بهم بگو اضافه کنم.</div>';
+   '<div class="tvnote">🔗 پخش از یوتیوب/پلیرِ رسمیِ خودِ کانال‌هاست. 🎬 کافه‌فیلم متأسفانه پخشِ اینترنتیِ رسمی نداره — جاش MBC Persia فیلمِ دوبله داره. کانالِ دیگه‌ای خواستی، بگو اضافه کنم.</div>';
  const wrap=document.getElementById('tvwrap'), fr=document.getElementById('tvframe'), bar=document.getElementById('tvbar');
  async function goFull(){ try{ if(wrap.requestFullscreen) await wrap.requestFullscreen(); }catch(e){} try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){} }
  function stop(){ fr.src='about:blank'; wrap.classList.remove('on'); bar.classList.remove('on'); host.querySelectorAll('.tvch').forEach(b=>b.classList.remove('on')); }
@@ -957,7 +960,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  }
  host.addEventListener('click',ev=>{
    const b=ev.target.closest('.tvch');
-   if(b){ play(CH[+b.dataset.i],b); goFull(); return; }
+   if(b){ const ch=CH[+b.dataset.i]; if(ch.m==='link'){ window.open(ch.url,'_blank'); return; } play(ch,b); goFull(); return; }
    if(ev.target.closest('#tvfull')){ goFull(); return; }
    if(ev.target.closest('#tvstop')){ stop(); return; }
  });
