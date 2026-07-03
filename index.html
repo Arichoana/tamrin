@@ -121,6 +121,7 @@
   .fmbtn.add{background:var(--legs); color:#04210d}
   .fmresult{margin-top:10px; font-size:13px}
   .fmest{background:#0e1117; border:1px solid var(--line); border-radius:10px; padding:11px; line-height:1.95} .fmest b{color:#ffd27a} .fmest span{color:var(--mut); font-size:12px}
+  .fmbr{margin:7px 0 4px; border-top:1px dashed var(--line); padding-top:7px; font-size:12px; line-height:2; color:#b9c2d0} .fmbr b{color:#eef1f6}
   .fl-items{margin-top:10px; display:flex; flex-direction:column; gap:6px}
   .fl-item{display:flex; align-items:center; justify-content:space-between; gap:8px; background:#0e1117; border:1px solid var(--line); border-radius:9px; padding:7px 10px; font-size:12px}
   .fl-itxt{color:#cdd5e0; line-height:1.6; word-break:break-word} .fl-itxt em{color:var(--mut); font-style:normal; font-size:11px}
@@ -900,11 +901,13 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
      const r=await fetch(API+'/food',{method:'POST',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({text:txt})});
      const d=await r.json();
      if(d==null||d.kcal==null){ res.innerHTML='❌ نشد حساب کنم، یه‌بار دیگه امتحان کن.'; return; }
-     res.innerHTML='<div class="fmest">≈ <b>'+faNum(+d.kcal||0)+'</b> کالری · <b>'+faNum(+d.protein||0)+'</b>گ پروتئین<br><span>'+esc(d.note||'')+'</span></div>'+
+     let br=''; if(Array.isArray(d.items)&&d.items.length>1){ br='<div class="fmbr">'+d.items.map(it=>'<div>'+((+it.kcal||0)<0?'🔥':'🍽️')+' '+esc(it.n||'')+' — <b>'+faNum(+it.kcal||0)+'</b>'+((+it.protein||0)?' · '+faNum(+it.protein||0)+'گ':'')+'</div>').join('')+'</div>'; }   // تفکیکِ آیتم‌به‌آیتم
+     res.innerHTML='<div class="fmest">≈ <b>'+faNum(+d.kcal||0)+'</b> کالری · <b>'+faNum(+d.protein||0)+'</b>گ پروتئین'+br+'<span>'+esc(d.note||'')+'</span></div>'+
        '<button id="fmadd" type="button" class="fmbtn add">➕ اضافه به امروز</button>';
      document.getElementById('fmadd').onclick=()=>{
        const c=getCal(), t=today(); if(!c[t])c[t]={kcal:0,protein:0,items:[]};
        const ni={txt:txt,kcal:+d.kcal||0,protein:+d.protein||0};
+       if(Array.isArray(d.items)&&d.items.length>1) ni.br=d.items.map(it=>({n:''+(it.n||''),kcal:+it.kcal||0,protein:+it.protein||0}));   // ریزِ آیتم‌ها هم ذخیره شه
        if(pendingEdit && pendingEdit.date===t && c[t].items && c[t].items[pendingEdit.i]!=null){ c[t].items[pendingEdit.i]=ni; }   // ویرایش: جایگزینِ سرِجا
        else{ (c[t].items=c[t].items||[]).push(ni); }
        pendingEdit=null; recalc(c[t]);
