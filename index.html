@@ -107,6 +107,14 @@
   .estcard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:14px; font-size:12.5px; color:#b9c2d0}
   .estcard h4{margin:0 0 6px; font-size:13px; color:var(--txt)} .estcard ul{margin:0; padding-inline-start:18px} .estcard li{margin:3px 0}
   .daynote{font-size:12px; color:var(--mut); margin:0 2px 12px; line-height:1.6}
+  details.night{background:linear-gradient(135deg,#151b2b,#12151d); border:1px solid #2a3350; border-radius:14px; margin-bottom:14px}
+  details.night summary{padding:12px 14px; font-weight:800; font-size:14px; cursor:pointer; list-style:none; color:#a9c1ff}
+  details.night summary::-webkit-details-marker{display:none}
+  details.night summary::after{content:'▾'; float:left; color:var(--mut)} details.night[open] summary::after{content:'▴'}
+  .nightlist{padding:0 14px 13px; font-size:12.5px; color:#c3cbe0; line-height:1.95}
+  .nightlist .nrow{padding:7px 0; border-top:1px solid #232b42} .nightlist .nrow b{color:#eef1f6} .nightlist .nrow .nk{color:#7fe39b; font-weight:700; font-size:11.5px}
+  .nightlist .ncombo{margin-top:9px; background:rgba(52,199,89,.08); border:1px solid rgba(52,199,89,.35); border-radius:10px; padding:9px 11px; font-size:12px; color:#a7e9bd}
+  .nightlist .nno{margin-top:8px; font-size:11px; color:#6b7280}
   .foodlog{background:linear-gradient(135deg,#241c30,#191620); border:1px solid #3a2f4a; border-radius:14px; padding:12px 14px; margin-bottom:14px}
   .fl-top{display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:14px; font-weight:700}
   .fl-top button{background:#c084fc; color:#1a1020; border:none; font-family:inherit; font-weight:800; font-size:12px; padding:8px 12px; border-radius:10px; cursor:pointer; white-space:nowrap}
@@ -781,6 +789,17 @@ function glossify(t){
     <div class="mopt">بعد از سنگین‌ترین تمرین (روز پا) یه وعده‌ی آزاد بخور — پیتزا، برگر، هرچی دلت خواست. <b>یه وعده، نه یه روز کامل.</b></div>
     <div class="mtip">⏰ این برای روحیه و پایبندی معجزه می‌کنه — باعث می‌شه کلِ هفته راحت‌تر سرِ برنامه بمونی. بعدش برگرد سر برنامه.</div></div>`;
   html+=`<div class="daynote" style="margin-top:2px">⏱️ ترتیب: صبحانه ← میوه ← ناهار ← (قبل تمرین) ← تمرین ← (بعد تمرین + شیر پروتئین) ← شام. روز استراحت، شیر پروتئین رو هر وعده‌ای که پروتئینت کم موند بگیر.</div>`;
+  html+=`<details class="night"><summary>🌙 آخرِ شب گشنمه — چی بخورم؟</summary><div class="nightlist">
+    <div style="padding-bottom:4px">قانون: <b>پروتئین + حجم + آب</b> = مثل خر سیر، کالری تقریباً هیچی. اینا رو بزن:</div>
+    <div class="nrow">🥇 <b>ماگرکوارک ۲۵۰گ</b> + کاکائوی بی‌قند یا دارچین <span class="nk">~۱۵۰ کالری · ۲۸گ پروتئین</span><br>کازئینش آهسته هضم می‌شه ← تا صبح سیری + عضله‌سازی تو خواب. قهرمانِ مطلقِ شب.</div>
+    <div class="nrow">🍜 <b>نودل/برنجِ کونجاک (شیراتاکی)</b> تو آبِ مرغِ داغ <span class="nk">کلِ بسته ~۱۰ کالری!</span><br>معده‌پُرکنِ افسانه‌ای. قبلش آب بکش + ۱–۲ دقیقه تفتِ خشک که بوش بره. (go asia کنارِ Hauptbahnhof، ~۱.۵€)</div>
+    <div class="nrow">🥣 <b>آبِ مرغِ داغ (Brühe)</b> + یه تخم‌مرغ توش بشکن <span class="nk">~۹۰ کالری</span><br>داغ + مایع = سیگنالِ سیریِ قوی برای شب.</div>
+    <div class="nrow">🥚 <b>۲–۳ تخم‌مرغِ آب‌پز</b> <span class="nk">۱۴۰–۲۱۰ کالری</span> · 🐟 <b>تن‌ماهیِ آب</b> <span class="nk">~۱۱۰ · ۲۵گ پروتئین</span></div>
+    <div class="nrow">🧀 <b>Harzer Käse</b> — مخفی‌ترین سلاحِ آلمان <span class="nk">۱۰۰گ = ~۱۲۰ کالری · ۳۰گ پروتئین!</span></div>
+    <div class="nrow">🍮 <b>ژله‌ی بی‌قند</b> (Götterspeise zuckerfrei) <span class="nk">کاسه‌ی بزرگ ~۱۰ کالری</span> — هوسِ شیرینی‌کُش · 🥒 <b>خیارشور</b> <span class="nk">~۵/دونه</span> — هوسِ خرت‌خرت‌کُش</div>
+    <div class="ncombo">🎯 کمبوی پیشنهادی: <b>کوارک + کاکائو</b>، یا <b>کونجاک تو آبِ مرغ + یه تخم‌مرغ</b> — مثل خر سیر، زیرِ ~۲۰۰ کالری، پروتئینتم میاد بالا. کنارش یه <b>چایِ گیاهیِ داغ</b>. 😴</div>
+    <div class="nno">😄 کاهو (شاش)، بروکلی و لوبیا (نفخ) و هویج (دل‌زدن) عمداً تو لیست نیستن.</div>
+  </div></details>`;
   host.insertAdjacentHTML('beforeend',html);
   const renderMeal=i=>{const o=MEALS[i].opts[idx[i]], el=host.querySelector('.meal[data-meal="'+i+'"]');
     el.querySelector('.mopt').innerHTML=glossify(o.n);
