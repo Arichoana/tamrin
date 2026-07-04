@@ -223,6 +223,12 @@
   details.adv summary{font-size:11.5px; color:#7fb3e8; cursor:pointer; list-style:none; font-weight:600}
   details.adv summary::-webkit-details-marker{display:none}
   details.adv>div{font-size:12px; color:#b9c2d0; line-height:1.9; margin-top:6px; background:#0e1117; border:1px solid var(--line); border-radius:9px; padding:8px 10px}
+  details.prog2{margin-bottom:9px}
+  details.prog2 summary{font-size:11.5px; color:#34c759; cursor:pointer; list-style:none; font-weight:600}
+  details.prog2 summary::-webkit-details-marker{display:none}
+  .pg2body{margin-top:6px; background:#0e1117; border:1px solid var(--line); border-radius:9px; padding:9px 10px}
+  .pg2svg{width:100%; height:54px; display:block}
+  .pg2note{font-size:11.5px; color:#9aa3b2; line-height:1.85; margin-top:6px} .pg2note b{color:#cdd5e0}
   .logtitle{font-size:11.5px; color:#aab3c2; font-weight:700; margin:8px 0 5px}
   .log{display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:#0e1117; border:1px solid var(--line); border-radius:12px; padding:9px 10px}
   .log label{font-size:12px; color:var(--mut)}
@@ -383,6 +389,7 @@ function card(e){
         <label>× چند تکرار</label><input type="number" inputmode="numeric" data-k="${e.id}r"><span class="ok">✓ ذخیره</span>
       </div>
       <div class="targets"><span class="last" id="last-${e.id}">${t.last}</span><span class="next" id="next-${e.id}">${t.next}</span></div>
+      <details class="prog2"><summary>📈 روندِ این حرکت (بزن تا باز شه)</summary><div class="pg2body" id="pg2-${e.id}"></div></details>
     </div>
   </div>`;
 }
@@ -395,6 +402,22 @@ const META={};
   DATA[day].forEach(e=>{e.num=i++; META[e.id]=e; html+=card(e);});
   document.getElementById(day).insertAdjacentHTML('beforeend',html);
 });
+
+// 📈 روندِ هر حرکت (جمع‌شونده — تاریخچه‌ی وزنه از الان ذخیره می‌شه، خودش رندر می‌شه وقتی بازش کنی)
+function recordHist(id,w){ const k='bf_'+id+'h'; let h; try{ h=JSON.parse(localStorage.getItem(k)||'[]'); }catch(e){ h=[]; }
+  const t=today(), i=h.findIndex(p=>p&&p.d===t); if(i>=0) h[i].w=w; else h.push({d:t,w:w});   // یه نقطه در روز (آخرین مقدارِ همون روز)
+  if(h.length>150) h=h.slice(-150); localStorage.setItem(k,JSON.stringify(h)); }
+function renderTrend(id,box){ let h; try{ h=JSON.parse(localStorage.getItem('bf_'+id+'h')||'[]'); }catch(e){ h=[]; }
+  h=(h||[]).filter(p=>p&&isFinite(+p.w)).sort((a,b)=>a.d<b.d?-1:1);
+  if(h.length<2){ box.innerHTML='<div class="pg2note">هنوز داده‌ی کافی نیست — چند جلسه وزنه ثبت کن تا روندت اینجا بیاد. 📈</div>'; return; }
+  const ws=h.map(p=>+p.w), mn=Math.min.apply(null,ws), mx=Math.max.apply(null,ws), W=260,H=54,pad=7, span=(mx-mn)||1;
+  const xOf=i=>pad+(i/(h.length-1))*(W-2*pad), yOf=w=>H-pad-((w-mn)/span)*(H-2*pad);
+  const pts=h.map((p,i)=>xOf(i).toFixed(1)+','+yOf(+p.w).toFixed(1)).join(' ');
+  const first=ws[0], last=ws[ws.length-1], diff=+(last-first).toFixed(1);
+  const dtxt=diff>0?('+'+faNum(diff)+' ↑'):(diff<0?(faNum(diff)+' ↓'):'ثابت');
+  box.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" class="pg2svg"><polyline points="'+pts+'" fill="none" stroke="#34c759" stroke-width="2"/><circle cx="'+xOf(h.length-1).toFixed(1)+'" cy="'+yOf(last).toFixed(1)+'" r="3" fill="#34c759"/></svg>'+
+    '<div class="pg2note">از <b>'+faNum(first)+'</b> شروع کردی → الان <b>'+faNum(last)+'</b> · <b style="color:#34c759">'+dtxt+'</b> (تو '+faNum(h.length)+' ثبت)</div>'; }
+document.querySelectorAll('details.prog2').forEach(d=>d.addEventListener('toggle',()=>{ if(d.open){ const b=d.querySelector('.pg2body'); if(b) renderTrend(b.id.slice(4),b); } }));
 
 // inline video: only the small playbtn opens it; gif stays fully visible
 document.addEventListener('click',ev=>{
@@ -445,6 +468,7 @@ document.querySelectorAll('input[data-k]').forEach(inp=>{
   inp.addEventListener('focus',()=>{ inp._prev=inp.value; setTimeout(()=>{ try{inp.select();}catch(e){} },0); });   // تپِ اول: کلِ عدد هایلایت شه (ادیتِ راحت)؛ تپِ بعدی خودِ مرورگر مکان‌نما می‌ذاره
   inp.addEventListener('change',()=>{                                    // 🤔 پرشِ مشکوک نسبت به رکوردِ قبلی؟ فقط می‌پرسه — چیزی رو خودش پاک نمی‌کنه
     const isW=/w$/.test(inp.dataset.k), v=parseFloat(inp.value), p=parseFloat(inp._prev);
+    if(isW && isFinite(v) && v>0) recordHist(inp.dataset.k.slice(0,-1), v);   // 📈 ثبتِ روندِ وزنه (آپسرتِ امروز)
     if(!isW||!isFinite(v)||!isFinite(p)||p<=0||v===p) return;
     const up=(v>=p*1.5&&v-p>=5), dn=(v<=p*0.55&&p-v>=5);
     if(!(up||dn)) return;
