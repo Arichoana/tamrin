@@ -358,7 +358,11 @@ const DATA={push:[
 
 function targets(e){
   const w=localStorage.getItem('bf_'+e.id+'w'), r=localStorage.getItem('bf_'+e.id+'r');
-  const U=e.unit==='s'?' ث':' kg';
+  const U=e.unit==='s'?' ث':' kg', noW=!(e.step>0);
+  if(noW){                                                              // حرکتِ بی‌وزنه (مثل کرانچ): فقط تکرار
+    return { last: r?('🔼 آخرین: '+faNum(r)+' تکرار'):'🔼 هنوز رکوردی ثبت نشده',
+             next: r?'🎯 هدف بعدی: +۱ تکرار':'' };
+  }
   let last=(w||r)?('🔼 آخرین: '+(w?faNum(w)+U:'—')+(r?' × '+faNum(r)+' تکرار':'')):'🔼 هنوز رکوردی ثبت نشده';
   let next='';
   if(w && e.step>0) next='🎯 هدف بعدی: '+faNum(+w+e.step)+U+' (یا +۱ تکرار)';
@@ -367,7 +371,9 @@ function targets(e){
 }
 function card(e){
   const wlab=e.wlabel||'وزنه', U=e.unit==='s'?'ث':'kg', mb=e.mode==='pyr'?'<span class="b pyr">پلکانی ↗</span>':'<span class="b fail">تا ناتوانی 🔥</span>';
+  const noW=!(e.step>0);
   const lt = e.id==='legs6' ? '📊 بهترین زمانِ ست آخرت رو ثبت کن (هرچی واقعاً نگه داشتی):'
+    : noW ? '📊 فقط تکرارِ «ست آخر (تا ناتوانی)» رو ثبت کن — چندتا تونستی:'
     : (e.mode==='pyr' ? '📊 فقط «ست آخرِ سنگین» رو ثبت کن — وزنه‌اش + چندتا واقعاً زدی:'
     : '📊 فقط «ست آخر (تا ناتوانی)» رو ثبت کن — وزنه‌اش + چندتا تونستی:');
   const t=targets(e);
@@ -394,8 +400,8 @@ function card(e){
       ${e.adv?'<details class="adv"><summary>💡 نکته‌ی فرم (پیشرفته) — بزن تا باز شه</summary><div>'+e.adv+'</div></details>':''}
       <div class="logtitle">${lt}</div>
       <div class="log">
-        <label>${wlab}</label><input type="number" inputmode="numeric" data-k="${e.id}w" data-step="${e.step}" placeholder="${e.w}"><label>${U}</label>
-        <label>× چند تکرار</label><input type="number" inputmode="numeric" data-k="${e.id}r"><span class="ok">✓ ذخیره</span>
+        ${noW?'':`<label>${wlab}</label><input type="number" inputmode="numeric" data-k="${e.id}w" data-step="${e.step}" placeholder="${e.w}"><label>${U}</label>`}
+        <label>${noW?'چند تکرار':'× چند تکرار'}</label><input type="number" inputmode="numeric" data-k="${e.id}r"><span class="ok">✓ ذخیره</span>
       </div>
       <div class="targets"><span class="last" id="last-${e.id}">${t.last}</span><span class="next" id="next-${e.id}">${t.next}</span></div>
       <details class="prog2"><summary>📈 روندِ این حرکت (بزن تا باز شه)</summary><div class="pg2body" id="pg2-${e.id}"></div></details>
@@ -478,6 +484,8 @@ document.querySelectorAll('input[data-k]').forEach(inp=>{
   inp.addEventListener('change',()=>{                                    // 🤔 پرشِ مشکوک نسبت به رکوردِ قبلی؟ فقط می‌پرسه — چیزی رو خودش پاک نمی‌کنه
     const isW=/w$/.test(inp.dataset.k), v=parseFloat(inp.value), p=parseFloat(inp._prev);
     if(isW && isFinite(v) && v>0) recordHist(inp.dataset.k.slice(0,-1), v);   // 📈 ثبتِ روندِ وزنه (آپسرتِ امروز)
+    const _id=inp.dataset.k.slice(0,-1);
+    if(!isW && META[_id] && !(META[_id].step>0) && isFinite(v) && v>0) recordHist(_id, v);   // حرکتِ بی‌وزنه (کرانچ): روند از روی تکرار
     if(!isW||!isFinite(v)||!isFinite(p)||p<=0||v===p) return;
     const up=(v>=p*1.5&&v-p>=5), dn=(v<=p*0.55&&p-v>=5);
     if(!(up||dn)) return;
@@ -943,11 +951,22 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
        }
      } return; }
  });
+ function workoutCtx(){                                                          // «تمرین داشتم» بگی، اپ خودش می‌دونه امروز چی زدی
+   try{
+     const t=today(), names={push:'سینه/سرشانه (Push)',pull:'پشت/بازو (Pull)',legs:'پا/شکم (Legs)'};
+     const done=[]; ['push','pull','legs'].forEach(d=>{ if(localStorage.getItem('bf_sessdate_'+d)===t) done.push(names[d]); });
+     let ex=0; Object.keys(typeof META!=='undefined'?META:{}).forEach(id=>{ if(localStorage.getItem('bf_done_'+id)===t) ex++; });
+     const cardio=(localStorage.getItem('bf_cardiodate')===t);
+     let wt=null; try{ const a=JSON.parse(localStorage.getItem('bf_wt')||'[]'); if(a.length){ a.sort((x,y)=>x.d<y.d?-1:1); wt=+a[a.length-1].w; } }catch(e){}
+     if(!done.length && !ex && !cardio) return '';
+     return 'امروز طبق اپ: '+(done.length?('جلسه‌ی '+done.join(' و ')+' ثبت شده (تمرینِ وزنه ~۴۵-۶۰ دقیقه)'):'جلسه ثبت نشده')+(ex?('، '+ex+' حرکت تیک خورده'):'')+(cardio?'، کراس‌ترینر هم زده (~۲۰ دقیقه)':'')+(wt?('، وزنِ بدن ~'+wt+' کیلو'):'، وزنِ بدن ~۱۰۵ کیلو');
+   }catch(e){ return ''; }
+ }
  document.getElementById('fmcalc').addEventListener('click',async()=>{
    const txt=(document.getElementById('fminput').value||'').trim(); if(!txt) return;
    const res=document.getElementById('fmresult'); res.innerHTML='⏳ دارم حساب می‌کنم...';
    try{
-     const r=await fetch(API+'/food',{method:'POST',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({text:txt})});
+     const r=await fetch(API+'/food',{method:'POST',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({text:txt,ctx:workoutCtx()})});
      const d=await r.json();
      if(d==null||d.kcal==null){ res.innerHTML='❌ نشد حساب کنم، یه‌بار دیگه امتحان کن.'; return; }
      let br=''; if(Array.isArray(d.items)&&d.items.length>1){ br='<div class="fmbr">'+d.items.map(it=>'<div>'+((+it.kcal||0)<0?'🔥':'🍽️')+' '+esc(it.n||'')+' — <b>'+faNum(+it.kcal||0)+'</b>'+((+it.protein||0)?' · '+faNum(+it.protein||0)+'گ':'')+'</div>').join('')+'</div>'; }   // تفکیکِ آیتم‌به‌آیتم
@@ -1017,8 +1036,12 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  function showVid(){ fr.style.display='none'; vid.style.display='block'; }
  function killHls(){ if(hls){ try{hls.destroy()}catch(e){} hls=null; } try{ vid.pause(); vid.removeAttribute('src'); vid.load(); }catch(e){} }
  async function goFull(){                                                        // تمام‌صفحه = خودِ باکس (تا لایه‌ی سواپ/کنترلِ خودمون کار کنه)
-   try{ if(wrap.requestFullscreen) await wrap.requestFullscreen(); else if(wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen(); }catch(e){}
-   try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){} }
+   if(wrap.requestFullscreen || wrap.webkitRequestFullscreen){
+     try{ if(wrap.requestFullscreen) await wrap.requestFullscreen(); else wrap.webkitRequestFullscreen(); }catch(e){}
+     try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){}
+   } else if(vid.style.display!=='none' && vid.webkitEnterFullscreen){          // آیفون: div تمام‌صفحه نمی‌شه — پلیرِ نیتیوِ خودِ ویدیو
+     try{ vid.webkitEnterFullscreen(); }catch(e){ vid.addEventListener('loadedmetadata',function(){ try{vid.webkitEnterFullscreen()}catch(_){} },{once:true}); }
+   } }
  function pipHint(msg){ const t=document.getElementById('tvpip'); if(t){ t.textContent=msg; setTimeout(()=>{t.textContent='🔳 شناور';},2200); } }
  async function enterPip(){                                                     // پنجره‌ی شناورِ کوچیک (گوشی پرتره می‌مونه) — فقط برای ویدیوی مستقیم
    if(vid.style.display==='none'){ pipHint('فقط کافه‌فیلم/انقلابِ ملی'); return; }
