@@ -1002,6 +1002,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  const esc=s=>(''+s).replace(/[<>&]/g,ch=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]));
  const itxt=it=> typeof it==='string'? it : (it&&it.txt||'');
  const recalc=day=>{ let k=0,p=0; (day.items||[]).forEach(it=>{ if(typeof it!=='string'){ k+=(+it.kcal||0); p+=(+it.protein||0); } }); day.kcal=k+(+day.legacyKcal||0); day.protein=p+(+day.legacyProtein||0); };  // جمعِ روز = آیتم‌های لیست + سهمِ قدیمی‌ها
+ const saveCal=(c,day)=>{ if(day&&c[day]) c[day]._t=Date.now(); localStorage.setItem('bf_cal',JSON.stringify(c)); };  // 🗓️ هر بار ذخیره، برچسبِ زمانیِ همون روز تازه می‌شه → ادغامِ روزبه‌روزِ سینک هیچ‌وقت روزی رو نمی‌پرونه
  function refreshToday(){
    const c=getCal(), t=c[today()]||{kcal:0,protein:0,items:[]}, el=document.getElementById('fltoday'); if(!el) return;
    const _its=t.items||[]; let _sk=0,_sp=0,_hasN=false; _its.forEach(it=>{ if(typeof it!=='string'){ _sk+=(+it.kcal||0); _sp+=(+it.protein||0); _hasN=true; } });
@@ -1026,7 +1027,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
        else{
          if(!del.dataset.arm){ del.dataset.arm='1'; del.textContent='مطمئن؟'; setTimeout(()=>{ if(del.isConnected){ delete del.dataset.arm; del.textContent='✕'; } },2000); return; }   // حذف = دو تَپ (ضدِ تپِ اشتباهی)
          day.items.splice(i,1); recalc(day); if(!day.items.length) delete c[t];
-         localStorage.setItem('bf_cal',JSON.stringify(c)); refreshToday();
+         saveCal(c,t); refreshToday();
        }
      } return; }
  });
@@ -1058,7 +1059,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
        if(pendingEdit && pendingEdit.date===t && c[t].items && c[t].items[pendingEdit.i]!=null){ c[t].items[pendingEdit.i]=ni; }   // ویرایش: جایگزینِ سرِجا
        else{ (c[t].items=c[t].items||[]).push(ni); }
        pendingEdit=null; recalc(c[t]);
-       localStorage.setItem('bf_cal',JSON.stringify(c));
+       saveCal(c,t);
        document.getElementById('fminput').value=''; res.innerHTML='✅ به امروز اضافه شد!';
        refreshToday(); setTimeout(()=>m.classList.remove('show'),1000);
      };
@@ -1222,6 +1223,15 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  function norm(r){ if(!r||typeof r!=='object') return {data:{},ts:{}};
    if(r.data && r.ts) return {data:r.data||{}, ts:r.ts||{}};
    const rt=+(r['bf_t']||0), d={}, s={}; Object.keys(r).forEach(k=>{ if(isBF(k)){ d[k]=r[k]; s[k]=rt; } }); return {data:d,ts:s}; }
+ function parseCal(s){ try{ return JSON.parse(s||'{}')||{}; }catch(e){ return {}; } }
+ function maxDayT(o){ let mx=0; for(const d in o){ const t=+(o[d]&&o[d]._t||0); if(t>mx)mx=t; } return mx; }
+ function mergeCal(localStr,remoteStr){                              // 🗓️ ادغامِ روزبه‌روز: هر روز، نسخه‌ای که برچسبِ _t تازه‌تر داره برنده؛ روزهای یکتای هر طرف حفظ می‌شن
+   const L=parseCal(localStr), Rr=parseCal(remoteStr), out={}; let localChanged=false;
+   const days=Object.keys(L); Object.keys(Rr).forEach(d=>{ if(days.indexOf(d)<0) days.push(d); });
+   days.forEach(function(d){ const a=L[d], b=Rr[d];
+     if(a&&b){ if(+(b._t||0)>+(a._t||0)){ out[d]=b; localChanged=true; } else out[d]=a; }
+     else if(a){ out[d]=a; } else { out[d]=b; localChanged=true; } });     // روزِ فقط-ریموت → اضافه به محلی
+   return {obj:out, localChanged:localChanged}; }
  async function syncIn(allowReload){
    try{
      ts=loadTS();
@@ -1231,6 +1241,13 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
      const R=norm(remote); let changed=false;
      const keys=new Set([].concat(Object.keys(snap()),Object.keys(R.data),Object.keys(ts),Object.keys(R.ts)));
      keys.forEach(k=>{ if(!isBF(k)) return;
+       if(k==='bf_cal'){                                            // 🗓️ غذا: به‌جای کل‌کلید، روزبه‌روز ادغام شه
+         const rc=Object.prototype.hasOwnProperty.call(R.data,'bf_cal')?R.data['bf_cal']:'{}';
+         const mm=mergeCal(_get('bf_cal'),rc);
+         if(mm.localChanged){ _set('bf_cal',JSON.stringify(mm.obj)); changed=true; }
+         ts['bf_cal']=Math.max(maxDayT(mm.obj), +(ts['bf_cal']||0), +((R.ts&&R.ts['bf_cal'])||0));
+         return;
+       }
        const lt=+(ts[k]||0), rt=Math.min(+(R.ts[k]||0),Date.now()+86400000);   // زمانِ آینده‌ی مشکوک هیچ‌وقت برای همیشه برنده نشه
        if(rt>lt){
          if(Object.prototype.hasOwnProperty.call(R.data,k)){ if(_get(k)!==R.data[k]){ _set(k,R.data[k]); changed=true; } }
