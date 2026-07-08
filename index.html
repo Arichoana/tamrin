@@ -20,6 +20,8 @@
   header{background:linear-gradient(135deg,#16181d,#202531); padding:18px 16px 16px; border-bottom:3px solid var(--orange)}
   .brand{display:flex; align-items:center; gap:8px; font-weight:800; font-size:15px}
   .brand .dot{background:var(--orange); color:#000; padding:2px 8px; border-radius:6px; font-size:13px}
+  #syncbtn{margin-inline-start:auto; background:#2a2f3a; color:#cfe0ff; border:1px solid #3a4759; border-radius:8px; padding:5px 10px; font:inherit; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap}
+  #syncbtn:active{transform:scale(.96)} #syncbtn[disabled]{opacity:.6}
   h1{font-size:20px; margin:10px 0 2px; font-weight:800}
   .sub{color:var(--mut); font-size:13px}
   .chips{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px}
@@ -265,7 +267,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="brand"><span class="dot">BASIC-FIT</span><span>Essen · Frohnhauser Str. 71</span></div>
+    <div class="brand"><span class="dot">BASIC-FIT</span><span>Essen · Frohnhauser Str. 71</span><button id="syncbtn" type="button" title="آپلود/دانلودِ فوریِ دیتا بین گوشی و لپ‌تاپ">🔄 سینک</button></div>
     <h1>برنامه تمرین — Push / Pull / Legs</h1>
     <div class="sub">۳ روز در هفته · مقاومتی · هدف: کات + عضله</div>
     <div class="chips">
@@ -1195,11 +1197,23 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  const snap=()=>{ const o={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(isBF(k)) o[k]=_get(k); } return o; };
  let ready=false, t, ts=loadTS();
  const ftimeout=(u,opt,ms)=>{ const ac=new AbortController(); const to=setTimeout(()=>ac.abort(),ms||6000); return fetch(u,Object.assign({},opt||{},{signal:ac.signal})).finally(()=>clearTimeout(to)); };
- function syncWarn(msg){ let el=document.getElementById('syncwarn');            // ⚠️ اگه آپلودِ سینک رد شد، بی‌صدا رد نشو — بگو
-   if(!el){ el=document.createElement('div'); el.id='syncwarn'; el.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99;background:#7a1f1f;color:#ffd9d9;font-size:12px;padding:8px 12px;text-align:center;font-family:inherit;line-height:1.7'; document.body.appendChild(el); }
-   el.textContent=msg; clearTimeout(el._t); el._t=setTimeout(()=>{ el.remove(); },9000); }
+ function toast(msg,ok){ let el=document.getElementById('syncwarn');              // بازخوردِ بالای صفحه — سبز=موفق، قرمز=خطا
+   if(!el){ el=document.createElement('div'); el.id='syncwarn'; el.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99;font-size:12.5px;padding:8px 12px;text-align:center;font-family:inherit;line-height:1.7'; document.body.appendChild(el); }
+   el.style.background=ok?'#1f5c2e':'#7a1f1f'; el.style.color=ok?'#d9ffe4':'#ffd9d9';
+   el.textContent=msg; clearTimeout(el._t); el._t=setTimeout(()=>{ el.remove(); }, ok?2600:9000); }
+ const syncWarn=msg=>toast(msg,false);
+ function btnFlash(txt){ const b=document.getElementById('syncbtn'); if(!b)return; b.textContent=txt; clearTimeout(b._t); b._t=setTimeout(()=>{ b.textContent='🔄 سینک'; },2600); }
  const push=()=>{ try{ ftimeout(API+'/sync?u='+U,{method:'PUT',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({v:2,data:snap(),ts:ts})},6000).then(r=>{ if(r&&!r.ok) syncWarn(r.status===401?'⚠️ سینک آپلود نشد — نسخه‌ی اپ قدیمیه؛ صفحه رو یه‌بار کامل رفرش کن':'⚠️ سینک آپلود نشد ('+r.status+') — بعداً خودش دوباره تلاش می‌کنه'); }).catch(()=>{}); }catch(e){} };
  const flush=()=>{ try{ clearTimeout(t); fetch(API+'/sync?u='+U,{method:'PUT',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({v:2,data:snap(),ts:ts}),keepalive:true}).catch(()=>{}); }catch(e){} };  // ذخیره‌ی فوریِ آخرین تغییر موقعِ بستن/بک‌گراند (keepalive)
+ async function syncNow(){                                             // 🔄 سینکِ دستیِ زوری با بازخوردِ چشمی (وقتی خودکارِ iOS بی‌صدا شکست خورده)
+   const b=document.getElementById('syncbtn'); if(b) b.disabled=true; btnFlash('⏳ سینک…');
+   let ok=false, status=0, neterr=false;
+   try{ ts=loadTS(); const r=await ftimeout(API+'/sync?u='+U,{method:'PUT',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({v:2,data:snap(),ts:ts})},9000); ok=r.ok; status=r.status; }
+   catch(e){ neterr=true; }
+   try{ await syncIn(true); }catch(e){}                               // بعدش دانلود — چیزِ جدیدِ دستگاهِ دیگه اومد خودش رفرش می‌کنه
+   if(b) b.disabled=false;
+   if(ok){ toast('✅ سینک شد — دیتات آپلود و هماهنگ شد',true); btnFlash('✅ شد'); }
+   else { const why=neterr?'اینترنت/سرور در دسترس نیست':status===401?'کلید/نسخه قدیمیه (۴۰۱) — صفحه رو کامل رفرش کن':('خطای '+status); toast('⚠️ آپلود نشد: '+why,false); btnFlash('⚠️ نشد'); } }
  const sched=()=>{ if(!ready)return; clearTimeout(t); t=setTimeout(push,700); };
  const stamp=k=>{ if(isBF(k)){ ts=loadTS(); ts[k]=Date.now(); saveTS(ts); sched(); } };   // هر بار تازه بخون — دو تبِ باز زمانِ همو خراب نکنن
  localStorage.setItem=function(k,v){ _set(k,v); stamp(k); };
@@ -1229,6 +1243,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    }catch(e){ ready=true; }
  }
  syncIn(true);                                                       // باز شدن → آخرین تغییراتِ دستگاهِ دیگه رو بکش
+ { const sb=document.getElementById('syncbtn'); if(sb) sb.addEventListener('click',syncNow); }   // دکمه‌ی سینکِ دستی
  window.addEventListener('pagehide',flush); window.addEventListener('beforeunload',flush);   // بستنِ تب/اپ → ذخیره‌ی فوری
  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') flush(); else { if(today()!==uiDay){ location.reload(); return; } syncIn(true); } });  // بک‌گراند→ذخیره ، برگشتن→دوباره بکش (روز عوض شده؟ رفرش)
  setInterval(function(){ if(today()!==uiDay) location.reload(); },60000);   // نیمه‌شب رد شد و صفحه بازه → UI روزِ نو
