@@ -1195,7 +1195,10 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  const snap=()=>{ const o={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(isBF(k)) o[k]=_get(k); } return o; };
  let ready=false, t, ts=loadTS();
  const ftimeout=(u,opt,ms)=>{ const ac=new AbortController(); const to=setTimeout(()=>ac.abort(),ms||6000); return fetch(u,Object.assign({},opt||{},{signal:ac.signal})).finally(()=>clearTimeout(to)); };
- const push=()=>{ try{ ftimeout(API+'/sync?u='+U,{method:'PUT',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({v:2,data:snap(),ts:ts})},6000).catch(()=>{}); }catch(e){} };
+ function syncWarn(msg){ let el=document.getElementById('syncwarn');            // ⚠️ اگه آپلودِ سینک رد شد، بی‌صدا رد نشو — بگو
+   if(!el){ el=document.createElement('div'); el.id='syncwarn'; el.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99;background:#7a1f1f;color:#ffd9d9;font-size:12px;padding:8px 12px;text-align:center;font-family:inherit;line-height:1.7'; document.body.appendChild(el); }
+   el.textContent=msg; clearTimeout(el._t); el._t=setTimeout(()=>{ el.remove(); },9000); }
+ const push=()=>{ try{ ftimeout(API+'/sync?u='+U,{method:'PUT',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({v:2,data:snap(),ts:ts})},6000).then(r=>{ if(r&&!r.ok) syncWarn(r.status===401?'⚠️ سینک آپلود نشد — نسخه‌ی اپ قدیمیه؛ صفحه رو یه‌بار کامل رفرش کن':'⚠️ سینک آپلود نشد ('+r.status+') — بعداً خودش دوباره تلاش می‌کنه'); }).catch(()=>{}); }catch(e){} };
  const flush=()=>{ try{ clearTimeout(t); fetch(API+'/sync?u='+U,{method:'PUT',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({v:2,data:snap(),ts:ts}),keepalive:true}).catch(()=>{}); }catch(e){} };  // ذخیره‌ی فوریِ آخرین تغییر موقعِ بستن/بک‌گراند (keepalive)
  const sched=()=>{ if(!ready)return; clearTimeout(t); t=setTimeout(push,700); };
  const stamp=k=>{ if(isBF(k)){ ts=loadTS(); ts[k]=Date.now(); saveTS(ts); sched(); } };   // هر بار تازه بخون — دو تبِ باز زمانِ همو خراب نکنن
