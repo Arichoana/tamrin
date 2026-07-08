@@ -108,6 +108,11 @@
   .estcard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:14px; font-size:12.5px; color:#b9c2d0}
   .estcard h4{margin:0 0 6px; font-size:13px; color:var(--txt)} .estcard ul{margin:0; padding-inline-start:18px} .estcard li{margin:3px 0}
   .daynote{font-size:12px; color:var(--mut); margin:0 2px 12px; line-height:1.6}
+  .myplan{background:linear-gradient(135deg,#1a2416,#151d12); border:1px solid #2e4a23; border-radius:14px; padding:11px 13px; margin-bottom:14px}
+  .mp-top{display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:13.5px; font-weight:800; flex-wrap:wrap}
+  .mp-top button{background:#34c759; color:#04210d; border:none; font-family:inherit; font-weight:800; font-size:12px; padding:8px 12px; border-radius:10px; cursor:pointer; white-space:nowrap}
+  .mp-top .mprev{background:transparent; border:1px solid var(--line); color:var(--mut)}
+  .mp-stat{font-size:11.5px; color:#a7c99b; margin-top:6px; line-height:1.85}
   details.night{background:linear-gradient(135deg,#151b2b,#12151d); border:1px solid #2a3350; border-radius:14px; margin-bottom:14px}
   details.night summary{padding:12px 14px; font-weight:800; font-size:14px; cursor:pointer; list-style:none; color:#a9c1ff}
   details.night summary::-webkit-details-marker{display:none}
@@ -775,6 +780,9 @@ function glossify(t){
       {n:'کته + خورشتِ کم‌روغن + ماست',kcal:480,pro:28}
     ]}
   ];
+  let MYP=null; try{ MYP=JSON.parse(localStorage.getItem('bf_myplan')||'null'); }catch(e){}   // 🧠 پلنِ شخصی از غذاهای خودش (اگه ساخته)
+  if(MYP && Array.isArray(MYP.meals)) MEALS.forEach((m,i)=>{ const pm=MYP.meals[i];
+    if(pm && Array.isArray(pm.opts)){ const po=pm.opts.map(o=>({n:''+(o.n||''),kcal:+o.kcal||0,pro:+(o.pro!=null?o.pro:o.protein)||0})).filter(o=>o.n); if(po.length) m.opts=po; } });
   const idx=MEALS.map((m,i)=>((dayNum+i)%m.opts.length));
   const host=document.getElementById('diet');
   const mc=(m,i)=>{const o=m.opts[idx[i]]; return `<div class="meal" data-meal="${i}">
@@ -787,6 +795,8 @@ function glossify(t){
     <div class="totnow">جمع گزینه‌های الان: <b id="totkcal">—</b> کالری · <b id="totpro">—</b>گ پروتئین</div>
     <div class="totbar"><div id="totfill"></div></div>
     <div class="totnow" style="margin-top:5px; font-size:11px">پروتئین زیر ۱۶۰ موند؟ یه Magerquark یا شیر پروتئین اضافه کن.</div></div>`;
+  html+=`<div class="myplan"><div class="mp-top"><span>🧠 رژیم از غذاهای خودت</span><span>${MYP?'<button id="mprev" type="button" class="mprev">↩️ پیش‌فرض</button> ':''}<button id="mpgen" type="button">${MYP?'🔄 دوباره بچین':'✨ بچین از غذاهای من'}</button></span></div>
+    <div class="mp-stat" id="mpstat">${MYP?('🧠 وعده‌ها از غذاهای پرتکرارِ خودت چیده شده ('+faNum(MYP.t||'')+')'+(MYP.note?' — '+MYP.note:'')):'اپ از چیزایی که با «🤖 ثبت با AI» می‌زنی یاد می‌گیره چی دمِ دستته — این دکمه رو بزنی، وعده‌های پایین رو از همونا می‌چینه که تهیه‌ش راحت باشه.'}</div></div>`;
   html+=`<div class="estcard"><h4>📈 پیش‌بینی واقع‌بینانه (اگه پایبند بمونی)</h4><ul>
     <li><b>این هفته:</b> ~۰.۵ تا ۱ کیلو وزن ↓ (اولش بیشترش آبه — طبیعیه)</li>
     <li><b>این ماه:</b> ~۲ تا ۴ کیلو ↓</li>
@@ -810,6 +820,26 @@ function glossify(t){
     <div class="nno">😄 کاهو (شاش)، بروکلی و لوبیا (نفخ) و هویج (دل‌زدن) عمداً تو لیست نیستن.</div>
   </div></details>`;
   host.insertAdjacentHTML('beforeend',html);
+  function myHist(){ let c={}; try{ c=JSON.parse(localStorage.getItem('bf_cal')||'{}'); }catch(e){}   // غذاهای پرتکرار از ثبت‌های AI
+    const freq={};
+    Object.keys(c).forEach(d=>{ ((c[d]&&c[d].items)||[]).forEach(it=>{ const t=(typeof it==='string'?it:(it&&it.txt||'')).trim(); if(t) freq[t.slice(0,90)]=(freq[t.slice(0,90)]||0)+1; }); });
+    return Object.keys(freq).sort((a,b)=>freq[b]-freq[a]).slice(0,60).map(t=>({t:t,n:freq[t]}));
+  }
+  async function makePlan(){
+    const st=document.getElementById('mpstat'), h=myHist();
+    if(h.length<5){ st.textContent='🕐 هنوز کمه — چند روز غذاهاتو با «🤖 ثبت با AI» بزن (حداقل ~۵ غذای مختلف)، بعد این دکمه رو بزن.'; return; }
+    st.textContent='⏳ دارم از رویِ '+faNum(h.length)+' غذای ثبت‌شده‌ت می‌چینم… (چند ثانیه)';
+    try{
+      const r=await fetch(API+'/plan',{method:'POST',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({history:h})});
+      const d=await r.json();
+      if(d && Array.isArray(d.meals) && d.meals.length>=4){
+        localStorage.setItem('bf_myplan',JSON.stringify({t:today(),meals:d.meals,staples:d.staples||[],note:''+(d.note||'')}));
+        st.textContent='✅ چیده شد! دارم صفحه رو تازه می‌کنم…'; setTimeout(()=>location.reload(),800);
+      } else st.textContent='😕 جوابِ درستی نیومد — یه بارِ دیگه بزن.';
+    }catch(e){ st.textContent='❌ نت وصل نشد — دوباره بزن.'; }
+  }
+  const mpg=document.getElementById('mpgen'); if(mpg) mpg.addEventListener('click',makePlan);
+  const mpr=document.getElementById('mprev'); if(mpr) mpr.addEventListener('click',()=>{ localStorage.removeItem('bf_myplan'); location.reload(); });
   const renderMeal=i=>{const o=MEALS[i].opts[idx[i]], el=host.querySelector('.meal[data-meal="'+i+'"]');
     el.querySelector('.mopt').innerHTML=glossify(o.n);
     el.querySelector('.mcal').innerHTML='<b>'+faNum(o.kcal)+'</b> کالری · <b>'+faNum(o.pro)+'</b>گ پروتئین';};
