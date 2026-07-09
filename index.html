@@ -107,6 +107,7 @@
   .totbar{height:8px; background:#0e1117; border-radius:6px; margin-top:8px; overflow:hidden}
   .totbar>div{height:100%; width:0; background:linear-gradient(90deg,#22c55e,#a3e635); transition:width .3s}
   .totbar>div.over{background:linear-gradient(90deg,#f59e0b,#ef4444)}
+  .plansum{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 11px; margin:0 0 10px; font-size:12.5px; color:var(--mut)} .plansum b{color:var(--txt)}
   .estcard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:14px; font-size:12.5px; color:#b9c2d0}
   .estcard h4{margin:0 0 6px; font-size:13px; color:var(--txt)} .estcard ul{margin:0; padding-inline-start:18px} .estcard li{margin:3px 0}
   .daynote{font-size:12px; color:var(--mut); margin:0 2px 12px; line-height:1.6}
@@ -841,9 +842,9 @@ function glossify(t){
     <button class="swap" data-meal="${i}">🔄 یه گزینه‌ی دیگه</button></div>`;};
   let html='';
   html+=`<div class="foodlog"><div class="fl-top"><span>🤖 امروز چی خوردی؟</span><button id="flopen" type="button">+ ثبت با AI</button></div><div class="fl-today" id="fltoday"></div></div><div class="totcard"><div class="t1">🎯 هدف امروز: <b>~۱۹۰۰ کالری</b> · پروتئین <b>۱۶۰–۱۸۰گ</b> · آب ۳ لیتر</div>
-    <div class="totnow">جمع گزینه‌های الان: <b id="totkcal">—</b> کالری · <b id="totpro">—</b>گ پروتئین</div>
-    <div class="totbar"><div id="totfill"></div></div>
-    <div class="totnow" style="margin-top:5px; font-size:11px">پروتئین زیر ۱۶۰ موند؟ یه Magerquark یا شیر پروتئین اضافه کن.</div></div>`;
+    <div class="totnow">🍽️ امروز خوردی: <b id="goalkcal">۰</b> از ~۱۹۰۰ کالری · <b id="goalpro">۰</b>گ پروتئین</div>
+    <div class="totbar"><div id="goalfill"></div></div>
+    <div class="totnow" id="goalrem" style="margin-top:5px; font-size:11px">هرچی با «🤖 ثبت با AI» بزنی، این نوار پُر می‌شه.</div></div>`;
   html+=`<div class="myplan"><div class="mp-top"><span>🧠 رژیم از غذاهای خودت</span><span>${MYP?'<button id="mprev" type="button" class="mprev">↩️ پیش‌فرض</button> ':''}<button id="mpgen" type="button">${MYP?'🔄 دوباره بچین':'✨ بچین از غذاهای من'}</button></span></div>
     <div class="mp-stat" id="mpstat">${MYP?('🧠 وعده‌ها از غذاهای پرتکرارِ خودت چیده شده ('+faNum(MYP.t||'')+')'+(MYP.note?' — '+MYP.note:'')):'اپ از چیزایی که با «🤖 ثبت با AI» می‌زنی یاد می‌گیره چی دمِ دستته — این دکمه رو بزنی، وعده‌های پایین رو از همونا می‌چینه که تهیه‌ش راحت باشه.'}</div></div>`;
   html+=`<div class="estcard"><h4>📈 پیش‌بینی واقع‌بینانه (اگه پایبند بمونی)</h4><ul>
@@ -852,6 +853,7 @@ function glossify(t){
     <li><b>۶ ماه:</b> ~۱۵ تا ۲۰ کیلو ↓ + فرم ورزشکاری</li></ul>
     <div style="margin-top:6px">چون اضافه‌وزن + تازه‌کاری، همزمان چربی می‌سوزونی و عضله می‌سازی (recomp) — این فرصت طلاییته. 💪</div></div>`;
   html+=`<div class="daynote">📅 برنامه‌ی امروز (${WD[new Date().getDay()]}) — گزینه‌ها هر روز خودکار عوض می‌شن. هر وعده سخت بود یا حسش نبود، «🔄 یه گزینه‌ی دیگه» رو بزن.</div>`;
+  html+=`<div class="plansum">📋 <b>پیشنهاد</b> (نه خورده‌ها): اگه گزینه‌های زیر رو بخوری ≈ <b id="totkcal">—</b> کالری · <b id="totpro">—</b>گ پروتئین<div class="totbar" style="margin-top:6px"><div id="totfill"></div></div></div>`;
   MEALS.forEach((m,i)=>{html+=mc(m,i);});
   html+=`<div class="meal cheat"><div class="meal-h"><span class="mt">🍫 وعده‌ی چیت</span><span class="mcal">هفته‌ای ۱ بار · ~<b>۸۰۰–۱۲۰۰</b> کالری</span></div>
     <div class="mopt">بعد از سنگین‌ترین تمرین (روز پا) یه وعده‌ی آزاد بخور — پیتزا، برگر، هرچی دلت خواست. <b>یه وعده، نه یه روز کامل.</b></div>
@@ -898,6 +900,7 @@ function glossify(t){
     const f=document.getElementById('totfill'); f.style.width=Math.min(k/TARGET,1)*100+'%'; f.className=(k>1950?'over':'');};
   host.addEventListener('click',ev=>{const b=ev.target.closest('.swap'); if(!b)return; const i=+b.dataset.meal; idx[i]=(idx[i]+1)%MEALS[i].opts.length; renderMeal(i); total();});
   total();
+  if(window.__refreshFood) window.__refreshFood();   // عددِ کارتِ هدف رو از خورده‌های واقعی پُر کن
 })();
 
 /* ---------- 🆘 پنل نجات و جبران ---------- */
@@ -1015,6 +1018,13 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
      its.forEach((it,i)=>{ const obj=typeof it!=='string'; s+='<div class="fl-item"><span class="fl-itxt">🍽️ '+esc(itxt(it))+(obj?' <em>(~'+faNum(+it.kcal||0)+'kcal · '+faNum(+it.protein||0)+'g)</em>':'')+'</span><span class="fl-ibtns"><button type="button" class="fl-edit" data-i="'+i+'" title="اصلاح">✏️</button><button type="button" class="fl-del" data-i="'+i+'" title="حذف">✕</button></span></div>'; });
      s+='</div>'; }
    el.innerHTML=s;
+   const gk=document.getElementById('goalkcal');                     // 🎯 کارتِ هدف = خورده‌های واقعی (نه نقشه)
+   if(gk){ gk.textContent=faNum(tk); const gp=document.getElementById('goalpro'); if(gp) gp.textContent=faNum(tp);
+     const gf=document.getElementById('goalfill'); if(gf){ gf.style.width=Math.min(tk/1900,1)*100+'%'; gf.className=(tk>1950?'over':''); }
+     const gr=document.getElementById('goalrem'); if(gr){ const rem=1900-tk;
+       let msg=tk<=0?'هرچی با «🤖 ثبت با AI» بزنی، این نوار پُر می‌شه.':(rem>0?('مونده تا ~۱۹۰۰: ~'+faNum(rem)+' کالری'):('~'+faNum(-rem)+' کالری از هدف رد شدی — فردا جبران'));
+       if(tk>0 && tp<160) msg+=' · پروتئین زیرِ ۱۶۰ موند؟ یه Magerquark بزن';
+       gr.textContent=msg; } }
  }
  let pendingEdit=null;   // ویرایش: آیتم سرِجاش می‌مونه تا نسخه‌ی جدید تأیید شه (آفلاین/بستنِ مودال چیزی رو نمی‌پرونه)
  document.addEventListener('click',ev=>{
@@ -1065,6 +1075,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
      };
    }catch(e){ res.innerHTML='❌ اتصال برقرار نشد — اینترنت رو چک کن.'; }
  });
+ window.__refreshFood=refreshToday;
  refreshToday();
 })();
 
