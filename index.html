@@ -137,6 +137,10 @@
   .fmbtn{margin-top:10px; width:100%; background:#c084fc; color:#1a1020; border:none; font-family:inherit; font-weight:800; font-size:14px; padding:11px; border-radius:11px; cursor:pointer}
   .fmbtn.add{background:var(--legs); color:#04210d}
   .fmresult{margin-top:10px; font-size:13px}
+  .fmphoto{display:flex; align-items:center; gap:8px; margin-top:8px}
+  .fmpick{background:#2a2f3a; color:#cfe0ff; border:1px solid #3a4759; border-radius:9px; padding:8px 11px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer}
+  #fmthumb{height:44px; width:44px; object-fit:cover; border-radius:8px; border:1px solid var(--line); display:none}
+  #fmclearph{background:#3a2020; color:#ff9a9a; border:1px solid #5a3030; border-radius:8px; padding:6px 9px; font:inherit; font-size:12px; cursor:pointer; display:none}
   .fmest{background:#0e1117; border:1px solid var(--line); border-radius:10px; padding:11px; line-height:1.95} .fmest b{color:#ffd27a} .fmest span{color:var(--mut); font-size:12px}
   .fmbr{margin:7px 0 4px; border-top:1px dashed var(--line); padding-top:7px; font-size:12px; line-height:2; color:#b9c2d0} .fmbr b{color:#eef1f6}
   .fl-items{margin-top:10px; display:flex; flex-direction:column; gap:6px}
@@ -990,7 +994,8 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
 (function(){
  const m=document.createElement('div'); m.id='foodmodal';
  m.innerHTML='<div class="fmcard"><div class="fmhead"><span>🤖 ثبتِ غذای امروز</span><button class="fmclose" type="button">✕</button></div>'+
-   '<textarea id="fminput" placeholder="امروز چی خوردی؟ بنویس... (ورزشتو هم بگی، کم می‌کنه)&#10;مثلاً: ناهار پیتزا، ولی ۴۰ دقیقه کراس‌ترینر زدم"></textarea>'+
+   '<textarea id="fminput" placeholder="امروز چی خوردی؟ بنویس... (ورزشتو هم بگی، کم می‌کنه)&#10;مثلاً: ناهار پیتزا، ولی ۴۰ دقیقه کراس‌ترینر زدم&#10;📷 عکسم می‌تونی بدی — متن+عکس با هم دقیق‌تره"></textarea>'+
+   '<div class="fmphoto"><button id="fmpick" type="button" class="fmpick">📷 عکسِ غذا</button><img id="fmthumb" alt=""><button id="fmclearph" type="button">✕ حذف عکس</button><input type="file" id="fmfile" accept="image/*" style="display:none"></div>'+
    '<button id="fmcalc" type="button" class="fmbtn">🧮 حساب کن با AI</button>'+
    '<div id="fmresult" class="fmresult"></div></div>';
  document.body.appendChild(m);
@@ -1054,10 +1059,29 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
        gr.textContent=msg; }
      const gs=document.getElementById('goalsug'); if(gs){ const h=suggestNext(tk,tp); gs.innerHTML=h; gs.style.display=h?'block':'none'; } }
  }
+ let photoB64=null;                                                              // 📷 عکسِ ضمیمه (base64 بدونِ پیشوند) — فقط برای تخمین؛ ذخیره/سینک نمی‌شه که حجم نره بالا
+ function clearPhoto(){ photoB64=null; const th=document.getElementById('fmthumb'), cl=document.getElementById('fmclearph'), f=document.getElementById('fmfile');
+   if(th){th.style.display='none'; th.src='';} if(cl)cl.style.display='none'; if(f)f.value=''; }
+ function pickPhoto(file){ if(!file) return;
+   const rd=new FileReader();
+   rd.onload=()=>{ const im=new Image();
+     im.onload=()=>{ const mx=1024, sc=Math.min(1,mx/Math.max(im.width,im.height));   // کوچیک+فشرده → آپلودِ سریع رو نتِ گوشی
+       const cv=document.createElement('canvas'); cv.width=Math.round(im.width*sc); cv.height=Math.round(im.height*sc);
+       cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+       const du=cv.toDataURL('image/jpeg',0.8); photoB64=du.split(',')[1];
+       const th=document.getElementById('fmthumb'), cl=document.getElementById('fmclearph');
+       if(th){th.src=du; th.style.display='block';} if(cl)cl.style.display='block'; };
+     im.src=rd.result; };
+   rd.readAsDataURL(file); }
+ document.addEventListener('click',ev=>{
+   if(ev.target.closest('#fmpick')){ const f=document.getElementById('fmfile'); if(f) f.click(); return; }
+   if(ev.target.closest('#fmclearph')){ clearPhoto(); return; }
+ });
+ document.addEventListener('change',ev=>{ if(ev.target&&ev.target.id==='fmfile'&&ev.target.files&&ev.target.files[0]) pickPhoto(ev.target.files[0]); });
  let pendingEdit=null;   // ویرایش: آیتم سرِجاش می‌مونه تا نسخه‌ی جدید تأیید شه (آفلاین/بستنِ مودال چیزی رو نمی‌پرونه)
  document.addEventListener('click',ev=>{
-   if(ev.target.closest('#flopen')){ pendingEdit=null; document.getElementById('fmresult').innerHTML=''; m.classList.add('show'); return; }
-   if(ev.target.closest('.fmclose')||ev.target===m){ pendingEdit=null; m.classList.remove('show'); return; }
+   if(ev.target.closest('#flopen')){ pendingEdit=null; clearPhoto(); document.getElementById('fmresult').innerHTML=''; m.classList.add('show'); return; }
+   if(ev.target.closest('.fmclose')||ev.target===m){ pendingEdit=null; clearPhoto(); m.classList.remove('show'); return; }
    const del=ev.target.closest('.fl-del'), edit=ev.target.closest('.fl-edit');
    if(del||edit){ const i=+(del||edit).dataset.i, c=getCal(), t=today(), day=c[t];
      if(day&&day.items&&day.items[i]!=null){ const it=day.items[i];
@@ -1081,10 +1105,10 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    }catch(e){ return ''; }
  }
  document.getElementById('fmcalc').addEventListener('click',async()=>{
-   const txt=(document.getElementById('fminput').value||'').trim(); if(!txt) return;
-   const res=document.getElementById('fmresult'); res.innerHTML='⏳ دارم حساب می‌کنم...';
+   const txt=(document.getElementById('fminput').value||'').trim(); if(!txt&&!photoB64) return;
+   const res=document.getElementById('fmresult'); res.innerHTML=photoB64?'⏳ دارم عکسو نگاه می‌کنم و حساب می‌کنم...':'⏳ دارم حساب می‌کنم...';
    try{
-     const r=await fetch(API+'/food',{method:'POST',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({text:txt,ctx:workoutCtx()})});
+     const r=await fetch(API+'/food',{method:'POST',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({text:txt,ctx:workoutCtx(),img:photoB64||undefined})});
      const d=await r.json();
      if(d==null||d.kcal==null){ res.innerHTML='❌ نشد حساب کنم، یه‌بار دیگه امتحان کن.'; return; }
      let br=''; if(Array.isArray(d.items)&&d.items.length>1){ br='<div class="fmbr">'+d.items.map(it=>'<div>'+((+it.kcal||0)<0?'🔥':'🍽️')+' '+esc(it.n||'')+' — <b>'+faNum(+it.kcal||0)+'</b>'+((+it.protein||0)?' · '+faNum(+it.protein||0)+'گ':'')+'</div>').join('')+'</div>'; }   // تفکیکِ آیتم‌به‌آیتم
@@ -1092,13 +1116,13 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
        '<button id="fmadd" type="button" class="fmbtn add">➕ اضافه به امروز</button>';
      document.getElementById('fmadd').onclick=()=>{
        const c=getCal(), t=today(); if(!c[t])c[t]={kcal:0,protein:0,items:[]};
-       const ni={txt:txt,kcal:+d.kcal||0,protein:+d.protein||0};
+       const ni={txt:(photoB64?'📷 ':'')+(txt||(d.note||'عکسِ غذا')),kcal:+d.kcal||0,protein:+d.protein||0};   // عکس-تنها بود؟ توضیحِ AI به‌جای متن
        if(Array.isArray(d.items)&&d.items.length>1) ni.br=d.items.map(it=>({n:''+(it.n||''),kcal:+it.kcal||0,protein:+it.protein||0}));   // ریزِ آیتم‌ها هم ذخیره شه
        if(pendingEdit && pendingEdit.date===t && c[t].items && c[t].items[pendingEdit.i]!=null){ c[t].items[pendingEdit.i]=ni; }   // ویرایش: جایگزینِ سرِجا
        else{ (c[t].items=c[t].items||[]).push(ni); }
        pendingEdit=null; recalc(c[t]);
        saveCal(c,t);
-       document.getElementById('fminput').value=''; res.innerHTML='✅ به امروز اضافه شد!';
+       document.getElementById('fminput').value=''; clearPhoto(); res.innerHTML='✅ به امروز اضافه شد!';
        refreshToday(); setTimeout(()=>m.classList.remove('show'),1000);
      };
    }catch(e){ res.innerHTML='❌ اتصال برقرار نشد — اینترنت رو چک کن.'; }
