@@ -92,6 +92,8 @@
   .tvhint{position:absolute; top:0; left:0; right:0; z-index:7; text-align:center; color:#fff; font-size:12px; background:rgba(0,0,0,.5); padding:7px; display:none}
   .tvwrap.fs .tvhint.show{display:block}
   .tvwrap:fullscreen{aspect-ratio:auto; border:0; border-radius:0}
+  .tvclose{position:absolute; top:10px; inset-inline-end:10px; z-index:8; display:none; background:rgba(0,0,0,.65); color:#fff; border:1px solid rgba(255,255,255,.4); border-radius:24px; padding:9px 16px; font-family:inherit; font-size:14px; font-weight:800; cursor:pointer}
+  .tvwrap.fs .tvclose{display:block}
   .tvbar{display:flex; gap:8px; margin-bottom:12px; display:none}
   .tvbar.on{display:flex}
   .tvbar button{flex:1; background:var(--card); border:1px solid var(--line); color:var(--txt); font-family:inherit; font-size:12.5px; font-weight:700; padding:9px; border-radius:10px; cursor:pointer}
@@ -1166,13 +1168,14 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
   {n:'پرشیانا پلاس',c:'🎨 فرهنگی و هنری',m:'hls',url:'https://euhls.persiana.live/hls/stream.m3u8',fb:'https://www.persianagroup.tv/live.html?ch=plus'}
  ];
  host.innerHTML='<div class="dayhead">📺 بزن رو کانال ← <b>بزرگ/افقی</b> پخش می‌شه. تو تمام‌صفحه: <b>↔ بکش</b> = کانالِ بعدی/قبلی · <b>تپ</b> = نوارِ دکمه‌ها (⟨ ⟩ و خروج ✕). بیرونِ تمام‌صفحه <b>🔳 شناور</b> هم داری.</div>'+
-   '<div class="tvwrap" id="tvwrap"><video id="tvvideo" playsinline controls></video><iframe id="tvframe" src="about:blank" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin"></iframe><div class="tvhint" id="tvhint">↔ بکش: کانالِ بعدی/قبلی · تپ: دکمه‌ها</div><div class="tvover" id="tvover"></div><div class="tvctrl" id="tvctrl"><button type="button" id="tvprev">⟨</button><span id="tvname"></span><button type="button" id="tvnext">⟩</button><button type="button" id="tvexit">✕</button></div></div>'+
+   '<div class="tvwrap" id="tvwrap"><video id="tvvideo" playsinline controls></video><iframe id="tvframe" src="about:blank" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin"></iframe><div class="tvhint" id="tvhint">↔ بکش: کانالِ بعدی/قبلی · تپ: دکمه‌ها</div><div class="tvover" id="tvover"></div><div class="tvctrl" id="tvctrl"><button type="button" id="tvprev">⟨</button><span id="tvname"></span><button type="button" id="tvnext">⟩</button><button type="button" id="tvexit">✕</button></div><button type="button" class="tvclose" id="tvclose">✕ بستن</button></div>'+
    '<div class="tvbar" id="tvbar"><button type="button" class="tvfull" id="tvfull">⛶ تمام‌صفحه</button><button type="button" id="tvfb" style="display:none;background:#3a2f14;border-color:#7a5a2a;color:#ffcf66">▶ پلیرِ اصلی</button><button type="button" id="tvpip">🔳 شناور</button><button type="button" id="tvstop">✕ قطع پخش</button></div>'+
    '<div class="tvgrid">'+CH.map((ch,i)=>'<button type="button" class="tvch" data-i="'+i+'"><div class="tn">'+ch.n+'</div><div class="tc">'+ch.c+'</div></button>').join('')+'</div>'+
    '<div class="tvnote">🔗 پخش از پلیرِ رسمیِ خودِ کانال‌هاست. 🎬 کافه‌فیلم و انقلابِ ملی استریمِ مستقیمِ رایگانن و گاهی چند دقیقه لوس/قطع می‌شن — اون‌وقت دکمه‌ی <b style="color:#ffcf66">▶ پلیرِ اصلی</b> ظاهر می‌شه که تو تبِ جدا بازش می‌کنه. کانالِ دیگه‌ای خواستی، بگو.</div>';
  const wrap=document.getElementById('tvwrap'), fr=document.getElementById('tvframe'), vid=document.getElementById('tvvideo'), bar=document.getElementById('tvbar'), fbBtn=document.getElementById('tvfb');
  const over=document.getElementById('tvover'), ctrl=document.getElementById('tvctrl'), hint=document.getElementById('tvhint');
  let hls=null, hlsP=null, wd=null, curFb=null, curIdx=-1;
+ let curCh=null, curBtn=null, stallI=null, stallN=0, lastCT=0, healN=0;         // 🩺 خوددرمانیِ پخشِ یخ‌زده
  function ensureHls(){ if(window.Hls) return Promise.resolve(true); if(hlsP) return hlsP;   // hls.js فقط اولین بارِ TV لود می‌شه
    hlsP=new Promise(res=>{ const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js'; s.onload=()=>res(true); s.onerror=()=>res(false); document.head.appendChild(s); }); return hlsP; }
  function showFrame(){ vid.style.display='none'; fr.style.display='block'; }
@@ -1194,24 +1197,37 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
      else await vid.requestPictureInPicture();
    }catch(e){ pipHint('اول بذار پخش شروع شه'); }
  }
- function stop(){ fr.src='about:blank'; killHls(); clearTimeout(wd); fbBtn.style.display='none'; wrap.classList.remove('on'); bar.classList.remove('on'); host.querySelectorAll('.tvch').forEach(b=>b.classList.remove('on')); }
+ function stopStall(){ clearInterval(stallI); stallI=null; stallN=0; lastCT=0; }
+ function startStall(){ stopStall(); stallI=setInterval(()=>{                   // 🩺 هر ۴ ثانیه: پخش یخ زده (صدا/تصویر قطع)؟ ~۸ ثانیه فریز → وصلِ دوباره‌ی خودکار
+   if(vid.style.display==='none'){ stopStall(); return; }
+   if(vid.paused||vid.readyState<2) return;
+   if(Math.abs(vid.currentTime-lastCT)<0.2){ stallN++; if(stallN>=2) selfHeal(); }
+   else stallN=0;
+   lastCT=vid.currentTime; },4000); }
+ function selfHeal(){ stopStall(); if(!curCh||curCh.m!=='hls'||!curBtn) return;
+   if(healN>=4){ const tc=curBtn.querySelector('.tc'); if(tc) tc.textContent='😕 استریم قطع شد'; if(curFb) fbBtn.style.display='inline-block'; return; }
+   healN++; const tc=curBtn.querySelector('.tc'); if(tc) tc.textContent='🔄 وصل‌شدنِ دوباره…';
+   play(curCh,curBtn); }
+ function stop(){ fr.src='about:blank'; killHls(); clearTimeout(wd); stopStall(); curCh=null; curBtn=null; healN=0; fbBtn.style.display='none'; wrap.classList.remove('on'); bar.classList.remove('on'); host.querySelectorAll('.tvch').forEach(b=>b.classList.remove('on')); }
  async function play(ch,b){
    host.querySelectorAll('.tvch').forEach(x=>x.classList.toggle('on',x===b));
    curIdx=CH.indexOf(ch); { const nm=document.getElementById('tvname'); if(nm) nm.textContent=ch.n; }
+   stopStall(); if(ch!==curCh) healN=0; curCh=ch; curBtn=b;                     // کانالِ نو → شمارنده‌ی درمان از نو
    wrap.classList.add('on'); bar.classList.add('on'); wrap.scrollIntoView({behavior:'smooth',block:'nearest'});
    killHls(); clearTimeout(wd); fbBtn.style.display='none'; fr.src='about:blank'; const tc=b.querySelector('.tc');
    if(ch.m==='site'){ showFrame(); fr.src=ch.url; return; }
    if(ch.m==='hls'){ showVid(); tc.textContent='⏳ در حالِ اتصال…'; curFb=ch.fb||null;   // استریمِ مستقیم با hls.js
-     vid.addEventListener('playing',function _ok(){ vid.removeEventListener('playing',_ok); clearTimeout(wd); fbBtn.style.display='none'; tc.textContent=ch.c; },{once:true});
+     vid.addEventListener('playing',function _ok(){ vid.removeEventListener('playing',_ok); clearTimeout(wd); fbBtn.style.display='none'; tc.textContent=ch.c; healN=0; startStall(); },{once:true});   // پخش راه افتاد → پزشکِ داخلی روشن + شمارنده صفر
      clearTimeout(wd); wd=setTimeout(()=>{ if(vid.videoWidth===0 && vid.readyState<3){ tc.textContent='😕 این استریمِ رایگان الان لوسه'; if(curFb) fbBtn.style.display='inline-block'; } },13000);   // واچ‌داگ: پخش نشد → دکمه‌ی پلیرِ رسمی
      await ensureHls();
      if(window.Hls && Hls.isSupported()){
        hls=new Hls({liveSyncDurationCount:1,liveMaxLatencyDurationCount:8,manifestLoadingMaxRetry:3,lowLatencyMode:false}); hls.loadSource(ch.url); hls.attachMedia(vid);
        hls.on(Hls.Events.MANIFEST_PARSED,()=>{ vid.play().catch(()=>{ vid.muted=true; vid.play().catch(()=>{}); }); });
-       let rec=0; hls.on(Hls.Events.ERROR,(e,d)=>{ if(!d||!d.fatal) return;
+       let rec=0; hls.on(Hls.Events.FRAG_LOADED,()=>{ rec=0; });                 // استریم دوباره سالمه → سهمیه‌ی ریکاوری پر شه
+       hls.on(Hls.Events.ERROR,(e,d)=>{ if(!d||!d.fatal) return;
          if(d.type==='networkError'&&rec<5){ rec++; setTimeout(()=>{try{hls.startLoad()}catch(x){}},1000); }
          else if(d.type==='mediaError'&&rec<5){ rec++; try{hls.recoverMediaError()}catch(x){} }
-         else{ clearTimeout(wd); tc.textContent='😕 پخش قطع شد'; if(curFb) fbBtn.style.display='inline-block'; } });
+         else{ clearTimeout(wd); selfHeal(); } });
      } else if(vid.canPlayType('application/vnd.apple.mpegurl')){ vid.src=ch.url; vid.play().catch(()=>{}); }
      else{ clearTimeout(wd); tc.textContent='❌ مرورگرت HLS نداره'; if(curFb) fbBtn.style.display='inline-block'; }
      return; }
@@ -1244,7 +1260,9 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  over.addEventListener('click',()=>{ if(Date.now()-lastTouch<600) return; toggleCtrl(); });   // موس/دسکتاپ (کلیکِ مصنوعیِ بعدِ تپ نادیده)
  document.getElementById('tvprev').addEventListener('click',()=>cycle(-1));
  document.getElementById('tvnext').addEventListener('click',()=>cycle(1));
- document.getElementById('tvexit').addEventListener('click',()=>{ try{ if(document.exitFullscreen) document.exitFullscreen(); }catch(e){} });
+ function exitFs(){ try{ if(document.exitFullscreen) document.exitFullscreen(); else if(document.webkitExitFullscreen) document.webkitExitFullscreen(); }catch(e){} }
+ document.getElementById('tvexit').addEventListener('click',exitFs);
+ document.getElementById('tvclose').addEventListener('click',exitFs);           // ✕ بستنِ همیشه‌پیدا تو تمام‌صفحه
  document.addEventListener('fullscreenchange',()=>{ const fs=(document.fullscreenElement===wrap); wrap.classList.toggle('fs',fs);
    if(fs){ hint.classList.add('show'); setTimeout(()=>hint.classList.remove('show'),3500); flashCtrl(); }
    else{ try{ screen.orientation.unlock(); }catch(e){} ctrl.classList.remove('show'); hint.classList.remove('show'); } });
