@@ -130,14 +130,14 @@
   .fl-top{display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:14px; font-weight:700}
   .fl-top button{background:#c084fc; color:#1a1020; border:none; font-family:inherit; font-weight:800; font-size:12px; padding:8px 12px; border-radius:10px; cursor:pointer; white-space:nowrap}
   .fl-today{font-size:12.5px; color:#cdd5e0; margin-top:8px; line-height:1.95} .fl-today b{color:#d8b4fe}
-  #foodmodal{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:80; padding:20px}
+  #foodmodal{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:80; padding:16px}
   #foodmodal.show{display:flex}
-  .fmcard{background:var(--card); border:1px solid var(--line); border-radius:16px; width:100%; max-width:370px; padding:16px}
+  .fmcard{background:var(--card); border:1px solid var(--line); border-radius:16px; width:100%; max-width:370px; padding:16px; max-height:86vh; max-height:86dvh; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch}
   .fmhead{display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:16px; margin-bottom:10px}
   .fmclose{background:#0e1117; border:1px solid var(--line); color:var(--txt); width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:14px}
   #fminput{width:100%; min-height:92px; background:#0e1117; border:1px solid var(--line); color:var(--txt); border-radius:10px; padding:10px; font-family:inherit; font-size:14px; resize:vertical; line-height:1.9}
   .fmbtn{margin-top:10px; width:100%; background:#c084fc; color:#1a1020; border:none; font-family:inherit; font-weight:800; font-size:14px; padding:11px; border-radius:11px; cursor:pointer}
-  .fmbtn.add{background:var(--legs); color:#04210d}
+  .fmbtn.add{background:var(--legs); color:#04210d; position:sticky; bottom:0; box-shadow:0 -10px 14px -6px rgba(27,30,37,.95)}   /* لیستِ بلند: دکمه‌ی اضافه همیشه پایینِ کارت پیداست */
   .fmresult{margin-top:10px; font-size:13px}
   .fmphoto{display:flex; align-items:center; gap:8px; margin-top:8px}
   .fmpick{background:#2a2f3a; color:#cfe0ff; border:1px solid #3a4759; border-radius:9px; padding:8px 11px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer}
