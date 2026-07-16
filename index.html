@@ -145,6 +145,11 @@
   #fmclearph{background:#3a2020; color:#ff9a9a; border:1px solid #5a3030; border-radius:8px; padding:6px 9px; font:inherit; font-size:12px; cursor:pointer; display:none}
   .fmest{background:#0e1117; border:1px solid var(--line); border-radius:10px; padding:11px; line-height:1.95} .fmest b{color:#ffd27a} .fmest span{color:var(--mut); font-size:12px}
   .fmbr{margin:7px 0 4px; border-top:1px dashed var(--line); padding-top:7px; font-size:12px; line-height:2; color:#b9c2d0} .fmbr b{color:#eef1f6}
+  .fmsum{margin:8px 0 4px; border-top:1px dashed var(--line); padding-top:8px; font-size:12.5px}   /* خورده − سوزونده = نهایی، که عددِ آخر معلوم باشه از کجا اومده */
+  .fmsum>div{display:flex; justify-content:space-between; align-items:center; padding:3px 0; color:#b9c2d0}
+  .fmsum b{color:#eef1f6; font-size:13.5px; direction:ltr; unicode-bidi:isolate}   /* عددِ علامت‌دار تو RTL نپره اون‌ور: «−۲۸۰» بمونه نه «۲۸۰−» */
+  .fmsum b.mn{color:#ff9a9a}
+  .fmsum .net{border-top:1px solid var(--line); margin-top:4px; padding-top:6px; color:#eef1f6; font-weight:700} .fmsum .net b{color:#7fe39b; font-size:15px}
   .fl-items{margin-top:10px; display:flex; flex-direction:column; gap:6px}
   .fl-item{display:flex; align-items:center; justify-content:space-between; gap:8px; background:#0e1117; border:1px solid var(--line); border-radius:9px; padding:7px 10px; font-size:12px}
   .fl-itxt{color:#cdd5e0; line-height:1.6; word-break:break-word} .fl-itxt em{color:var(--mut); font-style:normal; font-size:11px}
@@ -1114,7 +1119,13 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
      const d=await r.json();
      if(d==null||d.kcal==null){ res.innerHTML='❌ نشد حساب کنم، یه‌بار دیگه امتحان کن.'; return; }
      let br=''; if(Array.isArray(d.items)&&d.items.length>1){ br='<div class="fmbr">'+d.items.map(it=>'<div>'+((+it.kcal||0)<0?'🔥':'🍽️')+' '+esc(it.n||'')+' — <b>'+faNum(+it.kcal||0)+'</b>'+((+it.protein||0)?' · '+faNum(+it.protein||0)+'گ':'')+'</div>').join('')+'</div>'; }   // تفکیکِ آیتم‌به‌آیتم
-     res.innerHTML='<div class="fmest">≈ <b>'+faNum(+d.kcal||0)+'</b> کالری · <b>'+faNum(+d.protein||0)+'</b>گ پروتئین'+br+'<span>'+esc(d.note||'')+'</span></div>'+
+     let sum='';                                                                  // 🧮 خورده − سوزونده = نهایی (فقط وقتی ورزشی تو کار بوده، وگرنه شلوغش نکن)
+     const burn=(d.items||[]).reduce((s,it)=>s+Math.min(0,+it.kcal||0),0);
+     if(burn<0){ const eat=(d.items||[]).reduce((s,it)=>s+Math.max(0,+it.kcal||0),0);
+       sum='<div class="fmsum"><div><span>🍽️ خورده‌ها</span><b>'+faNum(eat)+'</b></div>'+
+           '<div><span>🔥 سوزوندی</span><b class="mn">'+faNum(burn)+'</b></div>'+
+           '<div class="net"><span>✅ نهایی</span><b>'+faNum(+d.kcal||0)+'</b></div></div>'; }
+     res.innerHTML='<div class="fmest">≈ <b>'+faNum(+d.kcal||0)+'</b> کالری · <b>'+faNum(+d.protein||0)+'</b>گ پروتئین'+br+sum+'<span>'+esc(d.note||'')+'</span></div>'+
        '<button id="fmadd" type="button" class="fmbtn add">➕ اضافه به امروز</button>';
      document.getElementById('fmadd').onclick=()=>{
        const c=getCal(), t=today(); if(!c[t])c[t]={kcal:0,protein:0,items:[]};
