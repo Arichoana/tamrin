@@ -308,7 +308,7 @@
   <div class="banner" id="banner">🔑 <b>راز معجزه = Progressive Overload.</b> وزنه/تکرارِ واقعی رو ثبت کن؛ پایین هر حرکت <b>«هدف بعدی»</b> رو نشونت می‌ده. 🎬 دکمه‌ی <b>«▶ ویدیوی فرم»</b> گوشه‌ی هر گیف، ویدیو رو همونجا پلی می‌کنه.<button class="bannerx" id="bannerx" type="button" title="دیگه نشونش نده">✕</button></div>
 
   <div class="block">
-    <div class="block-top"><span>📅 دوره‌ی تمرین — هفته‌ی <b id="wkNow">۱</b> از ۶</span>
+    <div class="block-top"><span>📅 دوره‌ی تمرین — هفته‌ی <b id="wkNow">۱</b> از ۴</span>
       <button class="block-btn" id="newBlock">🔄 بلوک جدید</button></div>
     <div class="bar"><div id="wkBar"></div></div>
     <div class="block-note" id="wkNote"></div>
@@ -361,8 +361,8 @@
       <li><b style="color:var(--pyr)">پلکانی ↗</b> (سنگینِ چندمفصلی): هر ست وزنه بالاتر، تکرار کمتر؛ ست آخر <b>یک تکرار مونده به ناتوانی</b>.</li>
       <li><b style="color:var(--fail)">تا ناتوانی 🔥</b> (ایزوله): وزنه ثابت، ست آخر تا جایی که <b>دیگه نتونی</b> با فرم درست.</li>
     </ul>
-    <h3>📅 چرخه‌ی ۶ هفته‌ای و سری‌ها</h3>
-    <ul><li>حرکت‌ها ۶ هفته ثابت، فقط وزنه/تکرار بالا (قانونِ پیشرفت: سقفِ تکرار تو همه‌ی ست‌ها = وزنه یه پله بالا).</li><li>هفته ۶ = Deload (سبک). بعدش دکمه‌ی <b>«🤖 سریِ بعد با AI»</b> رو بزن — از رو رکوردهای خودت سریِ تازه می‌چینه.</li><li>سری‌های قبلی همیشه از <b>«📚 سری‌های قبلی»</b> قابل دیدنن (فقط‌خواندنی — هیچ دیتایی گم نمی‌شه).</li></ul>
+    <h3>📅 چرخه‌ی ۴ هفته‌ای و سری‌ها</h3>
+    <ul><li>هر سری <b>۴ هفته</b> — حرکت‌ها ثابت، فقط وزنه/تکرار بالا (قانونِ پیشرفت: سقفِ تکرار تو همه‌ی ست‌ها = وزنه یه پله بالا).</li><li>آخرِ هفته‌ی ۴ دکمه‌ی <b>«🤖 سریِ بعد با AI»</b> رو بزن — از رو رکوردهای خودت سریِ تازه می‌چینه. دیلودِ جدا نمی‌خواد؛ هفته‌ی اولِ هر سریِ جدید خودش سبکه.</li><li>سری‌های قبلی همیشه از <b>«📚 سری‌های قبلی»</b> قابل دیدنن (فقط‌خواندنی — هیچ دیتایی گم نمی‌شه).</li></ul>
     <button class="reset" onclick="if(confirm('همه‌ی رکوردها، جلسات و دوره پاک بشن؟')){Object.keys(localStorage).filter(k=>k.indexOf('bf_')===0&&k!=='bf_ts').forEach(k=>localStorage.removeItem(k));setTimeout(()=>location.reload(),1100)}">🗑️ پاک کردن داده‌های من</button>
     <p style="margin-top:14px; font-size:11px; color:#5a6373">ساخته‌شده برای آرمان · دستگاه‌های واقعی کلوب Frohnhauser Str. 71 · گیف: fitnessprogramer.com · ویدیو: YouTube</p>
   </footer>
@@ -430,6 +430,7 @@ let AISERS=[]; try{ AISERS=JSON.parse(localStorage.getItem('bf_aisers')||'[]')||
 AISERS.forEach(g=>{ if(g&&g.serial>2&&g.days) SERIES[g.serial]={name:g.name||('سری '+g.serial),data:aiToData(g)}; });
 const ACTIVE=(function(){ const c=+(localStorage.getItem('bf_serial')||2); return SERIES[c]?c:2; })();
 const DATA=SERIES[ACTIVE].data;
+if(localStorage.getItem('bf_serblock')!==''+ACTIVE){ localStorage.setItem('bf_serblock',''+ACTIVE); localStorage.setItem('bf_blockstart',today()); }   // سری عوض شد → شمارشِ هفته از نو
 
 // 🎬 جایگزین‌های کلیکی: اسم‌های شناخته‌شده تو «شلوغ بود؟» → پاپ‌آپِ گیف (فقط نمایشی، به دیتا دست نمی‌زنه)
 const ALTG=[
@@ -723,12 +724,12 @@ function refreshBlock(){
   const bs=localStorage.getItem(BK)||today();
   const days=Math.floor((new Date(today())-new Date(bs))/86400000);
   const wk=Math.max(1,Math.floor(days/7)+1);
-  document.getElementById('wkNow').textContent=faNum(wk>6?'+۶':wk);
-  document.getElementById('wkBar').style.width=(Math.min(wk,6)/6*100)+'%';
+  document.getElementById('wkNow').textContent=wk>4?('+'+faNum(4)):faNum(wk);
+  document.getElementById('wkBar').style.width=(Math.min(wk,4)/4*100)+'%';
   const note=document.getElementById('wkNote');
-  if(wk<6){note.textContent='حرکت‌ها ثابت بمونن — فقط وزنه/تکرار رو یه پله ببر بالا.'; note.className='block-note';}
-  else if(wk===6){note.textContent='🟡 هفته‌ی Deload: وزنه‌ها رو ~۴۰٪ کم کن، تکرارها همون. بذار بدنت ریکاوری کنه. (اگه این ۵ هفته کمتر از ~۱۰ جلسه رفتی، Deload لازم نیست — عادی ادامه بده و بلوک جدید بزن.)'; note.className='block-note warn';}
-  else{note.textContent='✅ بلوک ۶ هفته‌ایت تموم شد! یه هفته سبک بزن، برای عوض‌کردن ۲–۳ حرکت بهم بگو، بعد «بلوک جدید» رو بزن.'; note.className='block-note warn';}
+  if(wk<4){note.textContent='حرکت‌ها ثابت بمونن — فقط وزنه/تکرار رو یه پله ببر بالا.'; note.className='block-note';}
+  else if(wk===4){note.textContent='🏁 هفته‌ی آخرِ این سریه — تمومش کن و بعدش «🤖 سریِ بعد با AI» رو بزن. دیلودِ جدا لازم نیست: هفته‌ی اولِ سریِ جدید خودش سبکه (حرکاتِ نو = وزنِ محافظه‌کارانه).'; note.className='block-note warn';}
+  else{note.textContent='✅ ۴ هفته تموم شد! وقتِ تازگیه — «🤖 سریِ بعد با AI» رو بزن تا از رو رکوردهات سریِ جدید چیده شه.'; note.className='block-note warn';}
 }
 document.getElementById('newBlock').addEventListener('click',()=>{
   if(confirm('بلوک جدید شروع بشه؟ شمارش هفته از ۱ شروع می‌شه.')){localStorage.setItem(BK,today()); refreshBlock();}
