@@ -418,12 +418,14 @@ const S2={push:[
 // 🗂️ رجیستریِ سری‌ها: سری‌های قدیمی همیشه از «📚 سری‌های قبلی» قابل دیدنن (فقط‌خواندنی)؛ سری‌های AI هم اینجا اضافه می‌شن
 const EXLIB={};
 function regLib(e,base){ if(!e||!e.en)return; const k=e.en.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-  if(!EXLIB[k]) EXLIB[k]={n:e.n,en:e.en,de:e.de||(base&&base.de)||'',mus:e.mus||(base&&base.mus)||'',zone:e.zone||(base&&base.zone)||'Strength',ph:e.ph||(base&&base.ph)||'🏋️',gif:e.gif,vid:e.vid,still:e.still||''}; }
+  if(!EXLIB[k]) EXLIB[k]={n:e.n,en:e.en,de:e.de||(base&&base.de)||'',mus:e.mus||(base&&base.mus)||'',zone:e.zone||(base&&base.zone)||'Strength',ph:e.ph||(base&&base.ph)||'🏋️',gif:e.gif,vid:e.vid,still:e.still||'',unit:e.unit||'',wlabel:e.wlabel||''}; }
 [S1,S2].forEach(S=>['push','pull','legs'].forEach(d=>S[d].forEach(e=>{ regLib(e); if(e.swap) regLib(e.swap,e); })));
 function aiToData(g){ const D={push:[],pull:[],legs:[]};
  ['push','pull','legs'].forEach(day=>((g.days&&g.days[day])||[]).forEach(x=>{ const L=EXLIB[x.key]; if(!L)return;
    D[day].push({id:'s'+g.serial+'_'+(''+x.key).replace(/[^a-z0-9]/g,''),n:L.n,en:L.en,de:L.de,mus:L.mus,zone:L.zone,ph:L.ph,gif:L.gif,vid:L.vid,still:L.still,
-     mode:x.mode==='pyr'?'pyr':'fail',scheme:''+(x.scheme||'۳×۱۲–۱۵'),rest:''+(x.rest||'۹۰ ثانیه'),why:''+(x.tip||''),tip:''+(x.tip||''),adv:''+(x.adv||''),w:+x.w||10,step:+x.step||2.5,alt:''});
+     unit:L.unit||undefined,wlabel:L.wlabel||undefined,
+     mode:x.mode==='pyr'?'pyr':'fail',scheme:''+(x.scheme||'۳×۱۲–۱۵'),rest:''+(x.rest||'۹۰ ثانیه'),why:''+(x.tip||''),tip:''+(x.tip||''),adv:''+(x.adv||''),
+     w:(L.unit==='s'&&!(+x.w>0))?30:(+x.w||10),step:L.unit==='s'?5:(+x.step||2.5),alt:''});
  })); return D; }
 const SERIES={1:{name:'سری ۱ — پایه',data:S1},2:{name:'سری ۲ — بالاتنه‌محور',data:S2}};
 let AISERS=[]; try{ AISERS=JSON.parse(localStorage.getItem('bf_aisers')||'[]')||[]; }catch(e){ AISERS=[]; }
