@@ -269,6 +269,22 @@
   .bigjump button{background:#ffb02e; color:#241a00; border:none; font-family:inherit; font-weight:800; font-size:11.5px; padding:5px 10px; border-radius:8px; cursor:pointer; margin-inline-start:6px}
   .targets{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; font-size:12px}
   .targets .last{color:var(--mut)} .targets .next{color:#ffd27a; font-weight:700}
+  .serrow{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:10px; padding-top:9px; border-top:1px dashed var(--line); font-size:12px; color:var(--mut); flex-wrap:wrap}
+  .serrow b{color:#c4b5fd} .serbtns{display:flex; gap:6px}
+  .serbtn{background:#0e1117; border:1px solid var(--line); color:#cdd5e0; font-family:inherit; font-size:11.5px; font-weight:700; padding:7px 10px; border-radius:9px; cursor:pointer}
+  .serbtn.ai{border-color:#7c3aed; color:#c4b5fd}
+  #archov{position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; z-index:75; align-items:flex-end; justify-content:center}
+  #archov.show{display:flex}
+  .archcard{background:var(--bg); border-top:3px solid #7c3aed; border-radius:18px 18px 0 0; width:100%; max-width:560px; max-height:90vh; overflow:auto}
+  .archhead{position:sticky; top:0; background:var(--bg); display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--line); font-weight:800; font-size:15px; z-index:2}
+  .archbody{padding:10px 16px 26px; font-size:13px; color:#cdd5e0}
+  .archnote{font-size:11.5px; color:var(--mut); background:#0e1117; border:1px solid var(--line); border-radius:9px; padding:8px 10px; margin:8px 0 12px; line-height:1.9}
+  .archser{font-weight:800; color:#c4b5fd; font-size:14px; margin:16px 0 4px}
+  .archday{font-weight:800; color:#ffb27a; margin:12px 0 6px; font-size:13px}
+  .archex{background:var(--card); border:1px solid var(--line); border-radius:11px; padding:9px 11px; margin-bottom:8px}
+  .archex .an{font-weight:700; font-size:13.5px} .archex .aen{color:var(--mut); font-size:11px; font-weight:400}
+  .archex .ascheme{font-size:11.5px; color:#9aa3b2; margin-top:2px}
+  .archex .arec{font-size:12px; color:#b9c2d0; margin-top:4px} .archex .arec b{color:#ffd27a}
   footer{padding:18px 16px; color:var(--mut); font-size:13px}
   footer h3{color:var(--txt); font-size:15px; margin:14px 0 6px}
   footer ul{margin:0; padding-inline-start:18px}
@@ -296,6 +312,8 @@
       <button class="block-btn" id="newBlock">🔄 بلوک جدید</button></div>
     <div class="bar"><div id="wkBar"></div></div>
     <div class="block-note" id="wkNote"></div>
+    <div class="serrow"><span class="sername">🏷️ <b id="serName">—</b></span>
+      <span class="serbtns"><button class="serbtn" id="serPrev" type="button">📚 سری‌های قبلی</button><button class="serbtn ai" id="serAI" type="button">🤖 سریِ بعد با AI</button></span></div>
   </div>
 
   <div class="goalcard">
@@ -306,7 +324,7 @@
 
   <div class="cardiobar">
     <div class="rhythm" id="rhythm">🔄 ریتمِ امروزت اینجا میاد…</div>
-    <button class="cardio-btn" id="cardioBtn" type="button">🚲 امروز کراس‌ترینر زدم</button>
+    <button class="cardio-btn" id="cardioBtn" type="button">🚲 امروز هوازی زدم (کراس/تردمیل)</button>
     <span class="cardio-cnt" id="cardioCnt"></span>
   </div>
   <div class="tabs">
@@ -316,9 +334,9 @@
     <div class="tab" data-day="diet">🍽️ تغذیه<br>رژیم روزانه</div>
     <div class="tab" data-day="tv">📺 TV<br>زنده</div>
   </div>
-  <div class="panel on" id="push"><div class="dayhead">🔥 گرم‌کردن: ۵ دقیقه کراس‌ترینر سبک. ترتیب: از سنگین به سبک.</div></div>
-  <div class="panel" id="pull"><div class="dayhead">🔥 گرم‌کردن: ۵ دقیقه کراس‌ترینر + ۱ ست سبک زیربغل.</div></div>
-  <div class="panel" id="legs"><div class="dayhead">🔥 گرم‌کردن: ۵ دقیقه کراس‌ترینر + ۱ ست سبک پرس پا. (هیپ‌تراست، ساق و داخل/خارج ران تازه اضافه شدن — اگه وقت کم بود، ساق و داخل/خارج ران رو می‌تونی حذف کنی.)</div></div>
+  <div class="panel on" id="push"><div class="dayhead">🔥 گرم‌کردن: ۵ دقیقه هوازی سبک + ۱ ست سبکِ حرکتِ اول. 📏 قانونِ پیشرفت: سقفِ تکرار رو تو همه‌ی ست‌ها زدی؟ جلسه‌ی بعد وزنه یه پله بالا. حرکاتِ جدید رو هفته‌ی ۱–۲ سبک بزن تا فرم بشینه.</div></div>
+  <div class="panel" id="pull"><div class="dayhead">🔥 گرم‌کردن: ۵ دقیقه هوازی + ۱ ست سبک زیربغل. 📏 همون قانونِ پیشرفت — و فقط ستِ آخرِ هر حرکت تا ناتوانی، ست‌های قبلش ۱–۲ تکرار ذخیره نگه دار.</div></div>
+  <div class="panel" id="legs"><div class="dayhead">🦵 پا = «نگه‌داری» — پاهات از قبل قوی‌ان (پرس پا ۲۶۰!)، اینجا رکوردزنی ممنوعه؛ تا ۲–۳ تکرار مونده وایسا. 🎁 عوضش فلای سینه اومده این روز که سینه هفته‌ای ۲ بار بخوره — انرژیِ اضافه خرجِ بالاتنه.</div></div>
   <div class="panel" id="diet"></div>
   <div class="panel" id="tv"></div>
 
@@ -326,9 +344,10 @@
 
   <details class="zones"><summary>🚲 هوازی (Cardio)</summary>
     <div class="zlist">
-      <div><b>کِی:</b> ۲۰ دقیقه کراس‌ترینر — صبح خونه، یا بعد از وزنه تو باشگاه (نه قبلش که انرژیت رو نخوره).</div>
-      <div><b>چه شدتی (رو ۱ تا ۲۵):</b> سطحِ <b style="color:#ffb27a">~۸ تا ۱۲</b> — ضربانِ متوسط، طوری که بتونی حرف بزنی ولی نفست یه‌کم بند بیاد. اگه راحت حرف می‌زنی یه پله ببر بالا؛ اگه نفس‌نفس می‌زنی بیار پایین.</div>
-      <div><b>تنوع (اختیاری):</b> کراس‌ترینر بهترینه (کم‌فشار رو زانو) و همیشه اوکیه. ولی هفته‌ای یه‌بار عوضش کن — تردمیل با شیبِ ۵–۸٪ و راه‌رفتنِ تند، یا دوچرخه، یا روئینگ. هم حوصله‌ت سر نمی‌ره هم عضله‌های مختلف کار می‌کنن. <a href="https://www.youtube.com/results?search_query=elliptical+cross+trainer+proper+form" target="_blank" rel="noopener" style="color:#3da5ff">▶ ویدیو</a></div>
+      <div><b>کِی:</b> ۲۰–۳۰ دقیقه — صبح خونه، یا بعد از وزنه تو باشگاه (نه قبلش که انرژیت رو نخوره).</div>
+      <div><b>چی:</b> کراس‌ترینر <b>یا</b> تردمیلِ شیب‌دار — <b style="color:#7fd6f0">کاملاً هم‌ارزن</b>، هر کدوم حال داد. تردمیل: شیبِ <b>۱۰–۱۲٪</b>، سرعتِ <b>۵–۵.۵</b>، بدونِ گرفتنِ دسته‌ها (گرفتی = نصفِ کالری پرید). کالریش تقریباً همون کراسه، باسن و ساق هم بیشتر کار می‌کنن.</div>
+      <div><b>چه شدتی:</b> ضربانِ متوسط — بتونی حرف بزنی ولی نفست یه‌کم بند بیاد. رو کراس یعنی سطحِ <b style="color:#ffb27a">~۸ تا ۱۲</b>. راحت حرف می‌زنی؟ یه پله بالا. نفس‌نفس؟ بیار پایین.</div>
+      <div><b>تنوع:</b> بینشون بچرخ که حوصله‌ت سر نره — دوچرخه و روئینگ هم اوکی‌ان. <a href="https://www.youtube.com/results?search_query=incline+treadmill+walking+fat+loss+form" target="_blank" rel="noopener" style="color:#3da5ff">▶ ویدیو</a></div>
       <div>📌 هوازی برای کات لازم نیست ولی کمک می‌کنه — اصلِ چربی‌سوزی رژیمه، هوازی یه بونوسه.</div>
     </div>
   </details>
@@ -342,8 +361,8 @@
       <li><b style="color:var(--pyr)">پلکانی ↗</b> (سنگینِ چندمفصلی): هر ست وزنه بالاتر، تکرار کمتر؛ ست آخر <b>یک تکرار مونده به ناتوانی</b>.</li>
       <li><b style="color:var(--fail)">تا ناتوانی 🔥</b> (ایزوله): وزنه ثابت، ست آخر تا جایی که <b>دیگه نتونی</b> با فرم درست.</li>
     </ul>
-    <h3>📅 چرخه‌ی ۶ هفته‌ای</h3>
-    <ul><li>حرکت‌ها ۶ هفته ثابت، فقط وزنه/تکرار بالا.</li><li>هفته ۶ = Deload (سبک). بعدش «بلوک جدید» بزن و برای عوض‌کردن ۲–۳ حرکت بهم بگو.</li></ul>
+    <h3>📅 چرخه‌ی ۶ هفته‌ای و سری‌ها</h3>
+    <ul><li>حرکت‌ها ۶ هفته ثابت، فقط وزنه/تکرار بالا (قانونِ پیشرفت: سقفِ تکرار تو همه‌ی ست‌ها = وزنه یه پله بالا).</li><li>هفته ۶ = Deload (سبک). بعدش دکمه‌ی <b>«🤖 سریِ بعد با AI»</b> رو بزن — از رو رکوردهای خودت سریِ تازه می‌چینه.</li><li>سری‌های قبلی همیشه از <b>«📚 سری‌های قبلی»</b> قابل دیدنن (فقط‌خواندنی — هیچ دیتایی گم نمی‌شه).</li></ul>
     <button class="reset" onclick="if(confirm('همه‌ی رکوردها، جلسات و دوره پاک بشن؟')){Object.keys(localStorage).filter(k=>k.indexOf('bf_')===0&&k!=='bf_ts').forEach(k=>localStorage.removeItem(k));setTimeout(()=>location.reload(),1100)}">🗑️ پاک کردن داده‌های من</button>
     <p style="margin-top:14px; font-size:11px; color:#5a6373">ساخته‌شده برای آرمان · دستگاه‌های واقعی کلوب Frohnhauser Str. 71 · گیف: fitnessprogramer.com · ویدیو: YouTube</p>
   </footer>
@@ -354,7 +373,7 @@ const today=()=>{const d=new Date(),p=n=>(''+n).padStart(2,'0');return d.getFull
 let uiDay=today();
 const GIF='https://fitnessprogramer.com/wp-content/uploads/';
 const STILL='https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
-const DATA={push:[
+const S1={push:[
  {id:'push1',n:'پرس سینه',en:'Chest Press',zone:'Strength (Matrix)',mus:'سینه',mode:'pyr',scheme:'۴ ست: ۱۲ ← ۱۰ ← ۸ ← ۶ تکرار · هر ست سنگین‌تر',rest:'۱۲۰ ثانیه',why:'گرم کن و تا ست آخرِ سنگین برو (یک تکرار مونده به ناتوانی).',tip:'تکرار آخر سخت باشه، ولی فرم خراب نشه.',w:30,step:2.5,ph:'🏋️',gif:'2021/02/Chest-Press-Machine.gif',still:'Dumbbell_Bench_Press',vid:'rY0B8UFdne0',swap:{n:'پرس سینه دمبل',en:'Dumbbell Bench Press',de:'Kurzhanteln + Flachbank',gif:'2021/02/Dumbbell-Press.gif',vid:'xhEhjF5ozuY',adv:'کفِ دست کمی به‌هم متمایل، پایین تا کنارِ سینه، آرنج ~۴۵ درجه از بدن. دمبل تعادل می‌خواد پس سبک‌تر شروع کن؛ پایین کِشِشِ بیشتری می‌ده.'},de:'Brustpresse',alt:'پرس سینه همگرا (Konvergierende Brustpresse)، پرس دمبل روی نیمکت، یا اسمیت (Smith)',adv:'آرنج‌ها رو ~۴۵ درجه از بدن باز کن (نه ۹۰ درجه) تا فشار از شونه برداشته شه. قفسه‌ی سینه رو جلو بده، کتف‌ها عقب و پایین.'},
  {id:'push2',n:'پرس سرشانه',en:'Shoulder Press',zone:'Strength (Matrix)',mus:'سرشانه',mode:'pyr',scheme:'۳ ست: ۱۲ ← ۱۰ ← ۸ تکرار · هر ست سنگین‌تر',rest:'۱۲۰ ثانیه',why:'گرم کن، ست آخر سنگین و کنترل‌شده.',tip:'کمر چسبیده به پشتی، قوس نده.',w:20,step:2.5,ph:'🛡️',gif:'2021/02/Dumbbell-Shoulder-Press.gif',still:'Arnold_Dumbbell_Press',vid:'3R14MnZbcpw',de:'Schulterpresse',alt:'پرس سرشانه دمبل، یا اسمیت (Smith-Maschine)',adv:'دسته‌ها هم‌سطحِ گوش شروع شن؛ بالا آرنج رو کامل قفل نکن، پایین تا نزدیکِ چونه کافیه — پایین‌تر فقط فشارِ الکی رو مفصلِ شونه‌ست. کمر با قوسِ طبیعی چسبیده به پشتی، پاها محکم رو زمین.'},
  {id:'push3',n:'قفسه سینه (پک‌دک)',en:'Pec Deck Fly',zone:'Strength (Matrix)',mus:'سینه',mode:'fail',scheme:'۳×۱۲–۱۵ · وزنه ثابت · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'ایزوله‌س؛ ست آخر تا جایی که دیگه نتونی.',tip:'آروم، تو فشار سینه رو فشرده کن.',w:25,step:2.5,ph:'🦋',gif:'2021/02/Pec-Deck-Fly.gif',still:'Butterfly',vid:'hZ0CGRaKwbQ',swap:{n:'فلای کابل',en:'Cable Crossover',de:'Kabelzug-Crossover',gif:'2021/02/Cable-Crossover.gif',vid:'D9dh1jKBlXY',adv:'قرقره‌ها هم‌سطحِ سینه، یه قدم جلو وایسا، آرنج کمی خم و ثابت؛ دست‌ها رو جلوی سینه به‌هم برسون و ۱ ثانیه فشار بده. قرقره بالاتر ← سینه‌ی پایین، پایین‌تر ← سینه‌ی بالا.'},de:'Butterfly / Pec Deck',alt:'فلای کابل (Cable Crossover)، یا پروانه دوحالته',adv:'جوابِ سؤالِ معروف: باسن و کمر «عقب» یعنی محکم چسبیده به پشتی، و هم‌زمان قفسه‌ی سینه «جلو» یعنی باز و بالا با کتف‌های عقب‌وپایین (مثل وقتی پُز می‌دی) — از پشتی جدا نمی‌شی، فقط سینه یه قوسِ کوچیک می‌گیره. زاویه‌ها هم قسمتِ سینه رو عوض می‌کنن: صاف‌تر بشین + آرنج پایین‌تر ← سینه‌ی پایین؛ صندلی بالاتر + آرنج بالاتر ← سینه‌ی بالا.'},
@@ -375,6 +394,42 @@ const DATA={push:[
  {id:'legs5',n:'شکم (کرانچ)',en:'Crunch',zone:'Strength / Stretch',mus:'شکم',mode:'fail',scheme:'۳×۱۵–۲۰ · ست آخر تا ناتوانی 🔥',rest:'۴۵ ثانیه',why:'با شکم جمع کن، نه با گردن.',tip:'دستگاه شکم یا روی مت.',w:'',step:0,ph:'🧎',gif:'2015/11/Crunch.gif',still:'Ab_Crunch_Machine',vid:'0OxOI3sAIrM',de:'Bauchmaschine / Crunch',alt:'نیمکت شکم (Bauchbank)، کرانچ کابل، یا چرخش تنه (Rotary Torso) برای پهلو',adv:'کمرِ پایین ثابت بمونه؛ فقط قفسه‌سینه رو به سمتِ لگن جمع کن و بازدم بده. دست پشتِ گردنه فقط برای ساپورته — نکِشش! گردن درد گرفت یعنی داری با گردن می‌زنی نه شکم.'},
  {id:'legs6',n:'پلانک',en:'Plank',zone:'Stretch (مت)',mus:'کُر',mode:'fail',scheme:'۳ ست نگه‌داشتن · ست آخر تا جایی که می‌تونی 🔥',rest:'۴۵ ثانیه',why:'بدن صاف مثل تخته، شکم سفت.',tip:'باسن نه بالا نه پایین.',w:30,step:5,unit:'s',wlabel:'ثانیه',ph:'🧘',gif:'2021/02/plank.gif',still:'Plank',vid:'mwlp75MS6Rg',de:'Matte (Stretch zone)',alt:'TRX، یا نیمکت شکم',adv:'باسن هم‌خطِ شونه و پاشنه — نه قله بسازه نه شکم بیفته. شکم و باسن رو سفت نگه دار و نفس بکش (حبس نکن). لرزیدی ولی خط صاف بود؟ ادامه بده. کمر شکست؟ ست همون‌جا تمومه.'}
 ]};
+
+// 🆕 سری ۲ — بالاتنه‌محور (پا = نگه‌داری). آی‌دی‌های جدید یعنی رکوردهای سری ۱ دست‌نخورده می‌مونن و از آرشیو قابل دیدنن.
+const S2={push:[
+ {id:'s2p1',n:'پرس سینه شیب‌دار دمبل',en:'Incline Dumbbell Press',zone:'Free weight (نیمکت شیب‌دار)',mus:'سینه‌ی بالا',mode:'pyr',scheme:'۴ ست: ۱۲ ← ۱۰ ← ۸ ← ۶ · هفته‌ی ۱–۲ فقط تا ۸',rest:'۱۲۰ ثانیه',why:'سینه‌ی بالا نقطه‌ضعفِ اکثرِ مرداست — این حرکت درستش می‌کنه.',tip:'نیمکت ۳۰–۴۵ درجه. دمبل‌ها رو با ضربِ زانو ببر بالا، نه با کمر.',w:16,step:2,ph:'🏋️',gif:'2021/02/Incline-Dumbbell-Press.gif',vid:'8iPEnn-ltC8',swap:{n:'پرس سینه دستگاه',en:'Chest Press',de:'Brustpresse (Matrix)',gif:'2021/02/Chest-Press-Machine.gif',vid:'rY0B8UFdne0',adv:'همون دستگاهِ آشنای سری ۱ — آرنج ~۴۵ درجه از بدن، کتف‌ها عقب و پایین، رکوردت اونجا ۵۹ بود.'},de:'Kurzhanteln + Schrägbank (30–45°)',alt:'اسمیت (Smith)، یا پرس سینه دستگاه',adv:'شیبِ نیمکت ۳۰–۴۵ درجه — بالاتر بشه سرشانه کار رو می‌دزده. دمبل‌ها رو رو زانو بذار و یکی‌یکی با ضربِ زانو ببرشون بالا (kick-up) — با این وزنِ بدن به کمرت فشار نیار. پایین: آرنج ~۴۵ درجه از بدن، تا کششِ راحتِ سینه؛ بالا: دمبل‌ها نزدیک ولی به‌هم نخورن. منفی رو ۲–۳ ثانیه کنترل کن — رشدِ سینه تو همون برگشته. هفته‌ی ۱–۲ سبک و ۸–۱۲ تکرار تا الگو دستت بیاد؛ از هفته‌ی ۳ هرمِ کامل تا ۶.'},
+ {id:'s2p2',n:'قفسه سینه (پک‌دک)',en:'Pec Deck Fly',zone:'Strength (Matrix)',mus:'سینه',mode:'fail',scheme:'۳×۱۲–۱۵ · وزنه ثابت · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'قوی‌ترین حرکتته (۶۶×۱۲!) — نگهش داشتیم که موتورِ رشدِ سینه‌ت خاموش نشه.',tip:'آروم، تو اوج سینه رو ۱ ثانیه فشرده کن.',w:66,step:2.5,ph:'🦋',gif:'2021/02/Pec-Deck-Fly.gif',still:'Butterfly',vid:'hZ0CGRaKwbQ',swap:{n:'فلای کابل',en:'Cable Crossover',de:'Kabelzug-Crossover',gif:'2021/02/Cable-Crossover.gif',vid:'D9dh1jKBlXY',adv:'قرقره هم‌سطحِ سینه، یه قدم جلو، آرنج کمی خم و ثابت؛ دست‌ها رو جلوی سینه برسون و ۱ ثانیه فشار.'},de:'Butterfly / Pec Deck',alt:'فلای کابل (Cable Crossover)',adv:'باسن و کمر محکم به پشتی، قفسه‌ی سینه باز و بالا (مثل وقتی پُز می‌دی). آرنج‌ها کمی خم و «قفل‌شده تو همون زاویه» — بازوبسته‌شدنِ آرنج یعنی داری پرس می‌زنی نه فلای. تو اوج ۱ ثانیه مکث با فشارِ آگاهانه‌ی سینه؛ برگشت آروم تا کششِ کامل. صندلی بالاتر + آرنج بالاتر ← سینه‌ی بالا.'},
+ {id:'s2p3',n:'نشر جانب دمبل',en:'Dumbbell Lateral Raise',zone:'Free weight',mus:'سرشانه‌ی کناری',mode:'fail',scheme:'۳×۱۲–۱۵ · سبک و تمیز · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'پهنیِ شونه از همینه — شونه‌ی پهن یعنی کمرِ باریک‌تر تو آینه. 🔥',tip:'دمبل سبک؛ مثل ریختنِ آب از پارچ، مچ کمی پایین.',w:8,step:2,ph:'🛡️',gif:'2021/02/Dumbbell-Lateral-Raise.gif',vid:'3VcKaXpzqRo',de:'Kurzhanteln',alt:'نشر جانب کابل',adv:'تنه ثابت (یا کمی خم به جلو)، آرنج کمی خم؛ دمبل رو با «آرنج» ببر بالا نه با دست — تا هم‌سطحِ شونه کافیه، بالاتر ترپز کارو می‌گیره. تو اوج شونه رو بالا ننداز (شراگ نکن). این عضله وزنه‌ی سنگین نمی‌خواد، سوزش می‌خواد — تکرارِ تقلبی با تاب یعنی هیچی. آخرین ست: بعدِ ناتوانی ۳–۴ تا نیمه‌تکرار (فقط تا نصفه) بزن، آتیشش کن.'},
+ {id:'s2p4',n:'پشت‌بازو طنابی',en:'Rope Pushdown',zone:'Functional (کابل)',mus:'پشت‌بازو',mode:'fail',scheme:'۳×۱۲–۱۵ · وزنه ثابت · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'طناب به‌جای میله — سرِ خارجیِ پشت‌بازو رو بهتر می‌گیره، بازو پُرتر دیده می‌شه.',tip:'پایین طناب رو از هم باز کن، انگار داری پرده رو کنار می‌زنی.',w:18,step:2.5,ph:'💪',gif:'2021/06/Rope-Pushdown.gif',vid:'vB5OHsJ3EME',swap:{n:'دیپ پشت‌بازو',en:'Triceps Dips',de:'Dip-Station',gif:'2021/02/Triceps-Dips.gif',vid:'U7HeutDqS_w',adv:'تنه صاف = پشت‌بازو، کمی خم = سینه. پایین تا ~۹۰ درجه کافیه.'},de:'Kabelzug + Seilgriff (طناب)',alt:'دیپ (Dip)',adv:'آرنج‌ها میخ کنارِ بدن، فقط ساعد حرکت کنه؛ پایین دو سرِ طناب رو از هم جدا کن و ۱ ثانیه فشار — همین جداکردنه که با میله نمی‌شه و طناب رو بهتر می‌کنه. برگشت آروم تا ساعد بالای موازی. آرنج جلو-عقب رفت؟ وزنه زیاده و شونه داره کمک می‌کنه — بیار پایین.'}
+],pull:[
+ {id:'s2q1',n:'زیربغل دستگیره‌ی جمع',en:'Close-Grip Lat Pulldown',zone:'Strength (Matrix)',mus:'پشت / لتِ پایینی',mode:'pyr',scheme:'۴ ست: ۱۲ ← ۱۰ ← ۸ ← ۶ تکرار · هر ست سنگین‌تر',rest:'۱۲۰ ثانیه',why:'دستگیره‌ی جمع = دامنه‌ی بلندتر و لتِ ضخیم‌تر — تازه‌ست نسبت به گریپِ بازِ سری ۱.',tip:'با آرنج بکش نه با دست؛ سینه بالا، میله تا بالای سینه.',w:45,step:2.5,ph:'🧗',gif:'2021/06/Close-Grip-Lat-Pulldown.gif',vid:'OTkdHxxAjt8',swap:{n:'بارفیکس کمکی',en:'Assisted Pull-up',de:'Klimmzug-Assistent',gif:'2021/04/Assisted-Pull-up.gif',vid:'fnHeovkmkkk',adv:'اول کتف پایین، بعد آرنج بکش؛ کمترین کمکی که ۸ تکرار تمیز بده.'},de:'Latzugmaschine + V-Griff',alt:'بارفیکس کمکی (Klimmzug-Assistent)',adv:'اول کتف‌ها رو «تو جیبِ عقب» بذار (پایین و عقب)، بعد با آرنج بکش تا دستگیره برسه بالای سینه — تنه فقط ~۱۰ درجه عقب. تو پایین ۱ ثانیه مکث و فشارِ لت؛ برگشت ۲–۳ ثانیه تا کششِ کاملِ بالا — همون کششه که پهنت می‌کنه. تاب‌خوردنِ تنه یعنی وزنه زیاده.'},
+ {id:'s2q2',n:'روئینگ سینه‌خواب (صفحه‌ای)',en:'Chest-Supported Row',zone:'Strength (Plate Loaded)',mus:'پشتِ میانی',mode:'pyr',scheme:'۳ ست: ۱۲ ← ۱۰ ← ۸ تکرار · هر ست سنگین‌تر',rest:'۱۲۰ ثانیه',why:'سینه رو تکیه‌گاه داره → کمرت با ۱۰۳ کیلو وزن کاملاً امنه و فقط پشت کار می‌کنه.',tip:'سینه چسبیده به پد؛ دسته رو به سمتِ شکم بکش.',w:40,step:5,ph:'🚣',gif:'2021/02/Seated-Row-Machine.gif',vid:'sP_4vybjVJs',swap:{n:'تی‌بار رو',en:'T-Bar Row',de:'T-Bar Row',gif:'2021/04/t-bar-rows.gif',vid:'BbBR3v2UShw',adv:'اگه کلوب داره: زانو کمی خم، کمر صاف، دسته به شکم و کتف‌ها جمع.'},de:'Rudermaschine (Plate Loaded / سینه‌خواب)',alt:'تی‌بار رو (T-Bar Row)، یا روئینگ صفحه‌ای (Plate Loaded)',adv:'سینه هیچ‌وقت از پد جدا نشه — جدا شد یعنی داری با کمر تقلب می‌کنی. دسته رو به سمتِ شکم/کمربند بکش نه گردن؛ آخرِ حرکت کتف‌ها رو ۱ ثانیه به‌هم فشار بده و آروم برگرد تا کششِ کاملِ کتف. دستگیره‌ی جمع ← لتِ میانی؛ باز ← پشتِ بالایی و ترپزِ میانی.'},
+ {id:'s2q3',n:'فیس‌پول کابل',en:'Cable Face Pull',zone:'Functional (کابل)',mus:'سرشانه پشتی / سلامتِ شونه',mode:'fail',scheme:'۳×۱۵–۲۰ · سبک · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'بیمه‌ی شونه‌هاته — پرس‌های سنگین بدونِ این، آخرش درد می‌شه. قیافه‌ی پشت‌گردنم می‌سازه.',tip:'طناب به سمتِ پیشونی، آرنج بالا و باز.',w:15,step:2.5,ph:'🔙',gif:'2021/02/Face-Pull.gif',vid:'0Po47vvj9g4',swap:{n:'نشر خم دستگاه',en:'Rear Delt Fly',de:'Reverse Butterfly',gif:'2021/02/Rear-Delt-Machine-Flys.gif',vid:'v0rJuhEa59c',adv:'همون دستگاهِ سری ۱ — سینه به پشتی، فقط تا امتدادِ بدن باز کن.'},de:'Kabelzug + Seilgriff (ارتفاعِ صورت)',alt:'نشر خم دمبل',adv:'قرقره هم‌سطحِ صورت؛ طناب رو طوری بکش که دو سرش بیاد دو طرفِ گوش‌هات و آخرِ حرکت شونه‌ها رو به بیرون بچرخون (مثل ژستِ «نمی‌دونم»). آرنج همیشه بالاتر از مچ. سبک بزن و تمیز — این حرکت برای «حسِ» عضله‌ست نه رکورد؛ جبرانِ همه‌ی پرس‌هاست و شونه‌تو ۱۰ سال جوون نگه می‌داره.'},
+ {id:'s2q4',n:'جلوبازو چکشی',en:'Hammer Curl',zone:'Free weight',mus:'جلوبازو / ساعد',mode:'fail',scheme:'۳×۱۰–۱۲ · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'گریپِ چکشی برَکیالیس رو می‌گیره — بازو از پهلو ضخیم‌تر دیده می‌شه. مکملِ کرلِ معمولیِ سری ۱.',tip:'مچ تو حالتِ دست‌دادن؛ آرنج میخ.',w:12,step:2,ph:'🔨',gif:'2021/02/Hammer-Curl.gif',vid:'zC3nLlEvin4',swap:{n:'جلوبازو دمبل (سوپینیت)',en:'Dumbbell Curl',de:'Kurzhanteln',gif:'2021/02/Dumbbell-Curl.gif',vid:'XE_pHwbst04',adv:'کفِ دست رو به بالا — همون کرلِ کلاسیکِ سری ۱؛ هفته درمیون با چکشی عوضش کن.'},de:'Kurzhanteln',alt:'جلوبازو لاری دستگاه',adv:'مثل دست‌دادن دمبل رو بگیر و آرنج رو کنارِ بدن میخ کن؛ بالا مکثِ کوتاه، پایین «کامل» باز کن — نصفه‌باز کردن یعنی نصفِ رشد. تاب‌دادنِ تنه = وزنه زیاده. هفته درمیون با کرلِ سوپینیت (کفِ دست بالا — دکمه‌ی عوض‌کن) جابه‌جا بزن تا هر دو سرِ بازو بخوره.'}
+],legs:[
+ {id:'s2l1',n:'هک‌اسکوات',en:'Hack Squat',zone:'Strength (Sled)',mus:'کل پا',mode:'pyr',scheme:'۳ ست: ۱۲ ← ۱۰ ← ۸ · تا ۲–۳ تکرار مونده وایسا (نگه‌داری)',rest:'۱۲۰ ثانیه',why:'پاهات از قبل قهرمانه (پرس پا ۲۶۰!) — هک فقط برای حفظِ همون، بدونِ رکوردزنی.',tip:'پاها وسطِ صفحه، پاشنه نچسبه بالا؛ رکورد نزن، حفظ کن.',w:60,step:5,ph:'🦵',gif:'2021/02/Sled-Hack-Squat.gif',vid:'hglQExHCM9Q',swap:{n:'پرس پا',en:'Leg Press',de:'Beinpresse 45°',gif:'2015/11/Leg-Press.gif',vid:'K5n2vg3oZa4',adv:'همون رفیقِ قدیمیت — ولی یادت باشه: نگه‌داری، نه ۲۶۰+!'},de:'Hackenschmidt (Sled)',alt:'پرس پا',adv:'پاها وسطِ صفحه به عرضِ شونه، پایین تا رانِ ~موازی، زانو هم‌مسیرِ پنجه. چون هدف نگه‌داریه: وزنه‌ای بزن که ست با ۲–۳ تکرارِ ذخیره تموم شه — پای تو با همین حجمِ کم هم نگه داشته می‌شه و انرژیت برای بالاتنه می‌مونه. عمقِ تمیز مهم‌تر از عدده.'},
+ {id:'s2l2',n:'پشت پا نشسته',en:'Seated Leg Curl',zone:'Strength (Matrix)',mus:'همسترینگ',mode:'fail',scheme:'۳×۱۲–۱۵ · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'پشتِ ران برعکسِ جلوش هنوز جا برای کار داره — تعادلِ زانو و قیافه‌ی پا از پشت.',tip:'نشسته این‌بار — پد محکم رو ران، برگشتِ آروم.',w:34,step:2.5,ph:'🦵',gif:'2021/08/Seated-Leg-Curl.gif',vid:'vl5nUdE9mWM',swap:{n:'پشت پا خوابیده',en:'Lying Leg Curl',de:'Beinbeuger liegend',gif:'2021/02/Leg-Curl.gif',vid:'vl5nUdE9mWM',adv:'خوابیده — باسن بلند نشه، برگشت ۲–۳ ثانیه.'},de:'Beinbeuger (sitzend)',alt:'هر کدوم خالی بود — نشسته یا خوابیده',adv:'نشسته نسبت به خوابیده کششِ بیشتری به همسترینگ می‌ده (تحقیقاً رشدش هم بهتره). پشتی رو جلو بکش که زانوت لبِ محور باشه؛ پنجه رو به سمتِ خودت فلکس کن، برگشت ۲–۳ ثانیه — نصفِ رشدِ پشتِ ران تو همون برگشتِ آرومه.'},
+ {id:'s2l3',n:'ساق پا',en:'Calf Raise',zone:'Strength (ساق)',mus:'ساق',mode:'fail',scheme:'۳×۱۵–۲۰ · ست آخر تا ناتوانی 🔥',rest:'۴۵ ثانیه',why:'ساق تنها جای پاست که هنوز می‌تونه پیشرفت کنه بدونِ گنده‌ترکردنِ ران.',tip:'پایین کششِ کامل، بالا مکث — فنری نزن.',w:32,step:5,ph:'🦶',gif:'2021/09/Bench-Press-Machine-Standing-Calf-Raise.gif',still:'Standing_Calf_Raises',vid:'SVtg-1loH4c',de:'Wadenheber — نبود؟ رو پرس پا یا اسمیت',alt:'ساق رو پرس پا',adv:'دامنه‌ی کامل تنها رازِ ساقه: پایین پاشنه کاملاً پایین‌ترِ پنجه (کشش ۱ ثانیه)، بالا رو پنجه با مکثِ ۱ ثانیه. فنری و سریع = هیچی. دستگاهش نبود؟ همین حرکت رو تو پرس پا (پنجه لبِ صفحه) یا زیرِ اسمیت با یه صفحه زیرِ پنجه بزن — همون ست و تکرار.'},
+ {id:'s2l4',n:'فلای کابل (سینه — دورِ دوم)',en:'Cable Crossover',zone:'Functional (کابل)',mus:'سینه',mode:'fail',scheme:'۳×۱۲–۱۵ · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',why:'رازِ اولویتِ بالاتنه: سینه‌ت الان هفته‌ای ۲ بار می‌خوره (پک‌دک روزِ پوش + این). انرژیِ اضافه‌ی روزِ پا خرجِ نقطه‌قوت‌سازی می‌شه.',tip:'قرقره هم‌سطحِ سینه، آرنجِ کمی خم و ثابت.',w:10,step:2.5,ph:'🦋',gif:'2021/02/Cable-Crossover.gif',vid:'D9dh1jKBlXY',de:'Kabelzug-Crossover',alt:'قفسه سینه دستگاه (پک‌دک)',adv:'یه قدم جلوتر از خطِ قرقره‌ها وایسا، یه پا جلو برای تعادل؛ دست‌ها رو با قوسِ بغل‌کردن جلوی سینه برسون و ۱ ثانیه فشرده کن. کابل مزیتش اینه که تو «فشرده‌ترین» نقطه هم مقاومت داره — دقیقاً جایی که پک‌دک وِل می‌کنه. سبک و تمیز؛ این ستِ دومِ هفته‌ی سینه‌ته نه مسابقه.'},
+ {id:'s2a1',n:'کرانچ کابل زانوزده',en:'Kneeling Cable Crunch',zone:'Functional (کابل)',mus:'شکم',mode:'fail',scheme:'۳×۱۲–۱۵ · ست آخر تا ناتوانی 🔥',rest:'۴۵ ثانیه',why:'برخلافِ کرانچِ ساده، این وزنه می‌خوره — یعنی شکمم مثل بقیه‌ی عضله‌ها «پیشرفت» داره.',tip:'با شکم جمع شو، نه با دست‌ها؛ باسن ثابت.',w:25,step:2.5,ph:'🧎',gif:'2021/02/Kneeling-Cable-Crunch.gif',vid:'AV5PmZJIrrw',swap:{n:'کرانچ دستگاه',en:'Machine Crunch',de:'Bauchmaschine',gif:'2015/11/Crunch.gif',vid:'0OxOI3sAIrM',adv:'همون کرانچِ سری ۱ — با شکم جمع کن، نه گردن.'},de:'Kabelzug + Seilgriff (زانوزده)',alt:'کرانچ دستگاه',adv:'زانو بزن، طناب دو طرفِ گردن، باسن رو ثابت نگه دار و فقط قفسه‌سینه رو با «گِردکردنِ ستون» به سمتِ زانو جمع کن + بازدمِ کامل. با دست نکِش — دست فقط نگه‌دارنده‌ست. برگشت آروم تا کششِ شکم. وقتی ۱۵ تا راحت شد، وزنه اضافه کن — شکم هم عضله‌ست، Progressive Overload می‌خواد.'},
+ {id:'s2a2',n:'پلانک',en:'Plank',zone:'Stretch (مت)',mus:'کُر',mode:'fail',scheme:'۳ ست نگه‌داشتن · ست آخر تا جایی که می‌تونی 🔥',rest:'۴۵ ثانیه',why:'کمرِ ۴۱ ساله با پرس‌های سنگین، بیمه می‌خواد — پلانک همون بیمه‌ست.',tip:'باسن نه بالا نه پایین؛ رکوردتو بشکن.',w:25,step:5,unit:'s',wlabel:'ثانیه',ph:'🧘',gif:'2021/02/plank.gif',still:'Plank',vid:'mwlp75MS6Rg',de:'Matte (Stretch zone)',alt:'سخت شد؟ ساعد رو نیمکت بذار؛ آسون شد؟ یه صفحه رو کمرت',adv:'باسن هم‌خطِ شونه و پاشنه؛ شکم و باسن سفت، نفس ادامه‌دار. وقتی ۶۰ ثانیه راحت شد، سخت‌ترش کن نه طولانی‌ترش: یه صفحه‌ی وزنه رو کمر، یا پاها رو نیمکت — کیفیتِ سفت، بهتر از کمیتِ شُل.'}
+]};
+
+// 🗂️ رجیستریِ سری‌ها: سری‌های قدیمی همیشه از «📚 سری‌های قبلی» قابل دیدنن (فقط‌خواندنی)؛ سری‌های AI هم اینجا اضافه می‌شن
+const EXLIB={};
+function regLib(e,base){ if(!e||!e.en)return; const k=e.en.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  if(!EXLIB[k]) EXLIB[k]={n:e.n,en:e.en,de:e.de||(base&&base.de)||'',mus:e.mus||(base&&base.mus)||'',zone:e.zone||(base&&base.zone)||'Strength',ph:e.ph||(base&&base.ph)||'🏋️',gif:e.gif,vid:e.vid,still:e.still||''}; }
+[S1,S2].forEach(S=>['push','pull','legs'].forEach(d=>S[d].forEach(e=>{ regLib(e); if(e.swap) regLib(e.swap,e); })));
+function aiToData(g){ const D={push:[],pull:[],legs:[]};
+ ['push','pull','legs'].forEach(day=>((g.days&&g.days[day])||[]).forEach(x=>{ const L=EXLIB[x.key]; if(!L)return;
+   D[day].push({id:'s'+g.serial+'_'+(''+x.key).replace(/[^a-z0-9]/g,''),n:L.n,en:L.en,de:L.de,mus:L.mus,zone:L.zone,ph:L.ph,gif:L.gif,vid:L.vid,still:L.still,
+     mode:x.mode==='pyr'?'pyr':'fail',scheme:''+(x.scheme||'۳×۱۲–۱۵'),rest:''+(x.rest||'۹۰ ثانیه'),why:''+(x.tip||''),tip:''+(x.tip||''),adv:''+(x.adv||''),w:+x.w||10,step:+x.step||2.5,alt:''});
+ })); return D; }
+const SERIES={1:{name:'سری ۱ — پایه',data:S1},2:{name:'سری ۲ — بالاتنه‌محور',data:S2}};
+let AISERS=[]; try{ AISERS=JSON.parse(localStorage.getItem('bf_aisers')||'[]')||[]; }catch(e){ AISERS=[]; }
+AISERS.forEach(g=>{ if(g&&g.serial>2&&g.days) SERIES[g.serial]={name:g.name||('سری '+g.serial),data:aiToData(g)}; });
+const ACTIVE=(function(){ const c=+(localStorage.getItem('bf_serial')||2); return SERIES[c]?c:2; })();
+const DATA=SERIES[ACTIVE].data;
 
 // 🎬 جایگزین‌های کلیکی: اسم‌های شناخته‌شده تو «شلوغ بود؟» → پاپ‌آپِ گیف (فقط نمایشی، به دیتا دست نمی‌زنه)
 const ALTG=[
@@ -399,7 +454,11 @@ const ALTG=[
  {k:'داخل ران',g:'2021/02/HIP-ADDUCTION-MACHINE.gif',q:'hip adduction machine'},
  {k:'نیمکت شکم',g:'2021/02/Sit-ups.gif',q:'decline sit up'},
  {k:'هک‌اسکوات',g:'2021/02/Sled-Hack-Squat.gif',q:'hack squat machine'},
- {k:'پرس پا',g:'2015/11/Leg-Press.gif',q:'leg press machine'}
+ {k:'پرس پا',g:'2015/11/Leg-Press.gif',q:'leg press machine'},
+ {k:'نشر جانب کابل',g:'2021/02/Cable-Lateral-Raise.gif',q:'cable lateral raise'},
+ {k:'جلوبازو لاری دستگاه',g:'2021/04/Lever-Preacher-Curl.gif',q:'machine preacher curl'},
+ {k:'ساق رو پرس پا',g:'2015/11/Leg-Press.gif',q:'leg press calf raise'},
+ {k:'قفسه سینه دستگاه (پک‌دک)',g:'2021/02/Pec-Deck-Fly.gif',q:'pec deck fly machine'}
 ];
 function altify(txt){ let t=''+txt;
   ALTG.forEach((a,i)=>{ if(t.indexOf(a.k)>=0) t=t.replace(a.k,"\u0001"+i+"\u0001"); });   // sentinel tokens
@@ -428,8 +487,8 @@ function card(e){
   const t=targets(e);
   return `<div class="ex" id="ex-${e.id}">
     <div class="media" data-vid="${e.vid}">
-      <img loading="lazy" src="${GIF}${e.gif}" data-still="${STILL}${e.still}/0.jpg"
-        onerror="if(!this.dataset.f){this.dataset.f=1;this.src=this.dataset.still}else{this.closest('.media').classList.add('noimg')}" alt="">
+      <img loading="lazy" src="${GIF}${e.gif}" data-still="${e.still?STILL+e.still+'/0.jpg':''}"
+        onerror="if(!this.dataset.f&&this.dataset.still){this.dataset.f=1;this.src=this.dataset.still}else{this.closest('.media').classList.add('noimg')}" alt="">
       <span class="ph">${e.ph}</span>
       <span class="num">${e.num}</span>
       <button class="playbtn" type="button">▶ ویدیوی فرم</button>
@@ -442,9 +501,9 @@ function card(e){
       </div>
       <div class="badges"><span class="b zone">${e.zone}</span><span class="b mus">${e.mus}</span>${mb}</div>
       <div class="sr">${e.scheme} <span class="rest">· استراحت ${e.rest}</span></div>
-      <div class="why">💡 ${e.why}</div>
-      <div class="tip">${e.tip}</div>
-      <div class="deline">🏷️ دستگاه: <b>${e.de}</b><br>🔁 شلوغ بود؟ ${altify(e.alt)}</div>
+      ${e.why?'<div class="why">💡 '+e.why+'</div>':''}
+      ${e.tip?'<div class="tip">'+e.tip+'</div>':''}
+      <div class="deline">🏷️ دستگاه: <b>${e.de}</b>${e.alt?'<br>🔁 شلوغ بود؟ '+altify(e.alt):''}</div>
       ${e.swap?'<button class="swapbtn" data-id="'+e.id+'" type="button">🔁 عوض کن با «'+e.swap.n+'»</button>':''}
       ${e.adv?'<details class="adv"><summary>💡 نکته‌ی فرم (پیشرفته) — بزن تا باز شه</summary><div>'+e.adv+'</div></details>':''}
       <div class="logtitle">${lt}</div>
@@ -629,18 +688,18 @@ function refreshCardio(){
   const c=+(localStorage.getItem('bf_cardio')||0);
   const done=localStorage.getItem('bf_cardiodate')===today();
   const btn=document.getElementById('cardioBtn'), cnt=document.getElementById('cardioCnt'), r=document.getElementById('rhythm');
-  if(btn && !btn._flash){ btn.textContent=done?'✅ امروز زدی — بزن تا حذف':'🚲 امروز کراس‌ترینر زدم'; btn.classList.toggle('done',done); }
+  if(btn && !btn._flash){ btn.textContent=done?'✅ امروز زدی — بزن تا حذف':'🚲 امروز هوازی زدم (کراس/تردمیل)'; btn.classList.toggle('done',done); }
   if(cnt) cnt.textContent='جمعاً '+faNum(c)+' بار';
   if(!r) return;
   const gymDates=['push','pull','legs'].map(d=>localStorage.getItem('bf_sessdate_'+d)).filter(Boolean).sort();
   const lastGym=gymDates.length?gymDates[gymDates.length-1]:null;
   const lastCardio=localStorage.getItem('bf_cardiodate')||null;
   const T=today(); let msg;
-  if(lastGym===T) msg='💪 امروز باشگاه رفتی — آفرین! فردا روزِ کراس‌ترینره 🚲';
-  else if(lastCardio===T) msg='🚲 امروز کراس‌ترینر زدی — عالی! فردا روزِ باشگاهه 🏋️';
+  if(lastGym===T) msg='💪 امروز باشگاه رفتی — آفرین! فردا روزِ هوازیه (کراس یا تردمیلِ شیب‌دار) 🚲';
+  else if(lastCardio===T) msg='🚲 امروز هوازی زدی — عالی! فردا روزِ باشگاهه 🏋️';
   else if(!lastGym && !lastCardio) msg='🔄 بزن بریم — امروز یه روزِ خوب برای باشگاهه 🏋️';
-  else if(!lastCardio || (lastGym && lastGym>lastCardio)) msg='🔄 آخرین‌بار باشگاه بودی ← امروز روزِ کراس‌ترینره 🚲';
-  else msg='🔄 آخرین‌بار کراس‌ترینر زدی ← امروز روزِ باشگاهه 🏋️';
+  else if(!lastCardio || (lastGym && lastGym>lastCardio)) msg='🔄 آخرین‌بار باشگاه بودی ← امروز روزِ هوازیه (کراس/تردمیل) 🚲';
+  else msg='🔄 آخرین‌بار هوازی زدی ← امروز روزِ باشگاهه 🏋️';
   r.textContent=msg;
 }
 document.getElementById('cardioBtn').addEventListener('click',function(){
@@ -1278,6 +1337,66 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    if(fs){ hint.classList.add('show'); setTimeout(()=>hint.classList.remove('show'),3500); flashCtrl(); }
    else{ try{ screen.orientation.unlock(); }catch(e){} ctrl.classList.remove('show'); hint.classList.remove('show'); } });
  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ if(t.dataset.day!=='tv' && (fr.src!=='about:blank'||hls)) stop(); }));   // رفتی سراغِ تمرین؟ پخش قطع شه که صداش مزاحم نشه
+})();
+
+/* ---------- 🗂️ سری‌ها: آرشیوِ فقط‌خواندنی + چیدنِ سریِ بعد با AI ---------- */
+(function(){
+ const nameEl=document.getElementById('serName');
+ if(nameEl) nameEl.textContent=SERIES[ACTIVE].name+' (فعال)';
+ // 📚 آرشیو — فقط‌خواندنی، با سؤالِ قبلش
+ const ov=document.createElement('div'); ov.id='archov';
+ ov.innerHTML='<div class="archcard"><div class="archhead"><span>📚 سری‌های قبلی — فقط برای دیدن</span><button class="rclose" id="archx" type="button">✕</button></div><div class="archbody" id="archbody"></div></div>';
+ document.body.appendChild(ov);
+ const DL={push:'🟠 Push — سینه/سرشانه',pull:'🔵 Pull — پشت/بازو',legs:'🟢 Legs — پا/شکم'};
+ function openArch(){
+   const others=Object.keys(SERIES).map(Number).filter(s=>s!==ACTIVE).sort((a,b)=>b-a);
+   if(!others.length){ alert('هنوز سریِ قبلی‌ای نیست.'); return; }
+   if(!confirm('سری‌های قبلی فقط برای «دیدن» باز بشن؟ (قابل ویرایش نیستن — رکوردها و روندشون سرِ جاشونه)')) return;
+   const body=document.getElementById('archbody'); let html='<div class="archnote">این آرشیوه — هیچ‌چیش قابلِ تغییر نیست. رکوردها، روندها و همه‌ی دیتای این سری‌ها برای همیشه محفوظه. 🔒</div>';
+   others.forEach(s=>{ const S=SERIES[s]; html+='<div class="archser">🏷️ '+S.name+'</div>';
+     ['push','pull','legs'].forEach(day=>{ const L=S.data[day]||[]; if(!L.length) return; html+='<div class="archday">'+DL[day]+'</div>';
+       L.forEach(e=>{ const w=localStorage.getItem('bf_'+e.id+'w'), r=localStorage.getItem('bf_'+e.id+'r');
+         const U=e.unit==='s'?' ثانیه':' kg';
+         const rec=(w||r)?('🔼 آخرین رکورد: <b>'+(w?faNum(w)+U:'—')+'</b>'+(r?' × '+faNum(r)+' تکرار':'')):'— رکوردی ثبت نشده بود';
+         html+='<div class="archex"><div class="an">'+e.n+' <span class="aen">'+e.en+'</span></div><div class="ascheme">'+e.scheme+'</div><div class="arec">'+rec+'</div><div class="atr" id="atr-'+e.id+'"></div></div>';
+       });
+     });
+   });
+   body.innerHTML=html; ov.classList.add('show');
+   others.forEach(s=>['push','pull','legs'].forEach(day=>(SERIES[s].data[day]||[]).forEach(e=>{ const b=document.getElementById('atr-'+e.id); if(b) renderTrend(e.id,b); })));
+ }
+ const pb=document.getElementById('serPrev'); if(pb) pb.addEventListener('click',openArch);
+ ov.addEventListener('click',ev=>{ if(ev.target===ov||ev.target.closest('#archx')) ov.classList.remove('show'); });
+ // 🤖 سریِ بعد با AI — از رویِ رکوردها و تاریخچه‌ی خودش می‌چینه (جمنای، نبود → کلاود)
+ async function genNext(){
+   const btn=document.getElementById('serAI'); if(!btn) return;
+   if(!confirm('سریِ '+faNum(ACTIVE+1)+' از رویِ دیتای همین سری با AI چیده بشه؟ سریِ فعلی می‌ره تو آرشیو (قابل دیدن، بدونِ عقب‌گرد). چند ثانیه طول می‌کشه.')) return;
+   btn.disabled=true; btn.textContent='⏳ داره می‌چینه…';
+   try{
+     const hist=[]; Object.keys(META).forEach(id=>{ const e=META[id];
+       const w=parseFloat(localStorage.getItem('bf_'+id+'w')), r=parseFloat(localStorage.getItem('bf_'+id+'r'));
+       let h=[]; try{ h=JSON.parse(localStorage.getItem('bf_'+id+'h')||'[]')||[]; }catch(_){}
+       hist.push({n:e.n,w:isFinite(w)?w:null,r:isFinite(r)?r:null,first:h.length?+h[0].w:null,last:h.length?+h[h.length-1].w:null});
+     });
+     const lib=Object.keys(EXLIB).map(k=>({key:k,n:EXLIB[k].n,mus:EXLIB[k].mus}));
+     const prevKeys=[]; Object.keys(SERIES).forEach(s=>['push','pull','legs'].forEach(d=>(SERIES[s].data[d]||[]).forEach(e=>{ if(prevKeys.indexOf(e.n)<0) prevKeys.push(e.n); })));
+     const serial=ACTIVE+1;
+     const resp=await fetch(API+'/cycle',{method:'POST',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({hist:hist,lib:lib,serial:serial,prevKeys:prevKeys})});
+     const d=await resp.json();
+     if(!d||!d.days){ alert('😕 جوابِ درستی نیومد'+(d&&d.error?(' — '+(''+d.error).slice(0,120)):'')+'. یه بارِ دیگه بزن.'); return; }
+     ['push','pull','legs'].forEach(day=>{ d.days[day]=(d.days[day]||[]).filter(x=>x&&EXLIB[x.key]); });
+     if(d.days.push.length<3||d.days.pull.length<3||d.days.legs.length<4){ alert('😕 برنامه‌ی کامل نیومد — یه بارِ دیگه بزن.'); return; }
+     const rec={serial:serial,name:''+(d.name||('سری '+serial)),note:''+(d.note||''),days:d.days,made:today()};
+     const list=AISERS.filter(g=>g&&g.serial!==serial); list.push(rec);
+     localStorage.setItem('bf_aisers',JSON.stringify(list));
+     localStorage.setItem('bf_serial',''+serial);
+     localStorage.setItem('bf_blockstart',today());
+     alert('✅ «'+rec.name+'» چیده شد! '+(rec.note?('\n'+rec.note+'\n'):'')+'\nسریِ قبلی رفت تو آرشیو 📚 — الان صفحه از نو لود می‌شه.');
+     location.reload();
+   }catch(e){ alert('❌ وصل نشد — اینترنت رو چک کن و دوباره بزن.'); }
+   finally{ btn.disabled=false; btn.textContent='🤖 سریِ بعد با AI'; }
+ }
+ const ab=document.getElementById('serAI'); if(ab) ab.addEventListener('click',genNext);
 })();
 
 /* ---------- 🔄 سینک بین دستگاه‌ها (ادغامِ کلید‌به‌کلید — آخرین تغییرِ هر کلید برنده) ---------- */
