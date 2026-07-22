@@ -150,6 +150,7 @@
   .fmsum b{color:#eef1f6; font-size:13.5px; direction:ltr; unicode-bidi:isolate}   /* عددِ علامت‌دار تو RTL نپره اون‌ور: «−۲۸۰» بمونه نه «۲۸۰−» */
   .fmsum b.mn{color:#ff9a9a}
   .fmsum .net{border-top:1px solid var(--line); margin-top:4px; padding-top:6px; color:#eef1f6; font-weight:700} .fmsum .net b{color:#7fe39b; font-size:15px}
+  .fmfix{margin-top:8px; font-size:11.5px; color:#ffd27a; background:rgba(255,176,46,.09); border:1px solid rgba(255,176,46,.35); border-radius:9px; padding:7px 9px; line-height:1.8}
   .fl-items{margin-top:10px; display:flex; flex-direction:column; gap:6px}
   .fl-item{display:flex; align-items:center; justify-content:space-between; gap:8px; background:#0e1117; border:1px solid var(--line); border-radius:9px; padding:7px 10px; font-size:12px}
   .fl-itxt{color:#cdd5e0; line-height:1.6; word-break:break-word} .fl-itxt em{color:var(--mut); font-style:normal; font-size:11px}
@@ -1180,6 +1181,12 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
      const r=await fetch(API+'/food',{method:'POST',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({text:txt,ctx:workoutCtx(),img:photoB64||undefined})});
      const d=await r.json();
      if(d==null||d.kcal==null){ res.innerHTML='❌ نشد حساب کنم، یه‌بار دیگه امتحان کن.'; return; }
+     let fixed=false;                                                          // 🧮 ریزِ آیتم‌ها همیشه مرجعه — AI گاهی جمعِ کل رو اشتباه می‌زنه
+     if(Array.isArray(d.items)&&d.items.length){
+       const sk=d.items.reduce((s,it)=>s+(+it.kcal||0),0), sp=d.items.reduce((s,it)=>s+(+it.protein||0),0);
+       if(Math.abs(sk-(+d.kcal||0))>2){ d.kcal=sk; fixed=true; }
+       if(Math.abs(sp-(+d.protein||0))>2){ d.protein=sp; fixed=true; }
+     }
      let br=''; if(Array.isArray(d.items)&&d.items.length>1){ br='<div class="fmbr">'+d.items.map(it=>'<div>'+((+it.kcal||0)<0?'🔥':'🍽️')+' '+esc(it.n||'')+' — <b>'+faNum(+it.kcal||0)+'</b>'+((+it.protein||0)?' · '+faNum(+it.protein||0)+'گ':'')+'</div>').join('')+'</div>'; }   // تفکیکِ آیتم‌به‌آیتم
      let sum='';                                                                  // 🧮 خورده − سوزونده = نهایی (فقط وقتی ورزشی تو کار بوده، وگرنه شلوغش نکن)
      const burn=(d.items||[]).reduce((s,it)=>s+Math.min(0,+it.kcal||0),0);
@@ -1187,7 +1194,8 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
        sum='<div class="fmsum"><div><span>🍽️ خورده‌ها</span><b>'+faNum(eat)+'</b></div>'+
            '<div><span>🔥 سوزوندی</span><b class="mn">'+faNum(burn)+'</b></div>'+
            '<div class="net"><span>✅ نهایی</span><b>'+faNum(+d.kcal||0)+'</b></div></div>'; }
-     res.innerHTML='<div class="fmest">≈ <b>'+faNum(+d.kcal||0)+'</b> کالری · <b>'+faNum(+d.protein||0)+'</b>گ پروتئین'+br+sum+'<span>'+esc(d.note||'')+'</span></div>'+
+     const fixnote=fixed?'<div class="fmfix">🧮 جمعِ کلِ AI با ریزِ آیتم‌ها نمی‌خوند — از رویِ خودِ آیتم‌ها تصحیح شد.</div>':'';
+     res.innerHTML='<div class="fmest">≈ <b>'+faNum(+d.kcal||0)+'</b> کالری · <b>'+faNum(+d.protein||0)+'</b>گ پروتئین'+br+sum+fixnote+'<span>'+esc(d.note||'')+'</span></div>'+
        '<button id="fmadd" type="button" class="fmbtn add">➕ اضافه به امروز</button>';
      document.getElementById('fmadd').onclick=()=>{
        const c=getCal(), t=today(); if(!c[t])c[t]={kcal:0,protein:0,items:[]};
