@@ -300,8 +300,8 @@
     <h1>برنامه تمرین — Push / Pull / Legs</h1>
     <div class="sub">۳ روز در هفته · مقاومتی · هدف: کات + عضله</div>
     <div class="chips">
-      <span class="chip"><b>۱۷۸</b> سانت</span><span class="chip">شروع: <b>۱۰۵</b> کیلو</span>
-      <span class="chip"><b>۴۱</b> سال</span><span class="chip">هدف: <b>−۲۰ کیلو</b></span>
+      <span class="chip"><b>۱۷۸</b> سانت</span><span class="chip">الان: <b>۱۰۸</b> کیلو</span><span class="chip">هدف: <b>۸۵</b> (تا فوریه)</span>
+      <span class="chip"><b>۴۱</b> سال</span><span class="chip">کسری روزانه: <b>~۹۰۰</b> کالری</span>
       <span class="chip">جلسات کل: <b id="cnt-all">۰</b></span>
     </div>
   </header>
@@ -883,7 +883,7 @@ function toJalali(gy,gm,gd){var g=[0,31,59,90,120,151,181,212,243,273,304,334];v
 /* ---------- 📈 نمودار پیشرفت (وزن + روزای خراب) ---------- */
 (function(){
  const body=document.getElementById('progbody'); if(!body) return;
- const START=105, GOAL=85;
+ const START=108, GOAL=85;   // ری‌استارت ۲۲.۰۸.۲۰۲۶ بعد از استانبول — وزنِ اعلامیِ خودش
  const getWt=()=>{try{return JSON.parse(localStorage.getItem('bf_wt')||'[]');}catch(e){return [];}};
  const getBad=()=>{try{return JSON.parse(localStorage.getItem('bf_bad')||'[]');}catch(e){return [];}};
  body.innerHTML='<div class="wtin"><label>وزن امروز:</label><input type="number" inputmode="decimal" id="wtval" placeholder="'+START+'"><label>kg</label><button id="wtsave" type="button">ثبت</button></div>'+
@@ -1020,8 +1020,8 @@ function glossify(t){
     ${m.tip?`<div class="mtip">⏰ ${m.tip}</div>`:''}
     <button class="swap" data-meal="${i}">🔄 یه گزینه‌ی دیگه</button></div>`;};
   let html='';
-  html+=`<div class="foodlog"><div class="fl-top"><span>🤖 امروز چی خوردی؟</span><button id="flopen" type="button">+ ثبت با AI</button></div><div class="fl-today" id="fltoday"></div></div><div class="totcard"><div class="t1">🎯 هدف امروز: <b>~۱۹۰۰ کالری</b> · پروتئین <b>۱۶۰–۱۸۰گ</b> · آب ۳ لیتر</div>
-    <div class="totnow">🍽️ امروز خوردی: <b id="goalkcal">۰</b> از ~۱۹۰۰ کالری · <b id="goalpro">۰</b>گ پروتئین</div>
+  html+=`<div class="foodlog"><div class="fl-top"><span>🤖 امروز چی خوردی؟</span><button id="flopen" type="button">+ ثبت با AI</button></div><div class="fl-today" id="fltoday"></div></div><div class="totcard"><div class="t1">🎯 هدف امروز: <b>~۲۱۰۰–۲۲۰۰ کالری</b> · پروتئین <b>۱۹۰–۲۰۰گ</b> · آب ۳ لیتر <span style="color:var(--mut)">(پلن ۱۰۸→۸۵ شش‌ماهه، ۲۲.۰۸)</span></div>
+    <div class="totnow">🍽️ امروز خوردی: <b id="goalkcal">۰</b> از ~۲۱۵۰ کالری · <b id="goalpro">۰</b>گ پروتئین</div>
     <div class="totbar"><div id="goalfill"></div></div>
     <div class="totnow" id="goalrem" style="margin-top:5px; font-size:11px">هرچی با «🤖 ثبت با AI» بزنی، این نوار پُر می‌شه.</div>
     <div class="totnow" id="goalsug" style="margin-top:7px; font-size:11.5px; line-height:1.95; display:none; border-top:1px dashed #3a2f4a; padding-top:7px"></div></div>`;
@@ -1035,9 +1035,9 @@ function glossify(t){
   html+=`<div class="daynote">📅 برنامه‌ی امروز (${WD[new Date().getDay()]}) — گزینه‌ها هر روز خودکار عوض می‌شن. هر وعده سخت بود یا حسش نبود، «🔄 یه گزینه‌ی دیگه» رو بزن.</div>`;
   html+=`<div class="plansum">📋 <b>پیشنهاد</b> (نه خورده‌ها): اگه گزینه‌های زیر رو بخوری ≈ <b id="totkcal">—</b> کالری · <b id="totpro">—</b>گ پروتئین<div class="totbar" style="margin-top:6px"><div id="totfill"></div></div></div>`;
   MEALS.forEach((m,i)=>{html+=mc(m,i);});
-  html+=`<div class="meal cheat"><div class="meal-h"><span class="mt">🍫 وعده‌ی چیت</span><span class="mcal">هفته‌ای ۱ بار · ~<b>۸۰۰–۱۲۰۰</b> کالری</span></div>
-    <div class="mopt">بعد از سنگین‌ترین تمرین (روز پا) یه وعده‌ی آزاد بخور — پیتزا، برگر، هرچی دلت خواست. <b>یه وعده، نه یه روز کامل.</b></div>
-    <div class="mtip">⏰ این برای روحیه و پایبندی معجزه می‌کنه — باعث می‌شه کلِ هفته راحت‌تر سرِ برنامه بمونی. بعدش برگرد سر برنامه.</div></div>`;
+  html+=`<div class="meal cheat"><div class="meal-h"><span class="mt">❤️ شام‌های دونفره</span><span class="mcal">هفته‌ای <b>۲</b> بار · آزاد، با بانکِ کالری</span></div>
+    <div class="mopt"><b>قانون بانک کالری:</b> روزِ قرار، تا شب فقط پروتئینِ سبک (~۶۰۰ کالری: کوارک، تخم‌مرغ، مرغ) ← شب با خیالِ راحت سرِ سفره بشین و بخور. <b>این شام‌ها جزوِ برنامه‌ن، نه خرابش.</b></div>
+    <div class="mtip">⏰ ۵ روزِ دیگه سفت سرِ کسری بمون — همین. اگه شد، شامِ دونفره رو بنداز نزدیکِ روزِ تمرین. عذاب وجدان ممنوع، جبرانِ افراطی فرداش هم ممنوع.</div></div>`;
   html+=`<div class="daynote" style="margin-top:2px">⏱️ ترتیب: صبحانه ← میوه ← ناهار ← (قبل تمرین) ← تمرین ← (بعد تمرین + شیر پروتئین) ← شام. روز استراحت، شیر پروتئین رو هر وعده‌ای که پروتئینت کم موند بگیر.</div>`;
   html+=`<details class="night"><summary>🌙 آخرِ شب گشنمه — چی بخورم؟</summary><div class="nightlist">
     <div style="padding-bottom:4px">قانون: <b>پروتئین + حجم + آب</b> = مثل خر سیر، کالری تقریباً هیچی. اینا رو بزن:</div>
@@ -1276,7 +1276,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
      const cardio=(localStorage.getItem('bf_cardiodate')===t);
      let wt=null; try{ const a=JSON.parse(localStorage.getItem('bf_wt')||'[]'); if(a.length){ a.sort((x,y)=>x.d<y.d?-1:1); wt=+a[a.length-1].w; } }catch(e){}
      if(!done.length && !ex && !cardio) return '';
-     return 'امروز طبق اپ: '+(done.length?('جلسه‌ی '+done.join(' و ')+' ثبت شده (تمرینِ وزنه ~۴۵-۶۰ دقیقه)'):'جلسه ثبت نشده')+(ex?('، '+ex+' حرکت تیک خورده'):'')+(cardio?'، کراس‌ترینر هم زده (~۲۰ دقیقه)':'')+(wt?('، وزنِ بدن ~'+wt+' کیلو'):'، وزنِ بدن ~۱۰۵ کیلو');
+     return 'امروز طبق اپ: '+(done.length?('جلسه‌ی '+done.join(' و ')+' ثبت شده (تمرینِ وزنه ~۴۵-۶۰ دقیقه)'):'جلسه ثبت نشده')+(ex?('، '+ex+' حرکت تیک خورده'):'')+(cardio?'، کراس‌ترینر هم زده (~۲۰ دقیقه)':'')+(wt?('، وزنِ بدن ~'+wt+' کیلو'):'، وزنِ بدن ~۱۰۸ کیلو');
    }catch(e){ return ''; }
  }
  document.getElementById('fmcalc').addEventListener('click',async()=>{
