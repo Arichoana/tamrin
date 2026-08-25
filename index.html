@@ -452,13 +452,48 @@ function aiToData(g){ const D={push:[],pull:[],legs:[]};
      mode:x.mode==='pyr'?'pyr':'fail',scheme:''+(x.scheme||'۳×۱۲–۱۵'),rest:''+(x.rest||'۹۰ ثانیه'),why:''+(x.tip||''),tip:''+(x.tip||''),adv:''+(x.adv||''),
      w:(L.unit==='s'&&!(+x.w>0))?30:(+x.w||10),step:L.unit==='s'?5:(+x.step||2.5),alt:''});
  })); return D; }
+// 🏠 سری ۱۰۲ — بازگشت به اسن. دوحالته: عادی 🌿 / فشرده ⚡ (سوییچ با دکمه‌ی کنار اسم سری).
+// از S2/S3 کپی می‌شه تا آی‌دی‌ها (و در نتیجه رکوردها)، گیف‌ها و نکات عیناً منتقل شن.
+// schemeX/restX = نسخه‌ی فشرده‌ی همون حرکت؛ موقع لود اگه bf_mode102==='x' باشه جایگزین می‌شن.
+const S102=(function(){
+ const cp=(e,o)=>Object.assign({},e,o);
+ const f=(src,day,id)=>{ for(var i=0;i<src[day].length;i++) if(src[day][i].id===id) return src[day][i]; return null; };
+ return {
+ push:[
+  cp(f(S2,'push','s2p1'),{scheme:'۴ ست: ۱۲ ← ۱۰ ← ۸ ← ۶ · هر ست سنگین‌تر',schemeX:'۵ ست: ۱۲ ← ۱۰ ← ۸ ← ۶ ← ۱۲ (آخری سبک، پمپ) 🔥',rest:'۱۲۰ ثانیه',restX:'۹۰ ثانیه'}),
+  cp(f(S3,'pull','s3b4')||f(S3,'push','s3b4')||{id:'s3b4',n:'پرس سرشانه دمبل',en:'Dumbbell Shoulder Press',zone:'دمبل + نیمکت (پشتیِ عمود)',mus:'سرشانه',mode:'fail',w:14,step:2.5,ph:'🛡️',gif:'2021/02/Dumbbell-Shoulder-Press.gif',still:'Dumbbell_Shoulder_Press',vid:'qEwKCR5JCog',de:'Dumbbell Shoulder Press',alt:'پرس سرشانه با هالتر روی رک',why:'سرشانه‌ی جلو + بالاتنه‌ی پُرتر.',tip:'کمر چسبیده به پشتی، شکم سفت.',adv:'پشتیِ نیمکت رو کاملاً عمود نکن — ~۸۰ درجه به شونه رحم می‌کنه.'},{scheme:'۳×۱۰–۱۲ · ست آخر تا ناتوانی 🔥',schemeX:'۴×۱۰–۱۲ · ست آخر تا ناتوانی 🔥',rest:'۹۰ ثانیه',restX:'۷۵ ثانیه'}),
+  cp(f(S2,'push','s2p3'),{scheme:'۳×۱۲–۱۵ · سبک و تمیز · ست آخر تا ناتوانی 🔥',schemeX:'۴×۱۵ · سبک و تمیز · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',restX:'۴۵ ثانیه'}),
+  cp(f(S2,'push','s2p2'),{scheme:'۳×۱۲–۱۵ · وزنه ثابت · ست آخر تا ناتوانی 🔥',schemeX:'۴×۱۲–۱۵ · وزنه ثابت · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',restX:'۴۵ ثانیه'}),
+  cp(f(S2,'push','s2p4'),{scheme:'۳×۱۲–۱۵ · وزنه ثابت · ست آخر تا ناتوانی 🔥',schemeX:'۴×۱۲–۱۵ · وزنه ثابت · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',restX:'۴۵ ثانیه'})
+ ],
+ pull:[
+  cp(f(S2,'pull','s2q1'),{scheme:'۴ ست: ۱۲ ← ۱۰ ← ۸ ← ۶ تکرار · هر ست سنگین‌تر',schemeX:'۵ ست: ۱۲ ← ۱۰ ← ۸ ← ۶ ← ۱۲ (آخری سبک) 🔥',rest:'۱۲۰ ثانیه',restX:'۹۰ ثانیه'}),
+  cp(f(S2,'pull','s2q2'),{scheme:'۳ ست: ۱۲ ← ۱۰ ← ۸ تکرار · هر ست سنگین‌تر',schemeX:'۴ ست: ۱۲ ← ۱۰ ← ۸ ← ۸ · هر ست سنگین‌تر',rest:'۱۲۰ ثانیه',restX:'۹۰ ثانیه'}),
+  cp(f(S2,'pull','s2q3'),{scheme:'۳×۱۵–۲۰ · سبک · ست آخر تا ناتوانی 🔥',schemeX:'۴×۱۵–۲۰ · سبک · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',restX:'۴۵ ثانیه'}),
+  cp(f(S2,'pull','s2q4'),{scheme:'۳×۱۰–۱۲ · ست آخر تا ناتوانی 🔥',schemeX:'۴×۱۰–۱۲ · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',restX:'۴۵ ثانیه'})
+ ],
+ legs:[
+  cp(f(S2,'legs','s2l1'),{scheme:'۳ ست: ۱۲ ← ۱۰ ← ۸ · تا ۲–۳ تکرار مونده وایسا (نگه‌داری)',schemeX:'۴ ست: ۱۲ ← ۱۰ ← ۸ ← ۸ · نگه‌داری، رکورد ممنوع',rest:'۱۲۰ ثانیه',restX:'۹۰ ثانیه'}),
+  cp(f(S3,'legs','s3c1')||{id:'s3c1',n:'هیپ تراست هالتر',en:'Barbell Hip Thrust',zone:'هالتر + نیمکت',mus:'باسن / پشتِ پا',mode:'pyr',w:40,step:5,ph:'🍑',gif:'2021/02/Barbell-Hip-Thrust.gif',vid:'LM8XHLYJoYs',de:'Barbell Hip Thrust',alt:'گلوت بریج با دمبل روی لگن',why:'قوی‌ترین حرکتِ باسن — و کمر رو هم سفت می‌کنه.',tip:'پشت رو بذار لبِ نیمکت، هالتر روی لگن (با پد یا حوله).',adv:'کفِ پا کاملاً رو زمین، ساق در بالای حرکت عمود. حوله یا پد زیر هالتر.'},{scheme:'۳ ست: ۱۲ ← ۱۰ ← ۱۰ · هر ست سنگین‌تر',schemeX:'۴ ست: ۱۵ ← ۱۲ ← ۱۰ ← ۱۰ · هر ست سنگین‌تر',rest:'۹۰ ثانیه',restX:'۷۵ ثانیه'}),
+  cp(f(S2,'legs','s2l2'),{scheme:'۳×۱۲–۱۵ · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه'}),
+  cp(f(S2,'legs','s2a1')||f(S2,'push','s2a1')||f(S2,'pull','s2a1'),{scheme:'۳×۱۲–۱۵ · ست آخر تا ناتوانی 🔥',schemeX:'۴×۱۵ · ست آخر تا ناتوانی 🔥',rest:'۴۵ ثانیه'}),
+  cp(f(S2,'legs','s2a2')||f(S2,'push','s2a2')||f(S2,'pull','s2a2'),{scheme:'۳ ست نگه‌داشتن · ست آخر تا جایی که می‌تونی 🔥',schemeX:'۴ ست نگه‌داشتن · ست آخر تا جایی که می‌تونی 🔥',rest:'۴۵ ثانیه'})
+ ]};
+})();
 const SERIES={1:{name:'سری ۱ — پایه',data:S1},2:{name:'سری ۲ — بالاتنه‌محور',data:S2},
  // سریِ سفری. شماره‌ش عمداً ۱۰۱ه تا با سری‌هایی که هوش مصنوعی می‌سازه (۳، ۴، …) قاطی نشه.
  // اسمِ روزها و پیشنهادِ هوازی هم با بقیه فرق داره، پس همراهِ خودِ سری نگه‌شون می‌داریم.
  101:{name:'سری ۱۰۱ — استانبول (فول‌بادی، موقت)',data:S3,travel:true,
     lbl:{push:'🅰️ فول‌بادی A',pull:'🅱️ فول‌بادی B',legs:'🅲 فول‌بادی C'},
     sub:{push:'کلِ بدن',pull:'کلِ بدن',legs:'کلِ بدن'},
-    cardio:'دوچرخه یا پله‌نورد'}};
+    cardio:'دوچرخه یا پله‌نورد'},
+ // 🏠 سریِ بازگشت. شماره‌ش ۱۰۲ه که مثل ۱۰۱ با سری‌های AI (۳، ۴، …) قاطی نشه.
+ // اسم و هوازی‌ش به حالت (bf_mode102) وابسته‌ست: 'x' = فشرده، هرچیز دیگه = عادی.
+ 102:(function(){ var x=false; try{ x=localStorage.getItem('bf_mode102')==='x'; }catch(e){}
+    return {name:'سری ۱۰۲ — بازگشت '+(x?'⚡ فشرده':'🌿 عادی'),data:S102,
+      cardio:x?'کراس یا تردمیلِ شیب‌دار — هفته‌ای ۴×۳۰–۴۰ دقیقه + روزی ۸–۱۰هزار قدم'
+             :'کراس یا تردمیلِ شیب‌دار — هفته‌ای ۲×۲۵–۳۰ دقیقه'};
+ })()};
 let AISERS=[]; try{ AISERS=JSON.parse(localStorage.getItem('bf_aisers')||'[]')||[]; }catch(e){ AISERS=[]; }
 AISERS.forEach(g=>{ if(g&&g.serial>2&&g.serial!==101&&g.days) SERIES[g.serial]={name:g.name||('سری '+g.serial),data:aiToData(g)}; });
 // ✈️ یک‌بار خودکار می‌بردش رو سریِ استانبول. بعدش هر وقت خواست دستی عوض می‌کنه و دیگه کاری باهاش نداریم.
@@ -481,8 +516,28 @@ if(SERIES[ACTIVE].travel){
   ['push','pull','legs'].forEach(d=>{
     const h=document.querySelector('#'+d+' .dayhead'); if(h&&HEAD[d]) h.innerHTML=HEAD[d];
   });
+  // 🏠 دکمه‌ی پایانِ سفر — رو هر سه روز دیده می‌شه؛ می‌بردت سری ۱۰۲ (بازگشت، دوحالته).
+  ['push','pull','legs'].forEach(d=>{
+    const h=document.querySelector('#'+d+' .dayhead'); if(!h) return;
+    const b=document.createElement('button');
+    b.textContent='🏠 برگشتم اسن — شروع سری ۱۰۲';
+    b.style.cssText='display:block;margin-top:9px;padding:7px 12px;border-radius:10px;border:1px solid #7fd6f0;background:transparent;color:#7fd6f0;font:inherit;font-size:12.5px;cursor:pointer';
+    b.onclick=function(){ if(confirm('سفر تموم؟ سری ۱۰۲ (بازگشت — دوحالته) فعال بشه؟ رکوردهای سری ۲ خودشون میان، سری ۱۰۱ می‌ره تو آرشیو.')){ localStorage.setItem('bf_serial','102'); location.reload(); } };
+    h.appendChild(b);
+  });
 }
 const DATA=SERIES[ACTIVE].data;
+// ⚡/🌿 حالتِ سری ۱۰۲: تو حالتِ فشرده، طرح و استراحتِ فشرده (schemeX/restX) جای عادی می‌شینه.
+const MODE102X=(function(){ var x=false; try{ x=localStorage.getItem('bf_mode102')==='x'; }catch(e){} return ACTIVE===102&&x; })();
+if(MODE102X) ['push','pull','legs'].forEach(d=>DATA[d].forEach(e=>{ if(e.schemeX)e.scheme=e.schemeX; if(e.restX)e.rest=e.restX; }));
+// دکمه‌ی سوییچ کنار اسمِ سری — فقط وقتی ۱۰۲ فعاله. رکوردها به حالت ربطی ندارن، فقط طرح عوض می‌شه.
+if(ACTIVE===102){ (function(){ var sr=document.querySelector('.serrow'); if(!sr) return;
+  var b=document.createElement('button'); b.id='mode102btn';
+  b.textContent=MODE102X?'⚡ فشرده‌ای — بزن برو 🌿 عادی':'🌿 عادی‌ای — بزن برو ⚡ فشرده';
+  b.style.cssText='margin-inline-start:8px;padding:4px 10px;border-radius:999px;border:1px solid '+(MODE102X?'#ffb27a':'#7fd6f0')+';background:transparent;color:'+(MODE102X?'#ffb27a':'#7fd6f0')+';font:inherit;font-size:11.5px;cursor:pointer';
+  b.onclick=function(){ localStorage.setItem('bf_mode102',MODE102X?'n':'x'); location.reload(); };
+  sr.appendChild(b);
+})(); }
 if(localStorage.getItem('bf_serblock')!==''+ACTIVE){ localStorage.setItem('bf_serblock',''+ACTIVE); localStorage.setItem('bf_blockstart',today()); }   // سری عوض شد → شمارشِ هفته از نو
 
 // 🎬 جایگزین‌های کلیکی: اسم‌های شناخته‌شده تو «شلوغ بود؟» → پاپ‌آپِ گیف (فقط نمایشی، به دیتا دست نمی‌زنه)
