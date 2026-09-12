@@ -94,6 +94,8 @@
   .tvwrap:fullscreen{aspect-ratio:auto; border:0; border-radius:0}
   .tvclose{position:absolute; top:10px; inset-inline-end:10px; z-index:8; display:none; width:44px; height:44px; padding:0; line-height:42px; text-align:center; background:rgba(0,0,0,.65); color:#fff; border:1px solid rgba(255,255,255,.4); border-radius:50%; font-family:inherit; font-size:18px; font-weight:800; cursor:pointer}   /* فقط آیکون — ولی ۴۴px که انگشت راحت بگیردش */
   .tvwrap.fs .tvclose{display:block}
+  .tvwrap.pfs{position:fixed; inset:0; z-index:9998; width:100vw; height:100vh; height:100dvh; aspect-ratio:auto; border:0; border-radius:0; margin:0}   /* تمام‌صفحه‌ی داخلِ صفحه — آیفون div رو تمام‌صفحه نمی‌کنه */
+  body.tvpfs{overflow:hidden}
   .tvbar{display:flex; gap:8px; margin-bottom:12px; display:none}
   .tvbar.on{display:flex}
   .tvbar button{flex:1; background:var(--card); border:1px solid var(--line); color:var(--txt); font-family:inherit; font-size:12.5px; font-weight:700; padding:9px; border-radius:10px; cursor:pointer}
@@ -573,8 +575,8 @@ function altify(txt){ let t=''+txt;
   ALTG.forEach((a,i)=>{ if(t.indexOf(a.k)>=0) t=t.replace(a.k,"\u0001"+i+"\u0001"); });   // sentinel tokens
   return t.replace(/\u0001(\d+)\u0001/g,(m,i)=>'<span class="altx" data-ai="'+i+'">'+ALTG[+i].k+' 🎬</span>');
 }
-function targets(e){
-  const w=localStorage.getItem('bf_'+e.id+'w'), r=localStorage.getItem('bf_'+e.id+'r');
+function targets(e,kb){ kb=kb||e.id;   // kb = کلیدِ رکورد (اصلی: id · جایگزین: id~a) — رکوردِ هر واریانت جداست
+  const w=localStorage.getItem('bf_'+kb+'w'), r=localStorage.getItem('bf_'+kb+'r');
   const U=e.unit==='s'?' ث':' kg', noW=!(e.step>0);
   if(noW){                                                              // حرکتِ بی‌وزنه (مثل کرانچ): فقط تکرار
     return { last: r?('🔼 آخرین: '+faNum(r)+' تکرار'):'🔼 هنوز رکوردی ثبت نشده',
@@ -613,7 +615,7 @@ function card(e){
       ${e.why?'<div class="why">💡 '+e.why+'</div>':''}
       ${e.tip?'<div class="tip">'+e.tip+'</div>':''}
       <div class="deline">🏷️ دستگاه: <b>${e.de}</b>${e.alt?'<br>🔁 شلوغ بود؟ '+altify(e.alt):''}</div>
-      ${e.swap?'<button class="swapbtn" data-id="'+e.id+'" type="button">🔁 عوض کن با «'+e.swap.n+'»</button>':''}
+      ${e.swap?'<div class="swapwk" id="swapwk-'+e.id+'"></div><button class="swapbtn" data-id="'+e.id+'" type="button">🔁 عوض کن با «'+e.swap.n+'»</button>':''}
       ${e.adv?'<details class="adv"><summary>💡 نکته‌ی فرم (پیشرفته) — بزن تا باز شه</summary><div>'+e.adv+'</div></details>':''}
       <div class="logtitle">${lt}</div>
       <div class="log">
@@ -663,24 +665,44 @@ document.addEventListener('click',ev=>{
   }
 });
 
-// 🔁 عوض‌کردنِ حرکت با جایگزینش (سرِجا، گیفِ جایگزین فقط موقع زدن لود می‌شه)
-document.addEventListener('click',ev=>{
-  const sb=ev.target.closest('.swapbtn'); if(!sb)return;
-  const id=sb.dataset.id, e=META[id]; if(!e||!e.swap)return;
-  const card=document.getElementById('ex-'+id), sw=card.classList.toggle('swapped'), cur=sw?e.swap:e;
+// 🔁 حرکتِ اصلی / جایگزین — یه هفته در میون، خودکار (هفته‌ی فرد: اصلی، هفته‌ی زوج: جایگزین)
+// رکوردِ هر کدوم جداست: اصلی رو کلیدِ id، جایگزین رو کلیدِ id~a (وزنه، تکرار، روند). قاطی نمی‌شن.
+// دکمه‌ی 🔁 فقط همین هفته رو دستی عوض می‌کنه (bf_swapov_id = "هفته:۰/۱")؛ هفته‌ی بعد دوباره خودکار.
+const SWAP_ANCHOR='2026-09-07';                                        // دوشنبه‌ی هفته‌ی ۱ (اصلی)
+function wkIdx(){ return Math.floor((new Date(today())-new Date(SWAP_ANCHOR))/604800000); }
+function autoAlt(){ return ((wkIdx()%2)+2)%2===1; }
+function wantAlt(id){ const ov=localStorage.getItem('bf_swapov_'+id); if(ov){ const p=ov.split(':'); if(+p[0]===wkIdx()) return p[1]==='1'; } return autoAlt(); }
+function applyVariant(id,useAlt,persist){
+  const e=META[id]; if(!e||!e.swap) return;
+  const card=document.getElementById('ex-'+id); if(!card) return;
+  const sw=!!useAlt, cur=sw?e.swap:e, kb=sw?id+'~a':id;
+  card.classList.toggle('swapped',sw);
   const m=card.querySelector('.media'), img=m.querySelector('img');
   const vf=m.querySelector('.vidframe'); if(vf)vf.remove(); const cv=m.querySelector('.closevid'); if(cv)cv.remove(); m.classList.remove('playing');
-  m.classList.remove('noimg'); img.removeAttribute('data-f'); img.dataset.still=sw?'':(STILL+e.still+'/0.jpg'); img.src=GIF+cur.gif;  // فال‌بکِ تصویر مالِ همون حرکتِ فعلی باشه
+  m.classList.remove('noimg'); img.removeAttribute('data-f'); img.dataset.still=sw?'':(e.still?STILL+e.still+'/0.jpg':''); img.src=GIF+cur.gif;  // فال‌بکِ تصویر مالِ همون حرکتِ فعلی باشه
   m.dataset.vid=cur.vid;
   const yt=m.querySelector('.ytlink'); if(yt)yt.href='https://www.youtube.com/watch?v='+cur.vid;
   card.querySelector('.name').innerHTML=cur.n+' <span class="en">'+cur.en+'</span>'+(sw?'<span class="swapbadge">جایگزین</span>':'');
   card.querySelector('.deline').innerHTML=sw
     ?'🏷️ دستگاه: <b>'+cur.de+'</b> <span class="swaphint">(جایگزینِ '+e.n+')</span>'
-    :'🏷️ دستگاه: <b>'+e.de+'</b><br>🔁 شلوغ بود؟ '+altify(e.alt);
+    :'🏷️ دستگاه: <b>'+e.de+'</b>'+(e.alt?'<br>🔁 شلوغ بود؟ '+altify(e.alt):'');
   const advBox=card.querySelector('details.adv'), at=(cur.adv||'');   // نکته‌ی فرمِ حرکتِ فعلی (اصلی یا جایگزین)
   if(advBox){ if(at){ advBox.style.display=''; const dd=advBox.querySelector('div'); if(dd) dd.innerHTML=at; } else advBox.style.display='none'; }
-  sb.textContent=sw?'↩️ برگرد به «'+e.n+'»':'🔁 عوض کن با «'+e.swap.n+'»';
+  // 🗂️ رکوردها جدا: کلیدِ ورودی‌ها می‌ره رو واریانتِ فعلی و مقدارِ ذخیره‌شده‌ی همون لود می‌شه
+  card.querySelectorAll('input[data-k]').forEach(inp=>{ const suf=/w$/.test(inp.dataset.k)?'w':'r'; inp.dataset.k=kb+suf; const sv=localStorage.getItem('bf_'+kb+suf); inp.value=(sv!==null)?sv:''; });
+  const t=targets(e,kb); const L=document.getElementById('last-'+id), N=document.getElementById('next-'+id); if(L)L.textContent=t.last; if(N)N.textContent=t.next;
+  const pg=card.querySelector('.pg2body'); if(pg){ pg.id='pg2-'+kb; const det=pg.closest('details'); if(det&&det.open) renderTrend(kb,pg); }
+  const sb=card.querySelector('.swapbtn'); if(sb) sb.textContent=sw?'↩️ این هفته اصلی رو بزن («'+e.n+'»)':'🔁 این هفته جایگزین رو بزن («'+e.swap.n+'»)';
+  const wkEl=document.getElementById('swapwk-'+id);
+  if(wkEl) wkEl.innerHTML='🗓 این هفته: <b>'+(sw?'جایگزین':'اصلی')+'</b>'+(sw!==autoAlt()?' <span class="swaphint">(دستی — فقط همین هفته)</span>':' <span class="swaphint">(خودکار، یه هفته در میون)</span>')+' · رکوردِ هر کدوم جدا ثبت می‌شه';
+  if(persist) localStorage.setItem('bf_swapov_'+id, wkIdx()+':'+(sw?1:0));
+}
+document.addEventListener('click',ev=>{
+  const sb=ev.target.closest('.swapbtn'); if(!sb)return;
+  const id=sb.dataset.id, card=document.getElementById('ex-'+id); if(!card) return;
+  applyVariant(id, !card.classList.contains('swapped'), true);
 });
+Object.keys(META).forEach(id=>{ if(META[id].swap) applyVariant(id, wantAlt(id), false); });   // اولِ لود: واریانتِ این هفته
 
 // 🎬 پاپ‌آپِ گیفِ حرکاتِ جایگزین
 (function(){
@@ -712,14 +734,15 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
 
 // weight/rep log + live targets
 document.querySelectorAll('input[data-k]').forEach(inp=>{
-  const key='bf_'+inp.dataset.k, saved=localStorage.getItem(key);
+  const K=()=>'bf_'+inp.dataset.k;                                       // کلید هر بار تازه خونده می‌شه — با سواپِ اصلی/جایگزین عوض می‌شه
+  const saved=localStorage.getItem(K());
   if(saved!==null) inp.value=saved;
   inp.addEventListener('focus',()=>{ inp._prev=inp.value; setTimeout(()=>{ try{inp.select();}catch(e){} },0); });   // تپِ اول: کلِ عدد هایلایت شه (ادیتِ راحت)؛ تپِ بعدی خودِ مرورگر مکان‌نما می‌ذاره
   inp.addEventListener('change',()=>{                                    // 🤔 پرشِ مشکوک نسبت به رکوردِ قبلی؟ فقط می‌پرسه — چیزی رو خودش پاک نمی‌کنه
     const isW=/w$/.test(inp.dataset.k), v=parseFloat(inp.value), p=parseFloat(inp._prev);
-    if(isW && isFinite(v) && v>0) recordHist(inp.dataset.k.slice(0,-1), v);   // 📈 ثبتِ روندِ وزنه (آپسرتِ امروز)
-    const _id=inp.dataset.k.slice(0,-1);
-    if(!isW && META[_id] && !(META[_id].step>0) && isFinite(v) && v>0) recordHist(_id, v);   // حرکتِ بی‌وزنه (کرانچ): روند از روی تکرار
+    const kb=inp.dataset.k.slice(0,-1), _id=kb.split('~')[0];            // kb = کلیدِ واریانت · _id = حرکتِ پایه (برای META)
+    if(isW && isFinite(v) && v>0) recordHist(kb, v);                     // 📈 ثبتِ روندِ وزنه (آپسرتِ امروز) — روندِ جایگزین جداست
+    if(!isW && META[_id] && !(META[_id].step>0) && isFinite(v) && v>0) recordHist(kb, v);   // حرکتِ بی‌وزنه (کرانچ): روند از روی تکرار
     if(!isW||!isFinite(v)||!isFinite(p)||p<=0||v===p) return;
     const up=(v>=p*1.5&&v-p>=5), dn=(v<=p*0.55&&p-v>=5);
     if(!(up||dn)) return;
@@ -730,9 +753,9 @@ document.querySelectorAll('input[data-k]').forEach(inp=>{
     clearTimeout(w._t); w._t=setTimeout(()=>{ w.remove(); },15000);
   });
   inp.addEventListener('input',()=>{
-    localStorage.setItem(key,inp.value);
+    localStorage.setItem(K(),inp.value);
     const ok=inp.parentNode.querySelector('.ok'); if(ok){ok.classList.add('show'); clearTimeout(ok._t); ok._t=setTimeout(()=>ok.classList.remove('show'),1100);}
-    const id=inp.dataset.k.slice(0,-1), e=META[id]; if(e){const t=targets(e); document.getElementById('last-'+id).textContent=t.last; document.getElementById('next-'+id).textContent=t.next;}
+    const kb=inp.dataset.k.slice(0,-1), id=kb.split('~')[0], e=META[id]; if(e){const t=targets(e,kb); document.getElementById('last-'+id).textContent=t.last; document.getElementById('next-'+id).textContent=t.next;}
   });
 });
 
@@ -1367,13 +1390,19 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  function showFrame(){ vid.style.display='none'; fr.style.display='block'; }
  function showVid(){ fr.style.display='none'; vid.style.display='block'; }
  function killHls(){ if(hls){ try{hls.destroy()}catch(e){} hls=null; } try{ vid.pause(); vid.removeAttribute('src'); vid.load(); }catch(e){} }
+ const canNative=!!(wrap.requestFullscreen || wrap.webkitRequestFullscreen);   // آیفون‌سافاری: false (فقط <video> رو تمام‌صفحه می‌کنه، نه div)
+ const forcePseudo=()=>{ try{ return localStorage.getItem('ui_tvpseudo')==='1'; }catch(e){ return false; } };   // سوییچِ مخفی: تمام‌صفحه‌ی داخلِ صفحه رو زوری کن
+ function pseudoFs(on){                                                          // 📱 تمام‌صفحه‌ی داخلِ صفحه: باکس fixed رو کلِ ویوپورت — سواپِ کانال، نوارِ دکمه‌ها و ✕ همون‌جور کار می‌کنن
+   wrap.classList.toggle('pfs',on); wrap.classList.toggle('fs',on); document.body.classList.toggle('tvpfs',on);
+   if(on){ hint.classList.add('show'); setTimeout(()=>hint.classList.remove('show'),3500); flashCtrl(); }
+   else { ctrl.classList.remove('show'); hint.classList.remove('show'); } }
  async function goFull(){                                                        // تمام‌صفحه = خودِ باکس (تا لایه‌ی سواپ/کنترلِ خودمون کار کنه)
-   if(wrap.requestFullscreen || wrap.webkitRequestFullscreen){
-     try{ if(wrap.requestFullscreen) await wrap.requestFullscreen(); else wrap.webkitRequestFullscreen(); }catch(e){}
+   if(canNative && !forcePseudo()){
+     try{ if(wrap.requestFullscreen) await wrap.requestFullscreen(); else wrap.webkitRequestFullscreen(); }catch(e){ pseudoFs(true); return; }
      try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){}
-   } else if(vid.style.display!=='none' && vid.webkitEnterFullscreen){          // آیفون: div تمام‌صفحه نمی‌شه — پلیرِ نیتیوِ خودِ ویدیو
-     try{ vid.webkitEnterFullscreen(); }catch(e){ vid.addEventListener('loadedmetadata',function(){ try{vid.webkitEnterFullscreen()}catch(_){} },{once:true}); }
-   } }
+     return; }
+   pseudoFs(true);                                                              // آیفون (و هر مرورگرِ بی‌Fullscreen-API): قبلاً برای کانال‌های یوتیوب هیچی نمی‌شد — الان تمام‌صفحه‌ی داخلِ صفحه
+ }
  function pipHint(msg){ const t=document.getElementById('tvpip'); if(t){ t.textContent=msg; setTimeout(()=>{t.textContent='🔳 شناور';},2200); } }
  async function enterPip(){                                                     // پنجره‌ی شناورِ کوچیک (گوشی پرتره می‌مونه) — فقط برای ویدیوی مستقیم
    if(vid.style.display==='none'){ pipHint('فقط کافه‌فیلم/انقلابِ ملی'); return; }
@@ -1394,7 +1423,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    if(healN>=4){ const tc=curBtn.querySelector('.tc'); if(tc) tc.textContent='😕 استریم قطع شد'; if(curFb) fbBtn.style.display='inline-block'; return; }
    healN++; const tc=curBtn.querySelector('.tc'); if(tc) tc.textContent='🔄 وصل‌شدنِ دوباره…';
    play(curCh,curBtn); }
- function stop(){ fr.src='about:blank'; killHls(); clearTimeout(wd); stopStall(); curCh=null; curBtn=null; healN=0; fbBtn.style.display='none'; wrap.classList.remove('on'); bar.classList.remove('on'); host.querySelectorAll('.tvch').forEach(b=>b.classList.remove('on')); }
+ function stop(){ if(wrap.classList.contains('pfs')) pseudoFs(false); fr.src='about:blank'; killHls(); clearTimeout(wd); stopStall(); curCh=null; curBtn=null; healN=0; fbBtn.style.display='none'; wrap.classList.remove('on'); bar.classList.remove('on'); host.querySelectorAll('.tvch').forEach(b=>b.classList.remove('on')); }
  async function play(ch,b){
    host.querySelectorAll('.tvch').forEach(x=>x.classList.toggle('on',x===b));
    curIdx=CH.indexOf(ch); { const nm=document.getElementById('tvname'); if(nm) nm.textContent=ch.n; }
@@ -1446,10 +1475,11 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  over.addEventListener('click',()=>{ if(Date.now()-lastTouch<600) return; toggleCtrl(); });   // موس/دسکتاپ (کلیکِ مصنوعیِ بعدِ تپ نادیده)
  document.getElementById('tvprev').addEventListener('click',()=>cycle(-1));
  document.getElementById('tvnext').addEventListener('click',()=>cycle(1));
- function exitFs(){ try{ if(document.exitFullscreen) document.exitFullscreen(); else if(document.webkitExitFullscreen) document.webkitExitFullscreen(); }catch(e){} }
+ function exitFs(){ if(wrap.classList.contains('pfs')){ pseudoFs(false); return; } try{ if(document.exitFullscreen) document.exitFullscreen(); else if(document.webkitExitFullscreen) document.webkitExitFullscreen(); }catch(e){} }
  document.getElementById('tvexit').addEventListener('click',exitFs);
  document.getElementById('tvclose').addEventListener('click',exitFs);           // ✕ بستنِ همیشه‌پیدا تو تمام‌صفحه
- document.addEventListener('fullscreenchange',()=>{ const fs=(document.fullscreenElement===wrap); wrap.classList.toggle('fs',fs);
+ document.addEventListener('keydown',e=>{ if(e.key==='Escape' && wrap.classList.contains('pfs')) pseudoFs(false); });   // دسکتاپ: Esc از تمام‌صفحه‌ی داخلِ صفحه درمیاره
+ document.addEventListener('fullscreenchange',()=>{ if(wrap.classList.contains('pfs')) return; const fs=(document.fullscreenElement===wrap); wrap.classList.toggle('fs',fs);
    if(fs){ hint.classList.add('show'); setTimeout(()=>hint.classList.remove('show'),3500); flashCtrl(); }
    else{ try{ screen.orientation.unlock(); }catch(e){} ctrl.classList.remove('show'); hint.classList.remove('show'); } });
  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ if(t.dataset.day!=='tv' && (fr.src!=='about:blank'||hls)) stop(); }));   // رفتی سراغِ تمرین؟ پخش قطع شه که صداش مزاحم نشه
