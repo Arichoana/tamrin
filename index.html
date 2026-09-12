@@ -105,6 +105,12 @@
   .tvch .tn{font-weight:800; font-size:13.5px} .tvch .tc{font-size:11px; color:var(--mut); margin-top:3px}
   .tvch.on{border-color:#ef4444; box-shadow:0 0 0 1px #ef4444 inset}
   .tvnote{font-size:11.5px; color:var(--mut); margin-top:12px; line-height:1.8}
+  .tvmusic{margin-top:16px; border-top:1px solid var(--line); padding-top:12px}
+  .tvmusic .dayhead{margin-bottom:8px}
+  .tvmusic .mgrid{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  .tvmusic a.mch{display:block; text-decoration:none; background:#0e1f14; border:1px solid #1f5c2e; border-radius:13px; padding:11px 12px; color:var(--txt); text-align:right}
+  .tvmusic a.mch:active{transform:scale(.99)}
+  .tvmusic a.mch .tn{font-weight:800; font-size:13.5px; color:#8ff0b0} .tvmusic a.mch .tc{font-size:11px; color:var(--mut); margin-top:3px}
   .totcard{background:linear-gradient(135deg,#241c30,#191620); border:1px solid #3a2f4a; border-radius:14px; padding:13px 14px; margin-bottom:14px}
   .totcard .t1{font-size:13px; font-weight:700} .totcard .t1 b{color:#d8b4fe}
   .totnow{font-size:12.5px; color:var(--mut); margin-top:6px} .totnow b{color:var(--txt)}
@@ -1381,6 +1387,17 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    '<div class="tvbar" id="tvbar"><button type="button" class="tvfull" id="tvfull">⛶ تمام‌صفحه</button><button type="button" id="tvfb" style="display:none;background:#3a2f14;border-color:#7a5a2a;color:#ffcf66">▶ پلیرِ اصلی</button><button type="button" id="tvpip">🔳 شناور</button><button type="button" id="tvstop">✕ قطع پخش</button></div>'+
    '<div class="tvgrid">'+CH.map((ch,i)=>'<button type="button" class="tvch" data-i="'+i+'"><div class="tn">'+ch.n+'</div><div class="tc">'+ch.c+'</div></button>').join('')+'</div>'+
    '<div class="tvnote">🔗 پخش از پلیرِ رسمیِ خودِ کانال‌هاست. 🎬 کافه‌فیلم و انقلابِ ملی استریمِ مستقیمِ رایگانن و گاهی چند دقیقه لوس/قطع می‌شن — اون‌وقت دکمه‌ی <b style="color:#ffcf66">▶ پلیرِ اصلی</b> ظاهر می‌شه که تو تبِ جدا بازش می‌کنه. کانالِ دیگه‌ای خواستی، بگو.</div>';
+ // 🎵 موزیک — پلی‌لیست‌های اسپاتیفای (آی‌دی‌ها با oEmbed خودِ اسپاتیفای چک شده). لینکِ open.spotify.com رو آیفون مستقیم تو اپِ اسپاتیفای باز می‌کنه:
+ // پشتِ‌سرِ‌هم پخش می‌شه، با قفلِ صفحه ادامه می‌ده، کنترل رو لاک‌اسکرین داره — چیزی که embed داخلِ صفحه رو آیفون نمی‌ده.
+ const MUSIC=[
+  {n:'هیپ‌هاپ باحال',c:'RapCaviar · داغ‌ترین رپِ روز',id:'37i9dQZF1DX0XUsuxWHRQd'},
+  {n:'امینم',c:'This Is Eminem · همه‌ی اساسی‌ها',id:'37i9dQZF1DZ06evO4gTUOY'},
+  {n:'رپِ باشگاه',c:'Beast Mode Hip-Hop · مخصوصِ وزنه',id:'37i9dQZF1DX9oh43oAzkyx'},
+  {n:'رپ فارسی',c:'هیچکس، بهرام، فدایی، شایع…',id:'0TErhH1n9C8Fnd5OlduTzC'}
+ ];
+ host.insertAdjacentHTML('beforeend','<div class="tvmusic"><div class="dayhead">🎵 موزیک — بزنی تو اپِ اسپاتیفای باز می‌شه و آهنگ‌ها پشتِ‌سرِ‌هم پخش می‌شن (صفحه رو قفل کنی هم ادامه داره).</div><div class="mgrid">'+
+   MUSIC.map(m=>'<a class="mch" href="https://open.spotify.com/playlist/'+m.id+'" target="_blank" rel="noopener"><div class="tn">🎵 '+m.n+'</div><div class="tc">'+m.c+'</div></a>').join('')+
+   '</div><div class="tvnote">پلی‌لیستِ دیگه‌ای خواستی، لینکِ اسپاتیفایش رو بفرست تا اضافه کنم.</div></div>');
  const wrap=document.getElementById('tvwrap'), fr=document.getElementById('tvframe'), vid=document.getElementById('tvvideo'), bar=document.getElementById('tvbar'), fbBtn=document.getElementById('tvfb');
  const over=document.getElementById('tvover'), ctrl=document.getElementById('tvctrl'), hint=document.getElementById('tvhint');
  let hls=null, hlsP=null, wd=null, curFb=null, curIdx=-1;
