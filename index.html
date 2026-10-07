@@ -522,7 +522,16 @@ const S103=(function(){
    rest1:   big(e)?'۹۰ ثانیه':'۶۰ ثانیه',
    scheme2: big(e)?'۳ ست × ۱۰–۱۲ · وزنه ~۸۵٪ِ رکورد · ۲ تکرار ذخیره':'۳ ست × ۱۲–۱۵ · ۲ تکرار ذخیره · ست آخر نزدیکِ ناتوانی',
    rest2:   big(e)?'۱۲۰ ثانیه':'۶۰ ثانیه'});
- return {push:S1.push.map(cp),pull:S1.pull.map(cp),legs:S1.legs.map(cp)};
+ // 💪 پشت‌بازو سیم‌کش تو همه‌ی سری‌ها بود (گلایه‌ی آرمان ۰۷.۱۰) — اینجا «پشت‌بازو از بالای سر با کابل» جاش می‌شینه. جایگزینِ هفتگیش همون دیپه.
+ const TRI={id:'s103t1',n:'پشت‌بازو از بالای سر با کابل',en:'Cable Overhead Triceps Extension',zone:'Functional (کابل)',mus:'پشت‌بازو (سرِ بلند)',mode:'fail',
+   scheme:'۳×۱۲–۱۵ · ست آخر تا ناتوانی 🔥',rest:'۶۰ ثانیه',w:15,step:2.5,ph:'💪',
+   gif:'2021/04/Cable-Rope-Overhead-Triceps-Extension.gif',still:'Cable_Rope_Overhead_Triceps_Extension',vid:'b5le--KkyH0',
+   de:'Trizepsdrücken über Kopf am Kabelzug (Seil)',alt:'پشت‌بازو از بالای سر با دمبل، یا دیپ کمکی',
+   why:'از بالای سر، سرِ بلندِ پشت‌بازو کشیده می‌شه — همون عضله ولی یه زاویه‌ی تازه، نه تکرارِ سیم‌کشِ همیشگی.',
+   tip:'آرنج‌ها کنارِ سر و ثابت؛ فقط ساعد حرکت کنه.',
+   adv:'پشت به دستگاه، طناب از قرقره‌ی پایین، یه پا جلو. پایین تا جایی برو که پشتِ بازو حسابی کشیده شه، بالا کامل باز کن. کمر قوس نده — شکم سفت.'};
+ const push=S1.push.map(e=>e.id==='push4'?Object.assign({},e,TRI,{swap:e.swap}):e);
+ return {push:push.map(cp),pull:S1.pull.map(cp),legs:S1.legs.map(cp)};
 })();
 SERIES[103]=(function(){ const w=wk103();
   return {name:'سری ۱۰۳ — برگشت بعد از مریضی 🩹',data:S103,
