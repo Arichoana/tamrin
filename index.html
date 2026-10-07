@@ -1425,6 +1425,8 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  const host=document.getElementById('tv'); if(!host) return;
  const CH=[
   {n:'ایران اینترنشنال',c:'📰 خبر · ۲۴/۷',m:'yt',id:'UCat6bC0Wrqq9Bcq7EkH_yQw'},
+  {n:'رادیو فردا',c:'📻 رادیو · خبر و موسیقی · زنده',m:'hls',url:'https://rferl-ingest.akamaized.net/hls/live/2121659/axia21/master.m3u8',fb:'https://www.radiofarda.com/live/audio/80'},
+  {n:'دکتر آذرخش مکری',c:'🧠 سخنرانی · هر بار یه ویدیوی رندوم',m:'ytrand',list:'UULFcjn40kF25PEYNlmS8_3hdQ',max:100},
   {n:'انقلابِ ملیِ ایران',c:'📢 صدای انقلابِ ملی · پیام‌های شاهزاده رضا پهلوی',m:'hls',url:'https://hls.irannrtv.live/hls/stream.m3u8',fb:'https://iranopasmigirim.com/fa/iran-national-revolution-tv'},
   {n:'کافه فیلم',c:'🎬 فیلم و سریال · ۲۴/۷',m:'hls',url:'https://cafefhls.wns.live/hls/stream.m3u8',fb:'https://cafefilm.wns.live/'},
   {n:'پرشیانا جونیور',c:'🧸 کارتونِ دوبله · مخصوصِ بچه‌ها',m:'hls',url:'https://junhls.persiana.live/hls/stream.m3u8',fb:'https://www.persianagroup.tv/live.html?ch=junior'},
@@ -1500,6 +1502,8 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    stopStall(); if(ch!==curCh) healN=0; curCh=ch; curBtn=b;                     // کانالِ نو → شمارنده‌ی درمان از نو
    wrap.classList.add('on'); bar.classList.add('on'); wrap.scrollIntoView({behavior:'smooth',block:'nearest'});
    killHls(); clearTimeout(wd); fbBtn.style.display='none'; fr.src='about:blank'; const tc=b.querySelector('.tc');
+   if(ch.m==='ytrand'){ showFrame(); const k=1+Math.floor(Math.random()*(ch.max||50));   // 🎲 یه ویدیوی رندوم از ویدیوهای بلندِ کانال (لیستِ UULF = بدونِ شورتس)
+     fr.src='https://www.youtube-nocookie.com/embed/videoseries?list='+ch.list+'&index='+k+'&autoplay=1&playsinline=1&rel=0'; tc.textContent=ch.c; return; }
    if(ch.m==='site'){ showFrame(); fr.src=ch.url; return; }
    if(ch.m==='hls'){ showVid(); tc.textContent='⏳ در حالِ اتصال…'; curFb=ch.fb||null;   // استریمِ مستقیم با hls.js
      vid.addEventListener('playing',function _ok(){ vid.removeEventListener('playing',_ok); clearTimeout(wd); fbBtn.style.display='none'; tc.textContent=ch.c; healN=0; startStall(); },{once:true});   // پخش راه افتاد → پزشکِ داخلی روشن + شمارنده صفر
