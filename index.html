@@ -121,6 +121,10 @@
 .tvmusic button.mch:active{transform:scale(.99)}
 .tvmusic button.mch .tn{font-weight:800; font-size:13.5px; color:#c9b6ff}
 .tvmusic button.mch .tc{font-size:12px; color:var(--mut); margin-top:3px} .tvmusic a.mch .tc{font-size:11px; color:var(--mut); margin-top:3px}
+.tvmusic button.mch.talk{background:#241a0c; border-color:#7a5a24} .tvmusic button.mch.talk .tn{color:#ffcf7a}
+.tchips{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+.tchips button{font:inherit; font-size:12px; padding:6px 10px; border-radius:999px; background:#16130d; border:1px solid #4a3a1c; color:var(--txt); cursor:pointer}
+.tchips button.on{background:#3a2a10; border-color:#ffcf7a; color:#ffcf7a}
   .totcard{background:linear-gradient(135deg,#241c30,#191620); border:1px solid #3a2f4a; border-radius:14px; padding:13px 14px; margin-bottom:14px}
   .totcard .t1{font-size:13px; font-weight:700} .totcard .t1 b{color:#d8b4fe}
   .totnow{font-size:12.5px; color:var(--mut); margin-top:6px} .totnow b{color:var(--txt)}
@@ -1474,6 +1478,33 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    }
    btn.addEventListener('click',next); au.addEventListener('ended',next);
  })();
+
+ // 💬 «حرف برای گفتن» — دونستنی‌هایی که تو جمع و سرِ قرار به درد می‌خورن (آرمان ۰۷.۱۰.۲۰۲۶). talk.json: ۱۳ پادکستِ فارسیِ پرقسمت، هر کدوم یه موضوع
+ // (پیدا شده از دایرکتوریِ پادکستِ اپل؛ قسمت‌ها از RSSِ خودِ پادکست‌ها). رندوم = اول موضوعِ رندوم، بعد قسمتِ رندوم — تا پادکستِ ۳۰۰قسمتی بقیه رو نخوره.
+ host.insertAdjacentHTML('beforeend','<div class="tvmusic" id="talkbox"><div class="dayhead">💬 حرف برای گفتن — دونستنی‌هایی که تو جمع و سرِ قرار به درد می‌خورن. «🎲» بزن: موضوع و قسمت رندوم؛ یا یه موضوع رو بزن تا فقط از همون پخش شه. تموم شد خودش بعدی رو می‌ذاره؛ با قفلِ صفحه هم ادامه داره.</div>'+
+   '<button type="button" class="mch talk" id="talkrand"><div class="tn">🎲 یه موضوعِ رندوم</div><div class="tc" id="talknow">هنوز چیزی پخش نشده</div></button>'+
+   '<div class="tchips" id="talkcats"></div>'+
+   '<audio id="talkaudio" controls preload="none" style="width:100%;margin-top:8px"></audio></div>');
+ (function(){ const au=document.getElementById('talkaudio'), nowEl=document.getElementById('talknow'), btn=document.getElementById('talkrand'), chips=document.getElementById('talkcats');
+   const CATS=["📚 کتاب", "🎙️ داستانِ واقعی", "👑 آدم‌های تاریخ‌ساز", "👤 زندگی‌نامه", "🏛️ تاریخ", "🐉 اسطوره‌ها", "🔬 علم", "🧠 مغز و ذهن", "🎬 سینما", "🎵 موسیقی", "🌹 شعر", "🤔 فلسفه", "🌍 سفر"], fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+   let BY=null, mode='', lastU='';
+   chips.innerHTML=CATS.map(c=>'<button type="button" data-c="'+c+'">'+c+'</button>').join('');
+   async function next(){
+     if(!BY){ try{ const L=await (await fetch('talk.json')).json(); BY={}; L.forEach(e=>{ (BY[e.c]=BY[e.c]||[]).push(e); }); }catch(e){ BY=null; nowEl.textContent='❌ لیست لود نشد — نت رو چک کن و دوباره بزن'; return; } }
+     const ks=Object.keys(BY); if(!ks.length) return;
+     const c=(mode&&BY[mode])?mode:ks[Math.floor(Math.random()*ks.length)], L=BY[c];
+     let e; do{ e=L[Math.floor(Math.random()*L.length)]; }while(L.length>1&&e.u===lastU); lastU=e.u;
+     if(curCh) stop();                                                           // تلویزیون روشن بود؟ خاموش
+     au.src=e.u; nowEl.textContent='▶ '+e.c+' · '+e.s+' — '+e.t+(e.m?' ('+fa(e.m)+' دقیقه)':''); au.play().catch(function(){});
+     chips.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.c===mode));
+     try{ if('mediaSession' in navigator){ navigator.mediaSession.metadata=new MediaMetadata({title:e.t,artist:e.s,album:'حرف برای گفتن · '+e.c}); navigator.mediaSession.setActionHandler('nexttrack',next); } }catch(x){}
+   }
+   btn.addEventListener('click',()=>{ mode=''; next(); });
+   chips.addEventListener('click',ev=>{ const b=ev.target.closest('button'); if(!b) return; mode=b.dataset.c; next(); });
+   au.addEventListener('ended',next);
+ })();
+ // دو تا پلیرِ صوتی هم‌زمان نه: هر کدوم پلی شد، اون یکی مکث و تلویزیون خاموش
+ ['podaudio','talkaudio'].forEach(id=>{ const a=document.getElementById(id); if(a) a.addEventListener('play',()=>{ document.querySelectorAll('#podaudio,#talkaudio').forEach(o=>{ if(o!==a&&!o.paused) o.pause(); }); if(curCh) stop(); }); });
  const wrap=document.getElementById('tvwrap'), fr=document.getElementById('tvframe'), vid=document.getElementById('tvvideo'), bar=document.getElementById('tvbar'), fbBtn=document.getElementById('tvfb');
  const over=document.getElementById('tvover'), ctrl=document.getElementById('tvctrl'), hint=document.getElementById('tvhint');
  let hls=null, hlsP=null, wd=null, curFb=null, curIdx=-1;
@@ -1518,7 +1549,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    play(curCh,curBtn); }
  function stop(){ if(wrap.classList.contains('pfs')) pseudoFs(false); fr.src='about:blank'; killHls(); clearTimeout(wd); stopStall(); curCh=null; curBtn=null; healN=0; fbBtn.style.display='none'; wrap.classList.remove('on'); bar.classList.remove('on'); host.querySelectorAll('.tvch').forEach(b=>b.classList.remove('on')); }
  async function play(ch,b){
-   try{ const pa=document.getElementById('podaudio'); if(pa&&!pa.paused) pa.pause(); }catch(e){}   // 🎧 کانال روشن شد → پادکست مکث
+   try{ document.querySelectorAll('#podaudio,#talkaudio').forEach(a=>{ if(!a.paused) a.pause(); }); }catch(e){}   // 🎧 کانال روشن شد → پادکست‌ها مکث
    host.querySelectorAll('.tvch').forEach(x=>x.classList.toggle('on',x===b));
    curIdx=CH.indexOf(ch); { const nm=document.getElementById('tvname'); if(nm) nm.textContent=ch.n; }
    stopStall(); if(ch!==curCh) healN=0; curCh=ch; curBtn=b;                     // کانالِ نو → شمارنده‌ی درمان از نو
