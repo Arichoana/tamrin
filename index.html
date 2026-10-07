@@ -5,6 +5,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#ff6a00">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="تمرین">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>برنامه تمرین — Basic-Fit Essen</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f1115'/%3E%3Crect x='19' y='29' width='26' height='6' rx='3' fill='%23ffb27a'/%3E%3Crect x='12' y='19' width='8' height='26' rx='3.5' fill='%23ff6a00'/%3E%3Crect x='44' y='19' width='8' height='26' rx='3.5' fill='%23ff6a00'/%3E%3Crect x='4' y='24' width='6' height='16' rx='3' fill='%23ff6a00'/%3E%3Crect x='54' y='24' width='6' height='16' rx='3' fill='%23ff6a00'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -504,6 +510,33 @@ const SERIES={1:{name:'سری ۱ — پایه',data:S1},2:{name:'سری ۲ — �
  })()};
 let AISERS=[]; try{ AISERS=JSON.parse(localStorage.getItem('bf_aisers')||'[]')||[]; }catch(e){ AISERS=[]; }
 AISERS.forEach(g=>{ if(g&&g.serial>2&&g.serial!==101&&g.days) SERIES[g.serial]={name:g.name||('سری '+g.serial),data:aiToData(g)}; });
+// 🩹 سری ۱۰۳ — برگشت بعد از دو هفته مریضی (درخواستِ آرمان، ۰۷.۱۰.۲۰۲۶). همون حرکت‌های ۱۰۲ (آی‌دی‌ها یکی → رکوردها، روندها و اصلی/جایگزین ادامه دارن)،
+// ولی ۴ هفته‌ی پله‌ای: هفته‌ی ۱ آشتی (~۷۰٪، دو ست)، هفته‌ی ۲ برگشت (~۸۵٪، سه ست)، هفته‌ی ۳–۴ طرحِ عادیِ ۱۰۲ با پیشرفت.
+function wk103(){ try{ if(localStorage.getItem('bf_serblock')!=='103') return 1;
+  const bs=localStorage.getItem('bf_blockstart')||today(); return Math.max(1,Math.floor((new Date(today())-new Date(bs))/86400000/7)+1); }catch(e){ return 1; } }
+const S103=(function(){
+ const big=e=>/۱۲۰/.test(e.rest||'');                                // حرکت‌های اصلیِ هرمی (استراحتِ ۱۲۰ ثانیه)
+ const cp=e=>Object.assign({},e,{
+   scheme1: big(e)?'۲ ست × ۱۲ · وزنه ~۷۰٪ِ رکوردِ قبلی · ۳ تکرار مونده وایسا — هیچ ستی تا ناتوانی نه':'۲ ست × ۱۲–۱۵ · سبک · ۳ تکرار ذخیره',
+   rest1:   big(e)?'۹۰ ثانیه':'۶۰ ثانیه',
+   scheme2: big(e)?'۳ ست × ۱۰–۱۲ · وزنه ~۸۵٪ِ رکورد · ۲ تکرار ذخیره':'۳ ست × ۱۲–۱۵ · ۲ تکرار ذخیره · ست آخر نزدیکِ ناتوانی',
+   rest2:   big(e)?'۱۲۰ ثانیه':'۶۰ ثانیه'});
+ return {push:S102.push.map(cp),pull:S102.pull.map(cp),legs:S102.legs.map(cp)};
+})();
+SERIES[103]=(function(){ const w=wk103();
+  return {name:'سری ۱۰۳ — برگشت بعد از مریضی 🩹',data:S103,
+   cardio: w===1?'هفته‌ی ۱: روزی ۶–۸ هزار قدم + ۲×۲۰ دقیقه کراسِ سبک (طوری که راحت بتونی حرف بزنی)'
+          :w===2?'هفته‌ی ۲: روزی ۸ هزار قدم + ۲×۲۵ دقیقه کراس یا تردمیلِ شیب‌دار'
+          :'روزی ۸–۱۰ هزار قدم + ۳×۳۰ دقیقه کراس یا تردمیلِ شیب‌دار'};
+})();
+// ⏩ یک‌بار خودکار می‌ره رو ۱۰۳. زمان‌دار ثبت می‌شه تا تو سینک برنده شه و بقیه‌ی دستگاه‌ها هم بیان.
+// دستگاهِ تازه (هنوز bf_ts نداره، مثلاً اپِ تازه نصب‌شده) کاری نمی‌کنه — اول سینک وضعیت رو بیاره، وگرنه شمارشِ هفته از نو می‌شد.
+(function(){ try{ if(localStorage.getItem('bf_s103go')||!localStorage.getItem('bf_ts')) return;
+  const now=Date.now(); let T={}; try{ T=JSON.parse(localStorage.getItem('bf_ts')||'{}')||{}; }catch(e){}
+  const kv={bf_s103go:'1',bf_serial:'103',bf_serblock:'103',bf_blockstart:today()};
+  Object.keys(kv).forEach(k=>{ localStorage.setItem(k,kv[k]); T[k]=now; });
+  localStorage.setItem('bf_ts',JSON.stringify(T));
+ }catch(e){} })();
 // ✈️ یک‌بار خودکار می‌بردش رو سریِ استانبول. بعدش هر وقت خواست دستی عوض می‌کنه و دیگه کاری باهاش نداریم.
 if(!localStorage.getItem('bf_ist2026')){ localStorage.setItem('bf_ist2026','1'); localStorage.setItem('bf_serial','101'); }
 const ACTIVE=(function(){ const c=+(localStorage.getItem('bf_serial')||2); return SERIES[c]?c:2; })();
@@ -547,6 +580,16 @@ if(ACTIVE===102){ (function(){ var sr=document.querySelector('.serrow'); if(!sr)
   sr.appendChild(b);
 })(); }
 if(localStorage.getItem('bf_serblock')!==''+ACTIVE){ localStorage.setItem('bf_serblock',''+ACTIVE); localStorage.setItem('bf_blockstart',today()); }   // سری عوض شد → شمارشِ هفته از نو
+// 🩹 سری ۱۰۳: طرحِ هفته‌ی ۱ و ۲ جای طرحِ عادی می‌شینه؛ سرتیترِ هر روز هم مخصوصِ همون هفته‌ست.
+if(ACTIVE===103){ (function(){ const w=wk103();
+  if(w<=2) ['push','pull','legs'].forEach(d=>DATA[d].forEach(e=>{ const sc=e['scheme'+w], rs=e['rest'+w]; if(sc)e.scheme=sc; if(rs)e.rest=rs; }));
+  const top= w===1?'🩹 <b>هفته‌ی ۱ از ۴ — آشتی با باشگاه.</b> بعد از دو هفته مریضی: همه‌چی ~۷۰٪ِ رکوردِ قبلی، ۲ ست، هیچ ستی تا ناتوانی نه. هدف فقط اینه که بدن یادش بیاد — عضله‌ای که داشتی تو دو هفته از بین نرفته.'
+           : w===2?'🔁 <b>هفته‌ی ۲ از ۴ — برگشت.</b> ۳ ست، ~۸۵٪ِ رکورد، ۲ تکرار ذخیره. اگه هفته‌ی ۱ راحت بود، آخرِ همین هفته برو سراغِ وزنه‌های قبلی.'
+           : '📈 <b>هفته‌ی '+faNum(Math.min(w,4))+' از ۴ — طرحِ کامل.</b> ست آخر تا ناتوانی؛ سقفِ تکرار رو تو همه‌ی ست‌ها زدی، جلسه‌ی بعد وزنه یه پله بالا. با کسریِ کالری هدف «نگه‌داشتن و آروم بالا بردن»ه، نه رکوردِ هر جلسه.';
+  const tail='<br>💉 روزِ آمپول و فرداش اگه حالت تهوع یا اسهال داشتی، فقط هوازیِ سبک یا استراحت. ۱–۲ ساعت قبلِ تمرین یه وعده‌ی کوچیکِ پروتئینی + یه لیوان آب. قرصِ قلبت ضربان رو پایین نگه می‌داره، پس شدت رو با حسِ سختی بسنج نه با ضربان؛ سرگیجه گرفتی، بشین.';
+  const legs=w<=2?'':'<br>🦵 پا همچنان «نگه‌داری»: تا ۲–۳ تکرار مونده وایسا.';
+  ['push','pull','legs'].forEach(d=>{ const h=document.querySelector('#'+d+' .dayhead'); if(h) h.innerHTML=top+(d==='legs'?legs:'')+tail; });
+})(); }
 
 // 🎬 جایگزین‌های کلیکی: اسم‌های شناخته‌شده تو «شلوغ بود؟» → پاپ‌آپِ گیف (فقط نمایشی، به دیتا دست نمی‌زنه)
 const ALTG=[
@@ -1641,6 +1684,10 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') flush(); else { if(today()!==uiDay){ location.reload(); return; } syncIn(true); } });  // بک‌گراند→ذخیره ، برگشتن→دوباره بکش (روز عوض شده؟ رفرش)
  setInterval(function(){ if(today()!==uiDay) location.reload(); },60000);   // نیمه‌شب رد شد و صفحه بازه → UI روزِ نو
 })();
+// 🩹 سری ۱۰۳، هفته‌ی ۱–۲: برچسبِ «تا ناتوانی/پلکانی» با طرحِ سبکِ این دو هفته جور نیست — عوضش کن.
+if(ACTIVE===103&&wk103()<=2) document.querySelectorAll('.panel .b.fail, .panel .b.pyr').forEach(function(b){ b.textContent='🩹 سبک — نه تا ناتوانی'; b.className='b pyr'; });
+// 📲 نصب روی گوشی: سرویس‌ورکرِ ساده (همیشه اول شبکه، آپدیت‌ها فوری) — شرطِ دکمه‌ی «نصب» تو کروم/اندروید.
+if('serviceWorker' in navigator){ window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
 </script>
 </body>
 </html>
