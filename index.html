@@ -116,7 +116,11 @@
   .tvmusic .mgrid{display:grid; grid-template-columns:1fr 1fr; gap:8px}
   .tvmusic a.mch{display:block; text-decoration:none; background:#0e1f14; border:1px solid #1f5c2e; border-radius:13px; padding:11px 12px; color:var(--txt); text-align:right}
   .tvmusic a.mch:active{transform:scale(.99)}
-  .tvmusic a.mch .tn{font-weight:800; font-size:13.5px; color:#8ff0b0} .tvmusic a.mch .tc{font-size:11px; color:var(--mut); margin-top:3px}
+  .tvmusic a.mch .tn{font-weight:800; font-size:13.5px; color:#8ff0b0}
+.tvmusic button.mch{display:block; width:100%; font:inherit; cursor:pointer; background:#1d1630; border:1px solid #4b3a7a; border-radius:13px; padding:11px 12px; color:var(--txt); text-align:right}
+.tvmusic button.mch:active{transform:scale(.99)}
+.tvmusic button.mch .tn{font-weight:800; font-size:13.5px; color:#c9b6ff}
+.tvmusic button.mch .tc{font-size:12px; color:var(--mut); margin-top:3px} .tvmusic a.mch .tc{font-size:11px; color:var(--mut); margin-top:3px}
   .totcard{background:linear-gradient(135deg,#241c30,#191620); border:1px solid #3a2f4a; border-radius:14px; padding:13px 14px; margin-bottom:14px}
   .totcard .t1{font-size:13px; font-weight:700} .totcard .t1 b{color:#d8b4fe}
   .totnow{font-size:12.5px; color:var(--mut); margin-top:6px} .totnow b{color:var(--txt)}
@@ -1453,6 +1457,23 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  host.insertAdjacentHTML('beforeend','<div class="tvmusic"><div class="dayhead">🎵 موزیک — بزنی تو اپِ اسپاتیفای باز می‌شه و آهنگ‌ها پشتِ‌سرِ‌هم پخش می‌شن (صفحه رو قفل کنی هم ادامه داره).</div><div class="mgrid">'+
    MUSIC.map(m=>'<a class="mch" href="https://open.spotify.com/playlist/'+m.id+'" target="_blank" rel="noopener"><div class="tn">🎵 '+m.n+'</div><div class="tc">'+m.c+'</div></a>').join('')+
    '</div><div class="tvnote">پلی‌لیستِ دیگه‌ای خواستی، لینکِ اسپاتیفایش رو بفرست تا اضافه کنم.</div></div>');
+
+ // 🎧 پادکستِ صوتیِ روانشناسی — فقط روانپزشک‌های معتبر؛ لیستِ قسمت‌ها تو podcasts.json (از RSSِ خودِ پادکست‌ها، ۰۷.۱۰.۲۰۲۶).
+ // <audio>ِ جدا (نه پلیرِ TV) تا با قفلِ صفحه‌ی آیفون هم پخش ادامه پیدا کنه و کنترلش رو لاک‌اسکرین باشه.
+ host.insertAdjacentHTML('beforeend','<div class="tvmusic" id="podbox"><div class="dayhead">🎧 پادکستِ صوتیِ روانشناسی — فقط از روانپزشک‌های معتبر: دکتر آذرخش مکری و دکتر روزبه توسرکانی. «🎲» بزن، یه قسمتِ رندوم پخش می‌شه؛ تموم شد خودش یکی دیگه می‌ذاره. با قفلِ صفحه هم ادامه داره.</div>'+
+   '<button type="button" class="mch" id="podrand"><div class="tn">🎲 یه قسمتِ رندوم</div><div class="tc" id="podnow">هنوز چیزی پخش نشده</div></button>'+
+   '<audio id="podaudio" controls preload="none" style="width:100%;margin-top:8px"></audio></div>');
+ (function(){ const au=document.getElementById('podaudio'), nowEl=document.getElementById('podnow'), btn=document.getElementById('podrand'); let EPS=null, last=-1;
+   async function next(){
+     try{ if(!EPS) EPS=await (await fetch('podcasts.json')).json(); }catch(e){ nowEl.textContent='❌ لیست لود نشد — نت رو چک کن و دوباره بزن'; return; }
+     if(!EPS||!EPS.length) return;
+     let i; do{ i=Math.floor(Math.random()*EPS.length); }while(EPS.length>1&&i===last); last=i; const e=EPS[i];
+     if(curCh) stop();                                                           // تلویزیون روشن بود؟ خاموش که صداها قاطی نشن
+     au.src=e.u; nowEl.textContent='▶ '+e.s+' — '+e.t; au.play().catch(function(){});
+     try{ if('mediaSession' in navigator){ navigator.mediaSession.metadata=new MediaMetadata({title:e.t,artist:e.s,album:'پادکستِ روانشناسی'}); navigator.mediaSession.setActionHandler('nexttrack',next); } }catch(x){}
+   }
+   btn.addEventListener('click',next); au.addEventListener('ended',next);
+ })();
  const wrap=document.getElementById('tvwrap'), fr=document.getElementById('tvframe'), vid=document.getElementById('tvvideo'), bar=document.getElementById('tvbar'), fbBtn=document.getElementById('tvfb');
  const over=document.getElementById('tvover'), ctrl=document.getElementById('tvctrl'), hint=document.getElementById('tvhint');
  let hls=null, hlsP=null, wd=null, curFb=null, curIdx=-1;
@@ -1497,6 +1518,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    play(curCh,curBtn); }
  function stop(){ if(wrap.classList.contains('pfs')) pseudoFs(false); fr.src='about:blank'; killHls(); clearTimeout(wd); stopStall(); curCh=null; curBtn=null; healN=0; fbBtn.style.display='none'; wrap.classList.remove('on'); bar.classList.remove('on'); host.querySelectorAll('.tvch').forEach(b=>b.classList.remove('on')); }
  async function play(ch,b){
+   try{ const pa=document.getElementById('podaudio'); if(pa&&!pa.paused) pa.pause(); }catch(e){}   // 🎧 کانال روشن شد → پادکست مکث
    host.querySelectorAll('.tvch').forEach(x=>x.classList.toggle('on',x===b));
    curIdx=CH.indexOf(ch); { const nm=document.getElementById('tvname'); if(nm) nm.textContent=ch.n; }
    stopStall(); if(ch!==curCh) healN=0; curCh=ch; curBtn=b;                     // کانالِ نو → شمارنده‌ی درمان از نو
