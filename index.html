@@ -526,9 +526,9 @@ function wk103(){ try{ if(localStorage.getItem('bf_serblock')!=='103') return 1;
 const S103=(function(){
  const big=e=>/۱۲۰/.test(e.rest||'');                                // حرکت‌های اصلیِ هرمی (استراحتِ ۱۲۰ ثانیه)
  const cp=e=>Object.assign({},e,{
-   scheme1: big(e)?'۲ ست × ۱۲ · وزنه ~۷۰٪ِ رکوردِ قبلی · ۳ تکرار مونده وایسا — هیچ ستی تا ناتوانی نه':'۲ ست × ۱۲–۱۵ · سبک · ۳ تکرار ذخیره',
+   scheme1: big(e)?'۲ ست × ۱۲ · وزنه: عددِ «🎯 این هفته» زیرِ همین کارت · ۳ تکرار مونده وایسا — هیچ ستی تا ناتوانی نه':'۲ ست × ۱۲–۱۵ · سبک · ۳ تکرار ذخیره',
    rest1:   big(e)?'۹۰ ثانیه':'۶۰ ثانیه',
-   scheme2: big(e)?'۳ ست × ۱۰–۱۲ · وزنه ~۸۵٪ِ رکورد · ۲ تکرار ذخیره':'۳ ست × ۱۲–۱۵ · ۲ تکرار ذخیره · ست آخر نزدیکِ ناتوانی',
+   scheme2: big(e)?'۳ ست × ۱۰–۱۲ · وزنه: عددِ «🎯 این هفته» زیرِ همین کارت · ۲ تکرار ذخیره':'۳ ست × ۱۲–۱۵ · ۲ تکرار ذخیره · ست آخر نزدیکِ ناتوانی',
    rest2:   big(e)?'۱۲۰ ثانیه':'۶۰ ثانیه'});
  // 💪 پشت‌بازو سیم‌کش تو همه‌ی سری‌ها بود (گلایه‌ی آرمان ۰۷.۱۰) — اینجا «پشت‌بازو از بالای سر با کابل» جاش می‌شینه. جایگزینِ هفتگیش همون دیپه.
  const TRI={id:'s103t1',n:'پشت‌بازو از بالای سر با کابل',en:'Cable Overhead Triceps Extension',zone:'Functional (کابل)',mus:'پشت‌بازو (سرِ بلند)',mode:'fail',
@@ -539,7 +539,11 @@ const S103=(function(){
    tip:'آرنج‌ها کنارِ سر و ثابت؛ فقط ساعد حرکت کنه.',
    adv:'پشت به دستگاه، طناب از قرقره‌ی پایین، یه پا جلو. پایین تا جایی برو که پشتِ بازو حسابی کشیده شه، بالا کامل باز کن. کمر قوس نده — شکم سفت.'};
  const push=S1.push.map(e=>e.id==='push4'?Object.assign({},e,TRI,{swap:e.swap}):e);
- return {push:push.map(cp),pull:S1.pull.map(cp),legs:S1.legs.map(cp)};
+ // 🍑 هیپ‌تراست هالتر: میله روی شکم می‌شینه و تنها جاگذاشتنش سخته (گلایه‌ی آرمان ۰۹.۱۰) → جایگزین: گلوت‌بریج با دمبل. رکوردِ جدا (legs7~a).
+ const GB={n:'گلوت‌بریج با دمبل',en:'Dumbbell Glute Bridge',de:'Kurzhantel Glute Bridge (روی مت یا نیمکت)',gif:'2022/01/Dumbbell-Glute-Bridge.gif',vid:'',
+   adv:'پشتت رو مت یا لبه‌ی نیمکت، زانو خم، پاشنه‌ها زمین. دمبل رو عمودی با دو دست روی لگن نگه دار (نه روی شکم). با پاشنه هل بده بالا تا شونه-لگن-زانو یه خط شه، بالا ۱ ثانیه فشار، پایین آروم. هالتر و جاگذاریِ سنگین لازم نیست.'};
+ const legs=S1.legs.map(e=>e.id==='legs7'?Object.assign({},e,{swap:GB,alt:'گلوت‌بریج با دمبل (دکمه‌ی 🔁)، یا فیله کمر (Hyperextension)'}):e);
+ return {push:push.map(cp),pull:S1.pull.map(cp),legs:legs.map(cp)};
 })();
 SERIES[103]=(function(){ const w=wk103();
   return {name:'سری ۱۰۳ — برگشت بعد از مریضی 🩹',data:S103,
@@ -601,11 +605,11 @@ if(localStorage.getItem('bf_serblock')!==''+ACTIVE){ localStorage.setItem('bf_se
 // 🩹 سری ۱۰۳: طرحِ هفته‌ی ۱ و ۲ جای طرحِ عادی می‌شینه؛ سرتیترِ هر روز هم مخصوصِ همون هفته‌ست.
 if(ACTIVE===103){ (function(){ const w=wk103();
   if(w<=2) ['push','pull','legs'].forEach(d=>DATA[d].forEach(e=>{ const sc=e['scheme'+w], rs=e['rest'+w]; if(sc)e.scheme=sc; if(rs)e.rest=rs; }));
-  const top= w===1?'🩹 <b>هفته‌ی ۱ از ۴ — آشتی با باشگاه.</b> بعد از دو هفته مریضی: همه‌چی ~۷۰٪ِ رکوردِ قبلی، ۲ ست، هیچ ستی تا ناتوانی نه. هدف فقط اینه که بدن یادش بیاد — عضله‌ای که داشتی تو دو هفته از بین نرفته.'
-           : w===2?'🔁 <b>هفته‌ی ۲ از ۴ — برگشت.</b> ۳ ست، ~۸۵٪ِ رکورد، ۲ تکرار ذخیره. اگه هفته‌ی ۱ راحت بود، آخرِ همین هفته برو سراغِ وزنه‌های قبلی.'
+  const top= w===1?'🩹 <b>هفته‌ی ۱ از ۴ — آشتی با باشگاه.</b> بعد از دو هفته مریضی: وزنه‌ها رو خودم حساب کردم: زیرِ هر حرکت «🎯 این هفته» رو ببین. ۲ ست، هیچ ستی تا ناتوانی نه. هدف فقط اینه که بدن یادش بیاد — عضله‌ای که داشتی تو دو هفته از بین نرفته.'
+           : w===2?'🔁 <b>هفته‌ی ۲ از ۴ — برگشت.</b> ۳ ست، وزنه‌ی «🎯 این هفته» زیرِ هر حرکت، ۲ تکرار ذخیره. اگه هفته‌ی ۱ راحت بود، آخرِ همین هفته برو سراغِ وزنه‌های قبلی.'
            : '📈 <b>هفته‌ی '+faNum(Math.min(w,4))+' از ۴ — طرحِ کامل.</b> ست آخر تا ناتوانی؛ سقفِ تکرار رو تو همه‌ی ست‌ها زدی، جلسه‌ی بعد وزنه یه پله بالا. با کسریِ کالری هدف «نگه‌داشتن و آروم بالا بردن»ه، نه رکوردِ هر جلسه.';
   const tail='<br>💉 روزِ آمپول و فرداش اگه حالت تهوع یا اسهال داشتی، فقط هوازیِ سبک یا استراحت. ۱–۲ ساعت قبلِ تمرین یه وعده‌ی کوچیکِ پروتئینی + یه لیوان آب. قرصِ قلبت ضربان رو پایین نگه می‌داره، پس شدت رو با حسِ سختی بسنج نه با ضربان؛ سرگیجه گرفتی، بشین.';
-  const legs=w<=2?'':'<br>🦵 پا همچنان «نگه‌داری»: تا ۲–۳ تکرار مونده وایسا.';
+  const legs=w<=2?'<br>🦵 روزِ پا طولانیه؟ این دو هفته اگه وقت یا انرژی کم بود، ساق و داخل/خارج ران رو بی‌خیال شو. مهم‌ترین‌ها: پرس پا، پشت پا، هیپ‌تراست (یا گلوت‌بریج).':'<br>🦵 پا همچنان «نگه‌داری»: تا ۲–۳ تکرار مونده وایسا.';
   ['push','pull','legs'].forEach(d=>{ const h=document.querySelector('#'+d+' .dayhead'); if(h) h.innerHTML=top+(d==='legs'?legs:'')+tail; });
 })(); }
 
@@ -653,6 +657,8 @@ function targets(e,kb){ kb=kb||e.id;   // kb = کلیدِ رکورد (اصلی: 
   let next='';
   if(w && e.step>0) next='🎯 هدف بعدی: '+faNum(+w+e.step)+U+' (یا +۱ تکرار)';
   else if(r) next='🎯 هدف بعدی: +۱ تکرار';
+  try{ if(ACTIVE===103 && w && +w>0 && e.step>0){ const wk=wk103(); if(wk<=2){ const f=wk===1?0.7:0.85, v=Math.max(e.step,Math.round(+w*f/e.step)*e.step);   // 🩹 برگشت بعد از مریضی: درصد رو خودم حساب می‌کنم
+      next='🎯 این هفته: '+faNum(v)+U+(wk===1?' (۷۰٪ِ رکوردت)':' (۸۵٪ِ رکوردت)'); } } }catch(x){}
   return {last,next};
 }
 function card(e){
@@ -725,7 +731,9 @@ document.addEventListener('click',ev=>{
   const close=ev.target.closest('.closevid');
   if(close){const m=close.closest('.media'); const f=m.querySelector('.vidframe'); if(f)f.remove(); close.remove(); m.classList.remove('playing'); return;}
   const pb=ev.target.closest('.playbtn');
-  if(pb){const m=pb.closest('.media'); if(m.classList.contains('playing'))return; m.classList.add('playing');
+  if(pb){const m=pb.closest('.media'); if(m.classList.contains('playing'))return;
+    if(!m.dataset.vid){ const nm=(m.closest('.ex')||document).querySelector('.name .en'); window.open('https://www.youtube.com/results?search_query='+encodeURIComponent((nm?nm.textContent:'glute bridge')+' form'),'_blank'); return; }
+    m.classList.add('playing');
     m.insertAdjacentHTML('beforeend',
       `<iframe class="vidframe" src="https://www.youtube-nocookie.com/embed/${m.dataset.vid}?autoplay=1&rel=0&playsinline=1&modestbranding=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`+
       `<button class="closevid" type="button">✕ گیف</button>`);
@@ -748,7 +756,7 @@ function applyVariant(id,useAlt,persist){
   const vf=m.querySelector('.vidframe'); if(vf)vf.remove(); const cv=m.querySelector('.closevid'); if(cv)cv.remove(); m.classList.remove('playing');
   m.classList.remove('noimg'); img.removeAttribute('data-f'); img.dataset.still=sw?'':(e.still?STILL+e.still+'/0.jpg':''); img.src=GIF+cur.gif;  // فال‌بکِ تصویر مالِ همون حرکتِ فعلی باشه
   m.dataset.vid=cur.vid;
-  const yt=m.querySelector('.ytlink'); if(yt)yt.href='https://www.youtube.com/watch?v='+cur.vid;
+  const yt=m.querySelector('.ytlink'); if(yt)yt.href=cur.vid?'https://www.youtube.com/watch?v='+cur.vid:'https://www.youtube.com/results?search_query='+encodeURIComponent(cur.en+' form');
   card.querySelector('.name').innerHTML=cur.n+' <span class="en">'+cur.en+'</span>'+(sw?'<span class="swapbadge">جایگزین</span>':'');
   card.querySelector('.deline').innerHTML=sw
     ?'🏷️ دستگاه: <b>'+cur.de+'</b> <span class="swaphint">(جایگزینِ '+e.n+')</span>'
