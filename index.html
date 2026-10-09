@@ -544,7 +544,9 @@ const S103=(function(){
    adv:'پشتت رو مت یا لبه‌ی نیمکت، زانو خم، پاشنه‌ها زمین. دمبل رو عمودی با دو دست روی لگن نگه دار (نه روی شکم). با پاشنه هل بده بالا تا شونه-لگن-زانو یه خط شه، بالا ۱ ثانیه فشار، پایین آروم. هالتر و جاگذاریِ سنگین لازم نیست.'};
  const CC={n:'کرانچ زانو‌زده با کابل',en:'Kneeling Cable Crunch',de:'Kabelzug Crunch (کابل با طناب، زانو‌زده)',gif:'2021/02/Kneeling-Cable-Crunch.gif',vid:'',
    adv:'رو زانو، طناب کابل بالا رو کنار سر نگه دار. فقط با شکم خم شو و آرنج‌ها رو به سمتِ زانو بیار (نه با دست‌ها و نه با باسن). پایین ۱ ثانیه فشار، بالا آروم. وزنه سبک، تکرار کامل.'};
- const legs=S1.legs.map(e=>e.id==='legs7'?Object.assign({},e,{swap:GB,alt:'گلوت‌بریج با دمبل (دکمه‌ی 🔁)، یا فیله کمر (Hyperextension)'}):e.id==='legs5'?Object.assign({},e,{swap:CC,alt:'کرانچ کابل (دکمه‌ی 🔁)، نیمکت شکم یا چرخش تنه'}):e);
+ const SL={n:'پشت پا نشسته',en:'Seated Leg Curl',de:'Beinbeuger sitzend',gif:'2021/08/Seated-Leg-Curl.gif',vid:'',
+   adv:'پشتی رو تنظیم کن که پد روی ساق، بالای مچ بشینه و زانو دقیقاً هم‌راستای محور دستگاه باشه. پایین بکش تا آخر، ۱ ثانیه فشار، برگشت ۲–۳ ثانیه کنترل‌شده. با تنه جلو و عقب نرو.'};
+ const legs=S1.legs.map(e=>e.id==='legs7'?Object.assign({},e,{swap:GB,alt:'گلوت‌بریج با دمبل (دکمه‌ی 🔁)، یا فیله کمر (Hyperextension)'}):e.id==='legs5'?Object.assign({},e,{swap:CC,alt:'کرانچ کابل (دکمه‌ی 🔁)، نیمکت شکم یا چرخش تنه'}):e.id==='legs3'?Object.assign({},e,{swap:SL,alt:'پشت پا نشسته (دکمه‌ی 🔁)'}):e);
  return {push:push.map(cp),pull:S1.pull.map(cp),legs:legs.map(cp)};
 })();
 SERIES[103]=(function(){ const w=wk103();
