@@ -743,7 +743,7 @@ document.addEventListener('click',ev=>{
 // 🔁 حرکتِ اصلی / جایگزین — یه هفته در میون، خودکار (هفته‌ی فرد: اصلی، هفته‌ی زوج: جایگزین)
 // رکوردِ هر کدوم جداست: اصلی رو کلیدِ id، جایگزین رو کلیدِ id~a (وزنه، تکرار، روند). قاطی نمی‌شن.
 // دکمه‌ی 🔁 فقط همین هفته رو دستی عوض می‌کنه (bf_swapov_id = "هفته:۰/۱")؛ هفته‌ی بعد دوباره خودکار.
-const SWAP_ANCHOR='2026-09-07';                                        // دوشنبه‌ی هفته‌ی ۱ (اصلی)
+const SWAP_ANCHOR='2026-09-14';                                        // ۰۹.۱۰: یه هفته جلو کشیده شد تا همین هفته جایگزین‌ها فعال باشن (درخواست آرمان) — این هفته جایگزین، هفته‌ی بعد اصلی
 function wkIdx(){ return Math.floor((new Date(today())-new Date(SWAP_ANCHOR))/604800000); }
 function autoAlt(){ return ((wkIdx()%2)+2)%2===1; }
 function wantAlt(id){ const ov=localStorage.getItem('bf_swapov_'+id); if(ov){ const p=ov.split(':'); if(+p[0]===wkIdx()) return p[1]==='1'; } return autoAlt(); }
