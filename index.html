@@ -261,6 +261,16 @@
   .b.pyr{background:rgba(255,176,46,.16); color:var(--pyr)}
   .b.fail{background:rgba(255,77,77,.16); color:var(--fail)}
   .sr{font-size:13.5px; font-weight:700; margin:2px 0 3px}
+  .ex .sr{display:none}   /* طرحِ امروز حالا تو .todaybox ـه */
+  .todaybox{margin:7px 0 8px; padding:9px 11px; border-radius:11px; border:1px solid #2c8a4a; background:#0e2416}
+  .todaybox .tt{font-weight:800; font-size:14.5px; color:#d9ffe4; line-height:1.75}
+  .todaybox .tt b{color:#7fe39b; font-size:16.5px}
+  .todaybox .ts{font-size:11.5px; color:#9fb3a6; margin-top:2px; line-height:1.75}
+  .todaybox.st-light{border-color:#8a6d2c; background:#221b0c} .todaybox.st-light .tt{color:#ffe7b0} .todaybox.st-light .tt b{color:#ffcf7a}
+  .todaybox.st-build{border-color:#2c5a8a; background:#0e1a2a} .todaybox.st-build .tt{color:#d6e9ff} .todaybox.st-build .tt b{color:#7fb3e8}
+  details.info{margin-bottom:9px}
+  details.info>summary{font-size:11.5px; color:#9aa3b2; cursor:pointer; list-style:none; font-weight:600; margin-bottom:5px}
+  details.info>summary::-webkit-details-marker{display:none}
   .sr .rest{color:var(--mut); font-weight:400; font-size:12px}
   .why{font-size:12px; color:#b9c2d0; margin-bottom:4px}
   .tip{font-size:12px; color:var(--mut); margin-bottom:8px}
@@ -328,7 +338,7 @@
     </div>
   </header>
   <div class="dailycard"><div class="dl">💬 یه حرف برای امروز · <span id="ddate"></span></div><div class="dm" id="dmsg"></div></div>
-  <div class="banner" id="banner">🔑 <b>راز معجزه = Progressive Overload.</b> وزنه/تکرارِ واقعی رو ثبت کن؛ پایین هر حرکت <b>«هدف بعدی»</b> رو نشونت می‌ده. 🎬 دکمه‌ی <b>«▶ ویدیوی فرم»</b> گوشه‌ی هر گیف، ویدیو رو همونجا پلی می‌کنه.<button class="bannerx" id="bannerx" type="button" title="دیگه نشونش نده">✕</button></div>
+  <div class="banner" id="banner">🔑 <b>راز معجزه = Progressive Overload.</b> وزنه/تکرارِ واقعی رو ثبت کن؛ بالای هر حرکت <b>«🎯 امروز»</b> دقیقاً می‌گه چند ست، چند تا و چند کیلو — حساب‌کتاب با سایته. 🎬 دکمه‌ی <b>«▶ ویدیوی فرم»</b> گوشه‌ی هر گیف، ویدیو رو همونجا پلی می‌کنه.<button class="bannerx" id="bannerx" type="button" title="دیگه نشونش نده">✕</button></div>
 
   <div class="block">
     <div class="block-top"><span>📅 دوره‌ی تمرین — هفته‌ی <b id="wkNow">۱</b> از ۴</span>
@@ -521,6 +531,57 @@ AISERS.forEach(g=>{ if(g&&g.serial>2&&g.serial!==101&&g.days) SERIES[g.serial]={
 // 🩹 سری ۱۰۳ — برگشت بعد از دو هفته مریضی (درخواستِ آرمان، ۰۷.۱۰.۲۰۲۶). حرکت‌های سری ۱ (دستگاه‌ها) — چون رکوردهای واقعیش (تیرماه) فقط رو همین آی‌دی‌هاست؛
 // ۱۰۲ هیچ عددی ثبت نداشت. آی‌دی‌ها یکی → رکوردها، روندها و اصلی/جایگزین ادامه دارن.
 // ولی ۴ هفته‌ی پله‌ای: هفته‌ی ۱ آشتی (~۷۰٪، دو ست)، هفته‌ی ۲ برگشت (~۸۵٪، سه ست)، هفته‌ی ۳–۴ طرحِ عادیِ ۱۰۲ با پیشرفت.
+// 🧠 مربیِ هوشمند (آرمان ۱۵.۱۰.۲۰۲۶: «یه هفته نرفتم سبک‌تر بگیره، کم‌کم که مرتب شدم بره تو حالتِ عادی؛ ۷۰٪ چیه، ماشین‌حسابم مگه؟»)
+// شدت از رویِ تیک‌های واقعی، نه تقویم. روزِ باشگاه = bf_gymlog + تاریخِ تیکِ جلسه/حرکت + تاریخِ رکوردها.
+// امروز حساب نمی‌شه تا وسطِ تمرین (با تیک زدن) حالت عوض نشه.
+// ≥۸ روز نرفته → 🩹 سبک (۳ جلسه) → 🔁 برگشت (۳ جلسه) → 📈 عادی. تو حالتِ عادی ۵–۷ روز وقفه = یه جلسه‌ی برگشت.
+// وزنه‌ی امروز رو خودِ سایت حساب می‌کنه (سبک ≈ ۰٫۷، برگشت ≈ ۰٫۸۵ِ بهترین رکورد، گرد به پله‌ی دستگاه). درصد هیچ‌جا نشون داده نمی‌شه.
+// چرخشِ برنامه: ۱۸ جلسه (≈ ۶ هفته تمرینِ واقعی)، یا ۸ هفته با حداقل ۱۲ جلسه → برنامه‌ی بعد خودکار چیده می‌شه (genNext).
+const CO_LIGHT=3, CO_BUILD=3, CO_BREAK=8, CO_ROT=18;
+function gymDays(){ const S={}, ok=v=>/^\d{4}-\d\d-\d\d$/.test(v||'');
+  try{ (JSON.parse(localStorage.getItem('bf_gymlog')||'[]')||[]).forEach(d=>{ if(ok(d)) S[d]=1; }); }catch(e){}
+  try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i)||'';
+    if(/^bf_(sessdate|done)_/.test(k)){ const v=localStorage.getItem(k); if(ok(v)) S[v]=1; }
+    else if(/^bf_[a-z0-9~]+h$/.test(k)){ try{ (JSON.parse(localStorage.getItem(k)||'[]')||[]).forEach(q=>{ if(q&&ok(q.d)) S[q.d]=1; }); }catch(e){} } } }catch(e){}
+  return Object.keys(S).sort(); }
+function dDiff(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+function coachStage(){ const T=today(), days=gymDays().filter(d=>d<T);
+  if(!days.length) return {st:'light',k:0,gap:null};
+  const gap=dDiff(days[days.length-1],T);
+  if(gap>=CO_BREAK) return {st:'light',k:0,gap:gap};
+  let k=1; for(let i=days.length-1;i>0;i--){ if(dDiff(days[i-1],days[i])>=CO_BREAK) break; k++; }
+  let st=k<CO_LIGHT?'light':(k<CO_LIGHT+CO_BUILD?'build':'normal');
+  if(st==='normal'&&gap>=5) st='build';
+  return {st:st,k:k,gap:gap}; }
+const COACH=coachStage();
+function trainedToday(){ const T=today(); for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i)||''; if(/^bf_(sessdate|done)_/.test(k)&&localStorage.getItem(k)===T) return true; } return false; }
+function gymLog(add){ const T=today(); let L=[]; try{ L=JSON.parse(localStorage.getItem('bf_gymlog')||'[]')||[]; }catch(e){ L=[]; }
+  const i=L.indexOf(T); if(add&&i<0) L.push(T); else if(!add&&i>=0) L.splice(i,1); else return;
+  if(L.length>400) L=L.slice(-400); localStorage.setItem('bf_gymlog',JSON.stringify(L)); }
+function blockSessions(){ const bs=localStorage.getItem('bf_blockstart')||today(); return gymDays().filter(d=>d>=bs).length; }
+function blockDue(){ const bs=localStorage.getItem('bf_blockstart')||today(), n=blockSessions(); return n>=CO_ROT || (dDiff(bs,today())>=56 && n>=12); }
+function isBig(e){ return e.mode==='pyr' || /۱۲۰/.test(e.rest0||e.rest||''); }
+function stageScheme(e,st){ const big=isBig(e), sec=e.unit==='s';
+  if(st==='light') return {sets:'۲ ست', reps:sec?'':(big?'× ۱۲':'× ۱۵'), how:'آخرِ هر ست حس کنی ۳ تا دیگه هم می‌تونستی', rest:big?'۹۰ ثانیه':'۶۰ ثانیه'};
+  if(st==='build') return {sets:'۳ ست', reps:sec?'':(big?'× ۱۰':'× ۱۲'), how:'آخرِ هر ست حس کنی ۲ تا دیگه هم می‌تونستی', rest:big?'۱۲۰ ثانیه':'۶۰ ثانیه'};
+  return null; }
+function refW(kb){ let m=+(localStorage.getItem('bf_'+kb+'w')||0)||0;
+  try{ (JSON.parse(localStorage.getItem('bf_'+kb+'h')||'[]')||[]).forEach(q=>{ if(q&&+q.w>m) m=+q.w; }); }catch(e){} return m; }
+function rndStep(v,step){ return Math.max(step, Math.round(v/step)*step); }
+function todayHTML(e,kb){ kb=kb||e.id; const st=COACH.st, sec=e.unit==='s', U=sec?' ثانیه':' kg', noW=!(e.step>0);
+  const last=+(localStorage.getItem('bf_'+kb+'w')||0)||0, ref=refW(kb), S=stageScheme(e,st);
+  let wt='';
+  if(!noW){
+    if(ref>0){ let v, more='';
+      if(st==='light') v=rndStep(ref*0.7,e.step); else if(st==='build') v=rndStep(ref*0.85,e.step);
+      else if(last>0&&last>=ref*0.9){ v=last+e.step; more=' (یا یه تکرار بیشتر از دفعه‌ی قبل)'; } else v=rndStep(ref*0.9,e.step);
+      wt=(sec?'هر ست ':(st==='normal'&&e.mode==='pyr'?'ست آخر با ':'با '))+'<b>'+faNum(v)+'</b>'+U+more; }
+    else wt=sec?'هر ست تا جایی که راحت نگه داری':(st==='normal'?'وزنه‌ای که فقط همین تعداد رو بتونی':'یه وزنه‌ی سبک که راحت بزنی');
+  }
+  const tag=st==='light'?'🩹 سبک':(st==='build'?'🔁 برگشت':'📈 عادی');
+  const rec=(ref>0&&!noW)?(' · رکوردت: '+faNum(ref)+U):'';
+  if(S) return '<div class="tt">🎯 امروز: '+S.sets+(S.reps?' '+S.reps:'')+(wt?' · '+wt:'')+'</div><div class="ts">'+tag+' · '+S.how+' · استراحت '+S.rest+rec+'</div>';
+  return '<div class="tt">🎯 امروز: '+(e.scheme0||e.scheme)+(wt?' · '+wt:'')+'</div><div class="ts">'+tag+' · استراحت '+(e.rest0||e.rest)+rec+'</div>'; }
 function wk103(){ try{ if(localStorage.getItem('bf_serblock')!=='103') return 1;
   const bs=localStorage.getItem('bf_blockstart')||today(); return Math.max(1,Math.floor((new Date(today())-new Date(bs))/86400000/7)+1); }catch(e){ return 1; } }
 const S103=(function(){
@@ -551,9 +612,9 @@ const S103=(function(){
 })();
 SERIES[103]=(function(){ const w=wk103();
   return {name:'سری ۱۰۳ — برگشت بعد از مریضی 🩹',data:S103,
-   cardio: w===1?'هفته‌ی ۱: روزی ۶–۸ هزار قدم + ۲×۲۰ دقیقه هوازیِ سبک (کراس، دوچرخه یا تردمیل — هر کدوم خواستی؛ طوری که راحت بتونی حرف بزنی)'
-          :w===2?'هفته‌ی ۲: روزی ۸ هزار قدم + ۲×۲۵ دقیقه کراس، دوچرخه یا تردمیلِ شیب‌دار (هر کدوم خواستی)'
-          :'روزی ۸–۱۰ هزار قدم + ۳×۳۰ دقیقه کراس، دوچرخه یا تردمیلِ شیب‌دار (هر کدوم خواستی؛ بین‌شون عوض کن تا خسته نشی)'};
+   cardio: COACH.st==='light'?'۲۰ دقیقه سبک: کراس، دوچرخه یا تردمیل'   // کوتاه — تو دکمه و پیامِ ریتم میاد
+          :COACH.st==='build'?'۲۵ دقیقه: کراس، دوچرخه یا تردمیل'
+          :'۳۰ دقیقه: کراس، دوچرخه یا تردمیلِ شیب‌دار'};
 })();
 // ⏩ یک‌بار خودکار می‌ره رو ۱۰۳. زمان‌دار ثبت می‌شه تا تو سینک برنده شه و بقیه‌ی دستگاه‌ها هم بیان.
 // دستگاهِ تازه (هنوز bf_ts نداره، مثلاً اپِ تازه نصب‌شده) کاری نمی‌کنه — اول سینک وضعیت رو بیاره، وگرنه شمارشِ هفته از نو می‌شد.
@@ -606,15 +667,23 @@ if(ACTIVE===102){ (function(){ var sr=document.querySelector('.serrow'); if(!sr)
   sr.appendChild(b);
 })(); }
 if(localStorage.getItem('bf_serblock')!==''+ACTIVE){ localStorage.setItem('bf_serblock',''+ACTIVE); localStorage.setItem('bf_blockstart',today()); }   // سری عوض شد → شمارشِ هفته از نو
-// 🩹 سری ۱۰۳: طرحِ هفته‌ی ۱ و ۲ جای طرحِ عادی می‌شینه؛ سرتیترِ هر روز هم مخصوصِ همون هفته‌ست.
-if(ACTIVE===103){ (function(){ const w=wk103();
-  if(w<=2) ['push','pull','legs'].forEach(d=>DATA[d].forEach(e=>{ const sc=e['scheme'+w], rs=e['rest'+w]; if(sc)e.scheme=sc; if(rs)e.rest=rs; }));
-  const top= w===1?'🩹 <b>هفته‌ی ۱ از ۴ — آشتی با باشگاه.</b> بعد از دو هفته مریضی: وزنه‌ها رو خودم حساب کردم: زیرِ هر حرکت «🎯 این هفته» رو ببین. ۲ ست، هیچ ستی تا ناتوانی نه. هدف فقط اینه که بدن یادش بیاد — عضله‌ای که داشتی تو دو هفته از بین نرفته.'
-           : w===2?'🔁 <b>هفته‌ی ۲ از ۴ — برگشت.</b> ۳ ست، وزنه‌ی «🎯 این هفته» زیرِ هر حرکت، ۲ تکرار ذخیره. اگه هفته‌ی ۱ راحت بود، آخرِ همین هفته برو سراغِ وزنه‌های قبلی.'
-           : '📈 <b>هفته‌ی '+faNum(Math.min(w,4))+' از ۴ — طرحِ کامل.</b> ست آخر تا ناتوانی؛ سقفِ تکرار رو تو همه‌ی ست‌ها زدی، جلسه‌ی بعد وزنه یه پله بالا. با کسریِ کالری هدف «نگه‌داشتن و آروم بالا بردن»ه، نه رکوردِ هر جلسه.';
-  const tail='<br>💉 روزِ آمپول و فرداش اگه حالت تهوع یا اسهال داشتی، فقط هوازیِ سبک یا استراحت. ۱–۲ ساعت قبلِ تمرین یه وعده‌ی کوچیکِ پروتئینی + یه لیوان آب. قرصِ قلبت ضربان رو پایین نگه می‌داره، پس شدت رو با حسِ سختی بسنج نه با ضربان؛ سرگیجه گرفتی، بشین.';
-  const legs=w<=2?'<br>🦵 روزِ پا طولانیه؟ این دو هفته اگه وقت یا انرژی کم بود، ساق و داخل/خارج ران رو بی‌خیال شو. مهم‌ترین‌ها: پرس پا، پشت پا، هیپ‌تراست (یا گلوت‌بریج).':'<br>🦵 پا همچنان «نگه‌داری»: تا ۲–۳ تکرار مونده وایسا.';
-  ['push','pull','legs'].forEach(d=>{ const h=document.querySelector('#'+d+' .dayhead'); if(h) h.innerHTML=top+(d==='legs'?legs:'')+tail; });
+// 🧠 طرحِ امروز از رویِ حالتِ مربی (سبک/برگشت/عادی) جای طرحِ نوشته‌شده می‌شینه؛ اصلش تو scheme0/rest0 می‌مونه.
+['push','pull','legs'].forEach(d=>DATA[d].forEach(e=>{ e.scheme0=e.scheme; e.rest0=e.rest; const S=stageScheme(e,COACH.st);
+  if(S){ e.scheme=S.sets+(S.reps?' '+S.reps:'')+' · '+S.how; e.rest=S.rest; } }));
+if(!SERIES[ACTIVE].travel){ (function(){
+  const st=COACH.st, k=COACH.k, gap=COACH.gap, NM={push:'🟠 Push',pull:'🔵 Pull',legs:'🟢 Legs'};
+  let nxt='push', old='9999'; ['push','pull','legs'].forEach(d=>{ const v=localStorage.getItem('bf_sessdate_'+d)||'0000'; if(v<old){ old=v; nxt=d; } });   // نوبتِ امروز = روزی که از همه دیرتر زده شده
+  const why=gap===null?'هنوز جلسه‌ای ثبت نشده':(gap>=CO_BREAK?faNum(gap)+' روزه باشگاه نرفتی':'آخرین باشگاه: '+(gap===1?'دیروز':faNum(gap)+' روز پیش'));
+  const left=st==='light'?(CO_LIGHT+CO_BUILD-k):(st==='build'?(CO_LIGHT+CO_BUILD-Math.min(k,CO_LIGHT+CO_BUILD-1)):0);
+  let dots=''; for(let i=0;i<CO_LIGHT+CO_BUILD;i++) dots+=(i<Math.min(k,CO_LIGHT+CO_BUILD)?'●':'○');
+  const top=st==='light'?'🩹 <b>امروز: سبک.</b> '+why+'. از هر حرکت ۲ ست، با وزنه‌ای که روی کارتش نوشته (🎯). هیچ ستی تا ناتوانی نه.'
+           :st==='build'?'🔁 <b>امروز: برگشت.</b> '+why+'. ۳ ست، با وزنه‌ی 🎯 روی هر کارت. ۲ تکرار ذخیره.'
+           :'📈 <b>امروز: عادی.</b> '+why+'. وزنه‌ی 🎯 رو بزن؛ ست آخر تا جایی که دیگه نتونی. همه‌ی ست‌ها رو کامل زدی؟ دفعه‌ی بعد خودش وزنه رو می‌بره بالا.';
+  const prog=st==='normal'?'':'<br>📶 تا حالتِ عادی: '+dots+' — '+faNum(left)+' جلسه‌ی دیگه (اول ۳ جلسه سبک، بعد ۳ جلسه برگشت). ۸ روز نری، دوباره از سبک شروع می‌شه.';
+  const turn='<br>👉 نوبتِ امروز: <b>'+NM[nxt]+'</b>';
+  const legs=st!=='normal'?'<br>🦵 وقت کم بود؟ ساق و داخل/خارج ران رو بی‌خیال شو.':'';
+  const tail='<br>💉 روزِ آمپول و فرداش حالت بد بود؟ فقط پیاده‌روی. قرصِ قلبت ضربان رو پایین نگه می‌داره؛ شدت رو با حس بسنج نه با ضربان. سرگیجه گرفتی، بشین.';
+  ['push','pull','legs'].forEach(d=>{ const h=document.querySelector('#'+d+' .dayhead'); if(h) h.innerHTML=top+prog+(d!==nxt?turn:'')+(d==='legs'?legs:'')+tail; });
 })(); }
 
 // 🎬 جایگزین‌های کلیکی: اسم‌های شناخته‌شده تو «شلوغ بود؟» → پاپ‌آپِ گیف (فقط نمایشی، به دیتا دست نمی‌زنه)
@@ -655,23 +724,18 @@ function targets(e,kb){ kb=kb||e.id;   // kb = کلیدِ رکورد (اصلی: 
   const U=e.unit==='s'?' ث':' kg', noW=!(e.step>0);
   if(noW){                                                              // حرکتِ بی‌وزنه (مثل کرانچ): فقط تکرار
     return { last: r?('🔼 آخرین: '+faNum(r)+' تکرار'):'🔼 هنوز رکوردی ثبت نشده',
-             next: r?'🎯 هدف بعدی: +۱ تکرار':'' };
+             next:'' };
   }
   let last=(w||r)?('🔼 آخرین: '+(w?faNum(w)+U:'—')+(r?' × '+faNum(r)+' تکرار':'')):'🔼 هنوز رکوردی ثبت نشده';
-  let next='';
-  if(w && e.step>0) next='🎯 هدف بعدی: '+faNum(+w+e.step)+U+' (یا +۱ تکرار)';
-  else if(r) next='🎯 هدف بعدی: +۱ تکرار';
-  try{ if(ACTIVE===103 && w && +w>0 && e.step>0){ const wk=wk103(); if(wk<=2){ const f=wk===1?0.7:0.85, v=Math.max(e.step,Math.round(+w*f/e.step)*e.step);   // 🩹 برگشت بعد از مریضی: درصد رو خودم حساب می‌کنم
-      next='🎯 این هفته: '+faNum(v)+U+(wk===1?' (۷۰٪ِ رکوردت)':' (۸۵٪ِ رکوردت)'); } } }catch(x){}
+  const next='';   // 🎯 هدفِ امروز حالا بالای کارته (todayHTML)
   return {last,next};
 }
 function card(e){
   const wlab=e.wlabel||'وزنه', U=e.unit==='s'?'ث':'kg', mb=e.mode==='pyr'?'<span class="b pyr">پلکانی ↗</span>':'<span class="b fail">تا ناتوانی 🔥</span>';
   const noW=!(e.step>0);
-  const lt = e.id==='legs6' ? '📊 بهترین زمانِ ست آخرت رو ثبت کن (هرچی واقعاً نگه داشتی):'
-    : noW ? '📊 فقط تکرارِ «ست آخر (تا ناتوانی)» رو ثبت کن — چندتا تونستی:'
-    : (e.mode==='pyr' ? '📊 فقط «ست آخرِ سنگین» رو ثبت کن — وزنه‌اش + چندتا واقعاً زدی:'
-    : '📊 فقط «ست آخر (تا ناتوانی)» رو ثبت کن — وزنه‌اش + چندتا تونستی:');
+  const lt = e.id==='legs6' ? '📊 ثبت کن: ست آخرت چند ثانیه نگه داشتی'
+    : noW ? '📊 ثبت کن: ست آخرت چند تا زدی'
+    : '📊 ثبت کن: ست آخرت — وزنه و تعداد';
   const t=targets(e);
   return `<div class="ex" id="ex-${e.id}">
     <div class="media" data-vid="${e.vid}">
@@ -687,13 +751,16 @@ function card(e){
         <div class="name">${e.n} <span class="en">${e.en}</span></div>
         <label class="done"><input type="checkbox" data-done="${e.id}"> تموم</label>
       </div>
+      <div class="todaybox st-${COACH.st}" id="today-${e.id}">${todayHTML(e)}</div>
       <div class="badges"><span class="b zone">${e.zone}</span><span class="b mus">${e.mus}</span>${mb}</div>
       <div class="sr">${e.scheme} <span class="rest">· استراحت ${e.rest}</span></div>
+      ${e.swap?'<div class="swapwk" id="swapwk-'+e.id+'"></div><button class="swapbtn" data-id="'+e.id+'" type="button">🔁 عوض کن با «'+e.swap.n+'»</button>':''}
+      <details class="info"><summary>ℹ️ چطوری بزنم · کدوم دستگاه · اگه شلوغ بود (بزن تا باز شه)</summary>
       ${e.why?'<div class="why">💡 '+e.why+'</div>':''}
       ${e.tip?'<div class="tip">'+e.tip+'</div>':''}
       <div class="deline">🏷️ دستگاه: <b>${e.de}</b>${e.alt?'<br>🔁 شلوغ بود؟ '+altify(e.alt):''}</div>
-      ${e.swap?'<div class="swapwk" id="swapwk-'+e.id+'"></div><button class="swapbtn" data-id="'+e.id+'" type="button">🔁 عوض کن با «'+e.swap.n+'»</button>':''}
       ${e.adv?'<details class="adv"><summary>💡 نکته‌ی فرم (پیشرفته) — بزن تا باز شه</summary><div>'+e.adv+'</div></details>':''}
+      </details>
       <div class="logtitle">${lt}</div>
       <div class="log">
         ${noW?'':`<label>${wlab}</label><input type="number" inputmode="numeric" data-k="${e.id}w" data-step="${e.step}" placeholder="${e.w}"><label>${U}</label>`}
@@ -770,6 +837,7 @@ function applyVariant(id,useAlt,persist){
   // 🗂️ رکوردها جدا: کلیدِ ورودی‌ها می‌ره رو واریانتِ فعلی و مقدارِ ذخیره‌شده‌ی همون لود می‌شه
   card.querySelectorAll('input[data-k]').forEach(inp=>{ const suf=/w$/.test(inp.dataset.k)?'w':'r'; inp.dataset.k=kb+suf; const sv=localStorage.getItem('bf_'+kb+suf); inp.value=(sv!==null)?sv:''; });
   const t=targets(e,kb); const L=document.getElementById('last-'+id), N=document.getElementById('next-'+id); if(L)L.textContent=t.last; if(N)N.textContent=t.next;
+  const tb=document.getElementById('today-'+id); if(tb) tb.innerHTML=todayHTML(e,kb);   // 🎯 وزنه‌ی امروز از رکوردِ همین واریانت
   const pg=card.querySelector('.pg2body'); if(pg){ pg.id='pg2-'+kb; const det=pg.closest('details'); if(det&&det.open) renderTrend(kb,pg); }
   const sb=card.querySelector('.swapbtn'); if(sb) sb.textContent=sw?'↩️ این هفته اصلی رو بزن («'+e.n+'»)':'🔁 این هفته جایگزین رو بزن («'+e.swap.n+'»)';
   const wkEl=document.getElementById('swapwk-'+id);
@@ -862,8 +930,8 @@ document.querySelectorAll('input[data-done]').forEach(cb=>{
   const id=cb.dataset.done, key='bf_done_'+id;
   if(localStorage.getItem(key)===today()){cb.checked=true; document.getElementById('ex-'+id).classList.add('checked');}
   cb.addEventListener('change',()=>{
-    if(cb.checked){localStorage.setItem(key,today()); document.getElementById('ex-'+id).classList.add('checked');}
-    else{localStorage.removeItem(key); document.getElementById('ex-'+id).classList.remove('checked');}
+    if(cb.checked){localStorage.setItem(key,today()); document.getElementById('ex-'+id).classList.add('checked'); gymLog(true);}
+    else{localStorage.removeItem(key); document.getElementById('ex-'+id).classList.remove('checked'); if(!trainedToday()) gymLog(false);}
   });
 });
 
@@ -898,11 +966,11 @@ document.querySelectorAll('button[data-sess]').forEach(b=>b.addEventListener('cl
   const day=b.dataset.sess, key='bf_sess_'+day, dkey='bf_sessdate_'+day, c=+(localStorage.getItem(key)||0);
   if(localStorage.getItem(dkey)===today()){
     // امروز قبلاً ثبت شده → حذف (undo)
-    localStorage.setItem(key,Math.max(0,c-1)); localStorage.removeItem(dkey);
+    localStorage.setItem(key,Math.max(0,c-1)); localStorage.removeItem(dkey); if(!trainedToday()) gymLog(false);
     b._flash=true; b.textContent='↩️ حذف شد'; b.classList.remove('done'); refreshSess();
     setTimeout(()=>{b._flash=false; refreshSess();},1400);
   } else {
-    localStorage.setItem(key,c+1); localStorage.setItem(dkey,today()); refreshSess();
+    localStorage.setItem(key,c+1); localStorage.setItem(dkey,today()); gymLog(true); refreshSess();
     let all=0; ['push','pull','legs'].forEach(d=>all+=(+(localStorage.getItem('bf_sess_'+d)||0)));
     const pct=Math.min(Math.round(all/144*100),100);
     b._flash=true; b.textContent='✅ جلسه‌ی '+faNum(all)+' — '+faNum(pct)+'٪! 💪'; b.classList.add('done'); refreshSess();
@@ -919,7 +987,7 @@ function refreshCardio(){
   if(btn && !btn._flash){ btn.textContent=done?'✅ امروز زدی — بزن تا حذف':('🚲 امروز هوازی زدم ('+CRD+')'); btn.classList.toggle('done',done); }
   if(cnt) cnt.textContent='جمعاً '+faNum(c)+' بار';
   if(!r) return;
-  const gymDates=['push','pull','legs'].map(d=>localStorage.getItem('bf_sessdate_'+d)).filter(Boolean).sort();
+  const gymDates=gymDays();   // 🧠 همه‌ی روزهای باشگاه (تیکِ جلسه، تیکِ حرکت، رکورد)
   const lastGym=gymDates.length?gymDates[gymDates.length-1]:null;
   const lastCardio=localStorage.getItem('bf_cardiodate')||null;
   const T=today(); let msg;
@@ -947,16 +1015,14 @@ refreshCardio();
 // 6-week block tracker + deload reminder
 const BK='bf_blockstart';
 if(!localStorage.getItem(BK)) localStorage.setItem(BK,today());
-function refreshBlock(){
-  const bs=localStorage.getItem(BK)||today();
-  const days=Math.floor((new Date(today())-new Date(bs))/86400000);
-  const wk=Math.max(1,Math.floor(days/7)+1);
-  document.getElementById('wkNow').textContent=wk>4?('+'+faNum(4)):faNum(wk);
-  document.getElementById('wkBar').style.width=(Math.min(wk,4)/4*100)+'%';
+function refreshBlock(){   // 🧠 دوره = جلسه‌های واقعیِ همین برنامه، نه هفته‌ی تقویم
+  const n=blockSessions();
+  const sp=document.getElementById('wkNow'); if(sp&&sp.parentNode) sp.parentNode.innerHTML='📅 برنامه‌ی فعلی — جلسه‌ی <b id="wkNow">'+faNum(n)+'</b> از '+faNum(CO_ROT);
+  document.getElementById('wkBar').style.width=(Math.min(n/CO_ROT,1)*100)+'%';
   const note=document.getElementById('wkNote');
-  if(wk<4){note.textContent='حرکت‌ها ثابت بمونن — فقط وزنه/تکرار رو یه پله ببر بالا.'; note.className='block-note';}
-  else if(wk===4){note.textContent='🏁 هفته‌ی آخرِ این سریه — تمومش کن و بعدش «🤖 سریِ بعد با AI» رو بزن. دیلودِ جدا لازم نیست: هفته‌ی اولِ سریِ جدید خودش سبکه (حرکاتِ نو = وزنِ محافظه‌کارانه).'; note.className='block-note warn';}
-  else{note.textContent='✅ ۴ هفته تموم شد! وقتِ تازگیه — «🤖 سریِ بعد با AI» رو بزن تا از رو رکوردهات سریِ جدید چیده شه.'; note.className='block-note warn';}
+  const stT=COACH.st==='light'?'🩹 الان: سبک':(COACH.st==='build'?'🔁 الان: برگشت':'📈 الان: عادی');
+  if(n<CO_ROT){ note.textContent=stT+' · بعد از '+faNum(CO_ROT)+' جلسه (حدود ۶ هفته تمرینِ واقعی) برنامه‌ی جدید خودش چیده می‌شه — '+faNum(CO_ROT-n)+' جلسه مونده.'; note.className='block-note'; }
+  else { note.textContent='✅ '+faNum(CO_ROT)+' جلسه تموم شد — برنامه‌ی جدید خودکار چیده می‌شه (اگه نشد، «🤖 سریِ بعد با AI» رو بزن).'; note.className='block-note warn'; }
 }
 document.getElementById('newBlock').addEventListener('click',()=>{
   if(confirm('بلوک جدید شروع بشه؟ شمارش هفته از ۱ شروع می‌شه.')){localStorage.setItem(BK,today()); refreshBlock();}
@@ -1672,9 +1738,9 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  const pb=document.getElementById('serPrev'); if(pb) pb.addEventListener('click',openArch);
  ov.addEventListener('click',ev=>{ if(ev.target===ov||ev.target.closest('#archx')) ov.classList.remove('show'); });
  // 🤖 سریِ بعد با AI — از رویِ رکوردها و تاریخچه‌ی خودش می‌چینه (جمنای، نبود → کلاود)
- async function genNext(){
+ async function genNext(auto){   // auto=true → بدونِ سؤال، خطا بی‌صدا (چرخشِ خودکار)
    const btn=document.getElementById('serAI'); if(!btn) return;
-   if(!confirm('سریِ '+faNum(ACTIVE+1)+' از رویِ دیتای همین سری با AI چیده بشه؟ سریِ فعلی می‌ره تو آرشیو (قابل دیدن، بدونِ عقب‌گرد). چند ثانیه طول می‌کشه.')) return;
+   if(!auto && !confirm('سریِ '+faNum(ACTIVE+1)+' از رویِ دیتای همین سری با AI چیده بشه؟ سریِ فعلی می‌ره تو آرشیو (قابل دیدن، بدونِ عقب‌گرد). چند ثانیه طول می‌کشه.')) return;
    btn.disabled=true; btn.textContent='⏳ داره می‌چینه…';
    try{
      const hist=[]; Object.keys(META).forEach(id=>{ const e=META[id];
@@ -1687,20 +1753,22 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
      const serial=ACTIVE+1;
      const resp=await fetch(API+'/cycle',{method:'POST',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({hist:hist,lib:lib,serial:serial,prevKeys:prevKeys})});
      const d=await resp.json();
-     if(!d||!d.days){ alert('😕 جوابِ درستی نیومد'+(d&&d.error?(' — '+(''+d.error).slice(0,120)):'')+'. یه بارِ دیگه بزن.'); return; }
+     if(!d||!d.days){ if(!auto) alert('😕 جوابِ درستی نیومد'+(d&&d.error?(' — '+(''+d.error).slice(0,120)):'')+'. یه بارِ دیگه بزن.'); return; }
      ['push','pull','legs'].forEach(day=>{ d.days[day]=(d.days[day]||[]).filter(x=>x&&EXLIB[x.key]); });
-     if(d.days.push.length<3||d.days.pull.length<3||d.days.legs.length<4){ alert('😕 برنامه‌ی کامل نیومد — یه بارِ دیگه بزن.'); return; }
+     if(d.days.push.length<3||d.days.pull.length<3||d.days.legs.length<4){ if(!auto) alert('😕 برنامه‌ی کامل نیومد — یه بارِ دیگه بزن.'); return; }
      const rec={serial:serial,name:''+(d.name||('سری '+serial)),note:''+(d.note||''),days:d.days,made:today()};
      const list=AISERS.filter(g=>g&&g.serial!==serial); list.push(rec);
      localStorage.setItem('bf_aisers',JSON.stringify(list));
      localStorage.setItem('bf_serial',''+serial);
      localStorage.setItem('bf_blockstart',today());
-     alert('✅ «'+rec.name+'» چیده شد! '+(rec.note?('\n'+rec.note+'\n'):'')+'\nسریِ قبلی رفت تو آرشیو 📚 — الان صفحه از نو لود می‌شه.');
+     alert((auto?'🆕 '+faNum(CO_ROT)+' جلسه‌ی برنامه‌ی قبلی تموم شد — برنامه‌ی جدید خودکار چیده شد: ':'✅ ')+'«'+rec.name+'» چیده شد! '+(rec.note?('\n'+rec.note+'\n'):'')+'\nسریِ قبلی رفت تو آرشیو 📚 — الان صفحه از نو لود می‌شه.');
      location.reload();
-   }catch(e){ alert('❌ وصل نشد — اینترنت رو چک کن و دوباره بزن.'); }
+   }catch(e){ if(!auto) alert('❌ وصل نشد — اینترنت رو چک کن و دوباره بزن.'); }
    finally{ btn.disabled=false; btn.textContent='🤖 سریِ بعد با AI'; }
  }
- const ab=document.getElementById('serAI'); if(ab) ab.addEventListener('click',genNext);
+ const ab=document.getElementById('serAI'); if(ab) ab.addEventListener('click',function(){ genNext(false); });
+ // ⏰ چرخشِ خودکار (آرمان ۱۵.۱۰: «هر ۶ هفته خودت آپدیت کن»): ۱۸ جلسه، یا ۸ هفته با ≥۱۲ جلسه → برنامه‌ی بعد خودش چیده می‌شه. روزی حداکثر یه تلاش.
+ try{ if(!SERIES[ACTIVE].travel && blockDue() && localStorage.getItem('bf_autocyc')!==today()){ localStorage.setItem('bf_autocyc',today()); setTimeout(function(){ genNext(true); },4000); } }catch(e){}
 })();
 
 /* ---------- 🔄 سینک بین دستگاه‌ها (ادغامِ کلید‌به‌کلید — آخرین تغییرِ هر کلید برنده) ---------- */
@@ -1780,8 +1848,8 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') flush(); else { if(today()!==uiDay){ location.reload(); return; } syncIn(true); } });  // بک‌گراند→ذخیره ، برگشتن→دوباره بکش (روز عوض شده؟ رفرش)
  setInterval(function(){ if(today()!==uiDay) location.reload(); },60000);   // نیمه‌شب رد شد و صفحه بازه → UI روزِ نو
 })();
-// 🩹 سری ۱۰۳، هفته‌ی ۱–۲: برچسبِ «تا ناتوانی/پلکانی» با طرحِ سبکِ این دو هفته جور نیست — عوضش کن.
-if(ACTIVE===103&&wk103()<=2) document.querySelectorAll('.panel .b.fail, .panel .b.pyr').forEach(function(b){ b.textContent='🩹 سبک — نه تا ناتوانی'; b.className='b pyr'; });
+// 🧠 حالتِ سبک/برگشت: برچسبِ «تا ناتوانی/پلکانی» با طرحِ امروز جور نیست — عوضش کن.
+if(!SERIES[ACTIVE].travel&&COACH.st!=='normal') document.querySelectorAll('.panel .b.fail, .panel .b.pyr').forEach(function(b){ b.textContent=COACH.st==='light'?'🩹 سبک — نه تا ناتوانی':'🔁 برگشت — ۲ تکرار ذخیره'; b.className='b pyr'; });
 // 📲 نصب روی گوشی: سرویس‌ورکرِ ساده (همیشه اول شبکه، آپدیت‌ها فوری) — شرطِ دکمه‌ی «نصب» تو کروم/اندروید.
 if('serviceWorker' in navigator){ window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
 </script>
