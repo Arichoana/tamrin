@@ -925,6 +925,15 @@ document.querySelectorAll('input[data-k]').forEach(inp=>{
 
 document.addEventListener('click',ev=>{ const u=ev.target.closest('.undoW'); if(!u) return; const w=u.closest('.bigjump'); if(w&&w._inp){ w._inp.value=w._p; w._inp.dispatchEvent(new Event('input')); } if(w) w.remove(); });
 
+// ✅ همه‌ی حرکت‌های اصلیِ روز تیک خورد → «امروز این جلسه رو زدم» خودکار تیک می‌خوره (آرمان ۱۵.۱۰). شکم/پلانک/ساق/داخل‌وخارج‌ران اختیاری‌ان.
+// اگه بعدش یه حرکت رو برداری، جلسه‌ای که خودکار ثبت شده بود هم برمی‌گرده (جلسه‌ی دستی دست‌نخورده می‌مونه).
+const OPTX=/شکم|کُر|پلانک|ساق|داخل|خارج/;
+function autoSess(id,on){ const card=document.getElementById('ex-'+id), pan=card&&card.closest('.panel'); if(!pan||!DATA[pan.id]) return;
+  const day=pan.id, T=today(), sb=document.querySelector('button[data-sess="'+day+'"]'); if(!sb) return;
+  const req=DATA[day].filter(e=>!OPTX.test((e.mus||'')+' '+e.n)), L=req.length?req:DATA[day];
+  const all=L.every(e=>localStorage.getItem('bf_done_'+e.id)===T), doneSess=localStorage.getItem('bf_sessdate_'+day)===T;
+  if(on && all && !doneSess){ localStorage.setItem('bf_autosess_'+day,T); sb.click(); }
+  else if(!on && !all && doneSess && localStorage.getItem('bf_autosess_'+day)===T){ localStorage.removeItem('bf_autosess_'+day); sb.click(); } }
 // per-exercise "done today"
 document.querySelectorAll('input[data-done]').forEach(cb=>{
   const id=cb.dataset.done, key='bf_done_'+id;
@@ -932,6 +941,7 @@ document.querySelectorAll('input[data-done]').forEach(cb=>{
   cb.addEventListener('change',()=>{
     if(cb.checked){localStorage.setItem(key,today()); document.getElementById('ex-'+id).classList.add('checked'); gymLog(true);}
     else{localStorage.removeItem(key); document.getElementById('ex-'+id).classList.remove('checked'); if(!trainedToday()) gymLog(false);}
+    autoSess(id,cb.checked);
   });
 });
 
