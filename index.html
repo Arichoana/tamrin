@@ -58,6 +58,10 @@
   .goalcard-top{font-size:13px; font-weight:700} .goalcard-top b{color:#34c759; font-size:15px}
   .gbar{height:9px; background:#0e1117; border-radius:6px; margin:9px 0 7px; overflow:hidden}
   .gbar>div{height:100%; width:0; background:linear-gradient(90deg,#34c759,#a3e635); transition:width .4s}
+  .bodycard{margin:12px 16px 0; background:linear-gradient(135deg,#1d1630,#15121f); border:1px solid #4b3a7a; border-radius:14px; padding:12px 14px}
+  .bodycard .bt{font-size:13px; font-weight:700; color:#c9b6ff} .bodycard .bs{font-size:11.5px; color:var(--mut); margin-top:3px; line-height:1.7}
+  .bodycard button{margin-top:8px; font:inherit; font-size:12.5px; font-weight:700; padding:8px 12px; border-radius:10px; border:1px solid #8b6fe0; background:#2a2045; color:#e5dcff; cursor:pointer}
+  .bodyres{margin-top:10px; font-size:12.5px; line-height:1.9; color:#ddd6f3} .bodyres b{color:#c9b6ff} .bodyres ul{margin:2px 18px 6px 0; padding:0}
   .goalcard-msg{font-size:12px; color:#a7e9bd; line-height:1.8}
   .block{margin:12px 16px 0; background:linear-gradient(135deg,#1d2530,#191c22); border:1px solid var(--line); border-radius:14px; padding:12px 14px}
   .block-top{display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; font-weight:700}
@@ -352,6 +356,13 @@
       <span class="serbtns"><button class="serbtn" id="serPrev" type="button">📚 سری‌های قبلی</button><button class="serbtn ai" id="serAI" type="button">🤖 سریِ بعد با AI</button></span></div>
   </div>
 
+  <div class="bodycard" id="bodycard">
+    <div class="bt">📸 تحلیلِ بدن با AI</div>
+    <div class="bs" id="bodylast">۱ تا ۳ عکس (جلو، بغل، پشت؛ صبح، با یه نور). عکس‌ها جایی ذخیره نمی‌شن؛ فقط متنِ تحلیل می‌مونه و سریِ بعدیِ برنامه از روش چیده می‌شه.</div>
+    <button type="button" id="bodybtn">📸 عکس بده، تحلیل کن</button>
+    <input type="file" id="bodyfile" accept="image/*" multiple style="display:none">
+    <div class="bodyres" id="bodyres"></div>
+  </div>
   <div class="goalcard">
     <div class="goalcard-top">🎯 مسیر به هیکلِ ایده‌آل — جلسه‌ی <b id="gsN">۰</b> از ۱۴۴ · <b id="gsP">۰٪</b></div>
     <div class="gbar"><div id="gsBar"></div></div>
@@ -1753,6 +1764,36 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ if(t.dataset.day!=='tv' && (fr.src!=='about:blank'||hls)) stop(); }));   // رفتی سراغِ تمرین؟ پخش قطع شه که صداش مزاحم نشه
 })();
 
+
+/* ---------- 📸 تحلیلِ بدن با AI (آرمان ۲۶.۱۰): عکس → /body (Claude) → متنِ تحلیل تو bf_bodyai (سینک می‌شه)، سریِ بعد از روش ---------- */
+function bodyNote(){ try{ const L=JSON.parse(localStorage.getItem('bf_bodyai')||'[]')||[]; const x=L[L.length-1]; if(!x||!x.r) return '';
+  return (x.d+': '+(x.r.summary||'')+' | تمرکز: '+(x.r.focus||[]).join('؛ ')+' | '+(x.r.plan_hint||'')).slice(0,700); }catch(e){ return ''; } }
+(function(){
+  const btn=document.getElementById('bodybtn'), inp=document.getElementById('bodyfile'), out=document.getElementById('bodyres'), last=document.getElementById('bodylast'); if(!btn) return;
+  const esc=t=>(''+(t||'')).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const li=a=>(a&&a.length)?'<ul>'+a.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'—';
+  function show(x){ const r=x.r||{}; out.innerHTML='<b>🗓 '+faNum(x.d)+'</b><br>'+esc(r.summary)+'<br><b>چربی (تقریبی):</b> '+esc(r.bf_range)+
+    '<br><b>💪 قوت‌ها:</b>'+li(r.strengths)+'<b>🎯 تمرکزِ سریِ بعد:</b>'+li(r.focus)+'<b>🧍 پاسچر:</b>'+li(r.posture)+
+    (r.plan_hint?'<b>📋 برای برنامه:</b> '+esc(r.plan_hint)+'<br>':'')+(r.caution?'<b>⚠️</b> '+esc(r.caution):''); }
+  function refresh(){ let L=[]; try{ L=JSON.parse(localStorage.getItem('bf_bodyai')||'[]')||[]; }catch(e){}
+    const x=L[L.length-1]; if(!x) return; const dd=dDiff(x.d,today());
+    last.innerHTML=(dd>=35?'⏰ <b>وقتِ عکسِ جدیده</b> — ':'')+'آخرین تحلیل: '+(dd<=0?'امروز':faNum(dd)+' روز پیش')+'. هر ۴–۶ هفته یه بار عکس بده؛ سریِ بعدیِ برنامه از آخرین تحلیل چیده می‌شه.'; show(x); }
+  function shrink(file){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onerror=rej; fr.onload=()=>{ const im=new Image(); im.onerror=rej; im.onload=()=>{
+      const M=1568, k=Math.min(1,M/Math.max(im.width,im.height)), c=document.createElement('canvas'); c.width=Math.round(im.width*k); c.height=Math.round(im.height*k);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height); res(c.toDataURL('image/jpeg',0.85).split(',')[1]); }; im.src=fr.result; }; fr.readAsDataURL(file); }); }
+  btn.addEventListener('click',()=>inp.click());
+  inp.addEventListener('change',async()=>{ const files=[...inp.files].slice(0,3); inp.value=''; if(!files.length) return;
+    btn.disabled=true; btn.textContent='⏳ داره تحلیل می‌کنه… (حدود ۳۰ ثانیه)';
+    try{ const imgs=[]; for(const f of files) imgs.push(await shrink(f));
+      const ctx='وزن '+bwKg()+' کیلو · حالتِ تمرین: '+COACH.st+' · '+SERIES[ACTIVE].name+' · جلسه‌های این برنامه: '+blockSessions();
+      const r=await fetch(API+'/body',{method:'POST',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({imgs:imgs,ctx:ctx,prev:bodyNote()})});
+      const d=await r.json(); if(!r.ok||!d||!d.summary){ out.textContent='😕 تحلیل نشد'+(d&&d.error?' — '+(''+d.error).slice(0,120):'')+'. یه بارِ دیگه امتحان کن.'; return; }
+      let L=[]; try{ L=JSON.parse(localStorage.getItem('bf_bodyai')||'[]')||[]; }catch(e){}
+      L.push({d:today(),r:d}); if(L.length>8) L=L.slice(-8); localStorage.setItem('bf_bodyai',JSON.stringify(L)); refresh();
+    }catch(e){ out.textContent='❌ وصل نشد یا عکس خونده نشد — دوباره بزن.'; }
+    finally{ btn.disabled=false; btn.textContent='📸 عکس بده، تحلیل کن'; } });
+  refresh();
+})();
 /* ---------- 🗂️ سری‌ها: آرشیوِ فقط‌خواندنی + چیدنِ سریِ بعد با AI ---------- */
 (function(){
  const nameEl=document.getElementById('serName');
@@ -1797,7 +1838,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
      const lib=Object.keys(EXLIB).map(k=>({key:k,n:EXLIB[k].n,mus:EXLIB[k].mus}));
      const prevKeys=[]; Object.keys(SERIES).forEach(s=>['push','pull','legs'].forEach(d=>(SERIES[s].data[d]||[]).forEach(e=>{ if(prevKeys.indexOf(e.n)<0) prevKeys.push(e.n); })));
      const serial=ACTIVE+1;
-     const resp=await fetch(API+'/cycle',{method:'POST',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({hist:hist,lib:lib,serial:serial,prevKeys:prevKeys})});
+     const resp=await fetch(API+'/cycle',{method:'POST',headers:{'Content-Type':'application/json','X-Key':APPKEY},body:JSON.stringify({hist:hist,lib:lib,serial:serial,prevKeys:prevKeys,body:bodyNote()})});
      const d=await resp.json();
      if(!d||!d.days){ if(!auto) alert('😕 جوابِ درستی نیومد'+(d&&d.error?(' — '+(''+d.error).slice(0,120)):'')+'. یه بارِ دیگه بزن.'); return; }
      ['push','pull','legs'].forEach(day=>{ d.days[day]=(d.days[day]||[]).filter(x=>x&&EXLIB[x.key]); });
