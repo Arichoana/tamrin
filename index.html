@@ -576,8 +576,23 @@ function stageScheme(e,st){ const big=isBig(e), sec=e.unit==='s';
 function refW(kb){ let m=+(localStorage.getItem('bf_'+kb+'w')||0)||0;
   try{ (JSON.parse(localStorage.getItem('bf_'+kb+'h')||'[]')||[]).forEach(q=>{ if(q&&+q.w>m) m=+q.w; }); }catch(e){} return m; }
 function rndStep(v,step){ return Math.max(step, Math.round(v/step)*step); }
-function todayHTML(e,kb){ kb=kb||e.id; const st=COACH.st, sec=e.unit==='s', U=sec?' ثانیه':' kg', noW=!(e.step>0);
-  const last=+(localStorage.getItem('bf_'+kb+'w')||0)||0, ref=refW(kb), S=stageScheme(e,st);
+// 🤝 دستگاهِ کمکی (آرمان ۲۶.۱۰: «دیپ با دستگاه، هرچی وزنه سنگین‌تر بذارم راحت‌تره»): بهترین = کمترین کمک؛ سبک = کمکِ بیشتر.
+// بارِ واقعی = وزنِ بدن − کمک. وزنِ بدن = آخرین وزنِ ثبت‌شده‌ی ۴۵ روزِ اخیر، وگرنه ۱۰۳.
+function isAssist(v){ return /assist|کمکی|dip|دیپ/i.test(((v&&v.en)||'')+' '+((v&&v.n)||'')); }
+function bwKg(){ try{ const L=JSON.parse(localStorage.getItem('bf_wt')||'[]')||[]; const q=L.filter(x=>x&&+x.w>0).sort((a,b)=>a.d<b.d?-1:1).pop(); if(q&&dDiff(q.d,today())<=45) return +q.w; }catch(e){} return 103; }
+function minW(kb){ let m=+(localStorage.getItem('bf_'+kb+'w')||0)||0;
+  try{ (JSON.parse(localStorage.getItem('bf_'+kb+'h')||'[]')||[]).forEach(q=>{ if(q&&+q.w>0&&(!m||+q.w<m)) m=+q.w; }); }catch(e){} return m; }
+function todayHTML(e,kb,cur){ kb=kb||e.id; const st=COACH.st, sec=e.unit==='s', U=sec?' ثانیه':' kg', noW=!(e.step>0);
+  const last=+(localStorage.getItem('bf_'+kb+'w')||0)||0, S=stageScheme(e,st);
+  if(!noW && isAssist(cur||e)){ const bw=bwKg(), best=minW(kb), tag0=st==='light'?'🩹 سبک':(st==='build'?'🔁 برگشت':'📈 عادی');
+    let v=0, more='';
+    if(best>0){ if(st==='light') v=bw-0.7*(bw-best); else if(st==='build') v=bw-0.85*(bw-best); else { v=(last>0?last:best)-e.step; more=' (یه پله کمکِ کمتر از دفعه‌ی قبل)'; }
+      v=Math.min(rndStep(Math.max(v,e.step),e.step), Math.floor(bw/e.step)*e.step); }
+    const wt=best>0?('با کمکِ <b>'+faNum(v)+'</b> kg'+more):'یه وزنه‌ی کمکیِ سنگین که راحت بزنی — عددش رو پایین ثبت کن';
+    const rec=best>0?(' · بهترینت: '+faNum(best)+' kg کمک'):'';
+    const head=S?(S.sets+(S.reps?' '+S.reps:'')):(e.scheme0||e.scheme);
+    return '<div class="tt">🎯 امروز: '+head+' · '+wt+'</div><div class="ts">'+tag0+' · 🤝 دستگاهِ کمکی: وزنه‌ی بیشتر = راحت‌تر'+(S?' · '+S.how+' · استراحت '+S.rest:' · استراحت '+(e.rest0||e.rest))+rec+'</div>'; }
+  const ref=refW(kb);
   let wt='';
   if(!noW){
     if(ref>0){ let v, more='';
@@ -684,16 +699,16 @@ if(!SERIES[ACTIVE].travel){ (function(){
   const why=gap===null?'هنوز جلسه‌ای ثبت نشده':(gap>=CO_BREAK?faNum(gap)+' روزه باشگاه نرفتی':'آخرین باشگاه: '+(gap===1?'دیروز':faNum(gap)+' روز پیش'));
   const left=st==='light'?(CO_LIGHT+CO_BUILD-k):(st==='build'?(CO_LIGHT+CO_BUILD-Math.min(k,CO_LIGHT+CO_BUILD-1)):0);
   let dots=''; for(let i=0;i<CO_LIGHT+CO_BUILD;i++) dots+=(i<Math.min(k,CO_LIGHT+CO_BUILD)?'●':'○');
-  const sh=SHORT?'<br>⏱ <b>کوتاه: '+faNum(SHORT_N)+' حرکت × ۲ ست، حدود ۳۰ دقیقه.</b> بقیه‌ی حرکت‌ها پایینِ صفحه زیرِ «اگه وقت داشتی»ن.':'';
+  const sh=d=>SHORT?('<br>⏱ <b>کوتاه: '+(d==='legs'?'۳ حرکتِ پا + ۲ شکم':faNum(SHORT_N)+' حرکت')+' × ۲ ست، حدود ۳۰ دقیقه.</b> بقیه‌ی حرکت‌ها پایینِ صفحه زیرِ «اگه وقت داشتی»ن.'):'';
   const top=(st==='light'?'🩹 <b>امروز: سبک.</b> '+why+'. از هر حرکت ۲ ست، با وزنه‌ای که روی کارتش نوشته (🎯). هیچ ستی تا ناتوانی نه.'
            :st==='build'?'🔁 <b>امروز: برگشت.</b> '+why+'. '+(SHORT?'۲':'۳')+' ست، با وزنه‌ی 🎯 روی هر کارت. ۲ تکرار ذخیره.'
            :(SHORT?'📈 <b>امروز: عادی.</b> '+why+'. ۲ ست با وزنه‌ی 🎯؛ ستِ دوم تا جایی که دیگه نتونی. همه رو کامل زدی؟ دفعه‌ی بعد خودش وزنه رو می‌بره بالا.'
-                  :'📈 <b>امروز: عادی.</b> '+why+'. وزنه‌ی 🎯 رو بزن؛ ست آخر تا جایی که دیگه نتونی. همه‌ی ست‌ها رو کامل زدی؟ دفعه‌ی بعد خودش وزنه رو می‌بره بالا.'))+sh;
+                  :'📈 <b>امروز: عادی.</b> '+why+'. وزنه‌ی 🎯 رو بزن؛ ست آخر تا جایی که دیگه نتونی. همه‌ی ست‌ها رو کامل زدی؟ دفعه‌ی بعد خودش وزنه رو می‌بره بالا.'));
   const prog=st==='normal'?'':'<br>📶 تا حالتِ عادی: '+dots+' — '+faNum(left)+' جلسه‌ی دیگه (اول ۳ جلسه سبک، بعد ۳ جلسه برگشت). ۸ روز نری، دوباره از سبک شروع می‌شه.';
   const turn='<br>👉 نوبتِ امروز: <b>'+NM[nxt]+'</b>';
   const legs=(st!=='normal'&&!SHORT)?'<br>🦵 وقت کم بود؟ ساق و داخل/خارج ران رو بی‌خیال شو.':'';
   const tail='<br>💉 روزِ آمپول و فرداش حالت بد بود؟ فقط پیاده‌روی. قرصِ قلبت ضربان رو پایین نگه می‌داره؛ شدت رو با حس بسنج نه با ضربان. سرگیجه گرفتی، بشین.';
-  ['push','pull','legs'].forEach(d=>{ const h=document.querySelector('#'+d+' .dayhead'); if(h) h.innerHTML=top+prog+(d!==nxt?turn:'')+(d==='legs'?legs:'')+tail; });
+  ['push','pull','legs'].forEach(d=>{ const h=document.querySelector('#'+d+' .dayhead'); if(h) h.innerHTML=top+sh(d)+prog+(d!==nxt?turn:'')+(d==='legs'?legs:'')+tail; });
 })(); }
 
 // 🎬 جایگزین‌های کلیکی: اسم‌های شناخته‌شده تو «شلوغ بود؟» → پاپ‌آپِ گیف (فقط نمایشی، به دیتا دست نمی‌زنه)
@@ -781,13 +796,19 @@ function card(e){
     </div>
   </div>`;
 }
+// ⏱ انتخابِ حالتِ کوتاه. روزِ پا = ۳ حرکتِ پا (دستگاهی و سریع: پرس، جلو پا، پشت پا) + ۲ شکم (آرمان ۲۶.۱۰: «روز پا کمتر بشه و با دو تا شکم عالی»).
+function shortPick(day){ const L=DATA[day], main=L.filter(e=>!OPTRX.test((e.mus||'')+' '+e.n));
+  if(day!=='legs') return (main.length?main:L).slice(0,SHORT_N).map(e=>e.id);
+  let legs=['legs1','legs2','legs3'].filter(id=>L.some(e=>e.id===id)); if(legs.length<3) legs=main.slice(0,3).map(e=>e.id);
+  const core=L.filter(e=>/شکم|کُر|پلانک/.test((e.mus||'')+' '+e.n)).slice(0,2).map(e=>e.id);
+  return legs.concat(core); }
 const META={}, SHORTSET={};   // SHORTSET[day] = آی‌دیِ حرکت‌هایی که امروز بالا نشون داده می‌شن
 ['push','pull','legs'].forEach(day=>{
   let i=1, html=`<div class="sess">
     <div class="sess-info">جلسات این روز: <b id="cnt-${day}">۰</b><br><span id="ld-${day}" style="font-size:11px">آخرین بار: —</span></div>
     <button class="sess-btn" data-sess="${day}">✅ امروز این جلسه رو زدم</button>
   </div>`;
-  const main=DATA[day].filter(e=>!OPTRX.test((e.mus||'')+' '+e.n)), pick=(SHORT?(main.length?main:DATA[day]).slice(0,SHORT_N):DATA[day]).map(e=>e.id);
+  const pick=SHORT?shortPick(day):DATA[day].map(e=>e.id);
   SHORTSET[day]=pick;
   DATA[day].filter(e=>pick.indexOf(e.id)>=0).forEach(e=>{e.num=i++; META[e.id]=e; html+=card(e);});
   const rest=DATA[day].filter(e=>pick.indexOf(e.id)<0);
@@ -852,7 +873,7 @@ function applyVariant(id,useAlt,persist){
   // 🗂️ رکوردها جدا: کلیدِ ورودی‌ها می‌ره رو واریانتِ فعلی و مقدارِ ذخیره‌شده‌ی همون لود می‌شه
   card.querySelectorAll('input[data-k]').forEach(inp=>{ const suf=/w$/.test(inp.dataset.k)?'w':'r'; inp.dataset.k=kb+suf; const sv=localStorage.getItem('bf_'+kb+suf); inp.value=(sv!==null)?sv:''; });
   const t=targets(e,kb); const L=document.getElementById('last-'+id), N=document.getElementById('next-'+id); if(L)L.textContent=t.last; if(N)N.textContent=t.next;
-  const tb=document.getElementById('today-'+id); if(tb) tb.innerHTML=todayHTML(e,kb);   // 🎯 وزنه‌ی امروز از رکوردِ همین واریانت
+  const tb=document.getElementById('today-'+id); if(tb) tb.innerHTML=todayHTML(e,kb,cur);   // 🎯 وزنه‌ی امروز از رکوردِ همین واریانت
   const pg=card.querySelector('.pg2body'); if(pg){ pg.id='pg2-'+kb; const det=pg.closest('details'); if(det&&det.open) renderTrend(kb,pg); }
   const sb=card.querySelector('.swapbtn'); if(sb) sb.textContent='🔁 حرکتِ دیگه: «'+(sw?e.n:e.swap.n)+'»';   // فقط عوض می‌کنه؛ دستور نمی‌ده
   const wkEl=document.getElementById('swapwk-'+id);
