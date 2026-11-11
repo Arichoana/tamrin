@@ -424,7 +424,8 @@
 /* 🕒 مُهرِ زمانِ سینک (آرمان ۱۱.۱۱): روی Storage.prototype و اولِ همه‌ی کدها. قبلاً `localStorage.setItem=…` بود که رو سافاریِ آیفون اثر نداشت
    → همه‌ی کلیدهای گوشی ts=0 → سرور (آخرین مُهر برنده) هیچ‌کدوم رو قبول نمی‌کرد. نوشتن‌های موقعِ لود هم حالا مُهر می‌خورن. */
 (function(){ try{ const P=Storage.prototype, S=P.setItem, R=P.removeItem, G=P.getItem, LS=window.localStorage;
-  const st=k=>{ k=''+k; if(k.indexOf('bf_')!==0||k==='bf_ts'||k==='bf_t') return;
+  // فقط بعد از راه افتادنِ موتورِ سینک (__bfSched) مُهر بزن: پیش‌فرض‌هایی که موقعِ لود رو دستگاهِ تازه نوشته می‌شن (مثلاً سریِ ۱۰۱) نباید دیتای واقعیِ سرور رو ببرن (۱۱.۱۱، تلگرام-براوزر سری رو برد رو ۱۰۱)
+  const st=k=>{ k=''+k; if(k.indexOf('bf_')!==0||k==='bf_ts'||k==='bf_t'||!window.__bfSched) return;
     try{ const o=JSON.parse(G.call(LS,'bf_ts')||'{}')||{}; o[k]=Date.now(); S.call(LS,'bf_ts',JSON.stringify(o)); }catch(e){}
     if(window.__bfSched) window.__bfSched(); };
   window.__bfRaw={set:(k,v)=>S.call(LS,k,v), rem:k=>R.call(LS,k), get:k=>G.call(LS,k)};   // بی‌مُهر — فقط برای خودِ موتورِ سینک
