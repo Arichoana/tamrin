@@ -60,7 +60,7 @@
   .gbar>div{height:100%; width:0; background:linear-gradient(90deg,#34c759,#a3e635); transition:width .4s}
   .daycard{margin:12px 16px 0; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 14px}
   .daycard .dt{font-size:13px; font-weight:700; color:var(--txt)} .dchips{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
-  .dchip{font:inherit; font-size:12.5px; padding:6px 11px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--txt); cursor:pointer}
+  .dchip{font:inherit; font-size:22px; line-height:1; padding:7px 14px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--txt); cursor:pointer}
   .dchip.on{background:#23361f; border-color:#7fcf6a; color:#e6ffe0; font-weight:700}
   .dmsg{margin-top:8px; font-size:12px; line-height:1.8; color:var(--mut)} .dmsg:empty{display:none}
   .bodycard{margin:12px 16px 0; background:linear-gradient(135deg,#1d1630,#15121f); border:1px solid #4b3a7a; border-radius:14px; padding:12px 14px}
@@ -571,7 +571,10 @@ AISERS.forEach(g=>{ if(g&&g.serial>2&&g.serial!==101&&g.days) SERIES[g.serial]={
 const CO_LIGHT=3, CO_BUILD=3, CO_BREAK=8, CO_ROT=18;
 // ⏱ حالتِ کوتاه (آرمان ۲۶.۱۰: «نیم ساعت، ۴ حرکت هر کدوم ۲ ست انگیزه می‌ده — همیشه این‌طوری باشه تا خودم بگم»).
 // پیش‌فرض روشن؛ دکمه‌ی کنارِ اسمِ سری خاموش/روشنش می‌کنه (bf_short='0' = کامل). هر روز ۴ حرکتِ اصلی × ۲ ست، بقیه زیرِ «اگه وقت داشتی».
-const SHORT=(function(){ try{ return localStorage.getItem('bf_short')!=='0'; }catch(e){ return true; } })(), SHORT_N=4;
+// 📝 پرچم‌های امروز (آرمان ۱۱.۱۱: «اگه روش زدم اتومات برنامه‌ی اون روز عوض می‌شه»): 😴 → سبک و کوتاه، 💑/🤒 → روزِ استراحت.
+const DAYF=(function(){ try{ return (JSON.parse(localStorage.getItem('bf_daylog')||'{}')||{})[today()]||[]; }catch(e){ return []; } })();
+const DAY_TIRED=DAYF.indexOf('tired')>=0, DAY_REST=DAYF.indexOf('gf')>=0?'gf':(DAYF.indexOf('sick')>=0?'sick':'');
+const SHORT=(function(){ try{ return localStorage.getItem('bf_short')!=='0'; }catch(e){ return true; } })()||DAY_TIRED, SHORT_N=4;
 const OPTRX=/شکم|کُر|پلانک|ساق|داخل|خارج/;   // حرکت‌های اختیاری (شکم/پلانک/ساق/داخل‌وخارج‌ران)
 function gymDays(){ const S={}, ok=v=>/^\d{4}-\d\d-\d\d$/.test(v||'');
   try{ (JSON.parse(localStorage.getItem('bf_gymlog')||'[]')||[]).forEach(d=>{ if(ok(d)) S[d]=1; }); }catch(e){}
@@ -588,7 +591,7 @@ function coachStage(){ const T=today(), days=gymDays().filter(d=>d<T);
   let st=k<CO_LIGHT?'light':(k<CO_LIGHT+CO_BUILD?'build':'normal');
   if(st==='normal'&&gap>=5) st='build';
   return {st:st,k:k,gap:gap}; }
-const COACH=coachStage();
+const COACH=coachStage(); if(DAY_TIRED&&COACH.st!=='light'){ COACH.st0=COACH.st; COACH.st='light'; }
 function trainedToday(){ const T=today(); for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i)||''; if(/^bf_(sessdate|done)_/.test(k)&&localStorage.getItem(k)===T) return true; } return false; }
 function gymLog(add){ const T=today(); let L=[]; try{ L=JSON.parse(localStorage.getItem('bf_gymlog')||'[]')||[]; }catch(e){ L=[]; }
   const i=L.indexOf(T); if(add&&i<0) L.push(T); else if(!add&&i>=0) L.splice(i,1); else return;
@@ -736,7 +739,10 @@ if(!SERIES[ACTIVE].travel){ (function(){
   const turn='<br>👉 نوبتِ امروز: <b>'+NM[nxt]+'</b>';
   const legs=(st!=='normal'&&!SHORT)?'<br>🦵 وقت کم بود؟ ساق و داخل/خارج ران رو بی‌خیال شو.':'';
   const tail='<br>💉 روزِ آمپول و فرداش حالت بد بود؟ فقط پیاده‌روی. قرصِ قلبت ضربان رو پایین نگه می‌داره؛ شدت رو با حس بسنج نه با ضربان. سرگیجه گرفتی، بشین.';
-  ['push','pull','legs'].forEach(d=>{ const h=document.querySelector('#'+d+' .dayhead'); if(h) h.innerHTML=top+sh(d)+prog+(d!==nxt?turn:'')+(d==='legs'?legs:'')+tail; });
+  const rest=DAY_REST==='gf'?'💑 <b>امروز روزِ استراحته.</b> بدون عذابِ وجدان؛ فردا حالت رو می‌پرسم. اگه باز هم خواستی بری، فقط کاردیوی سبک یا پیاده‌روی.'
+           :DAY_REST==='sick'?'🤒 <b>امروز استراحت.</b> آب و غذای سبک. بهتر نشدی، به دکتر بگو.':'';
+  const tired=DAY_TIRED?'😴 <b>منگی، پس امروز سبک و کوتاهه:</b> ۴ حرکت × ۲ ست با وزنه‌ی 🎯، هیچ ستی تا ته نه. نرفتی هم اشکال نداره.<br>':'';
+  ['push','pull','legs'].forEach(d=>{ const h=document.querySelector('#'+d+' .dayhead'); if(h) h.innerHTML=rest?rest+tail:(tired+(tired?'':top)+sh(d)+(tired?'':prog)+(d!==nxt?turn:'')+(d==='legs'?legs:'')+tail); });
 })(); }
 
 // 🎬 جایگزین‌های کلیکی: اسم‌های شناخته‌شده تو «شلوغ بود؟» → پاپ‌آپِ گیف (فقط نمایشی، به دیتا دست نمی‌زنه)
@@ -1786,18 +1792,18 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
 /* ---------- 📝 امروز (آرمان ۱۱.۱۱): 💑 😴 🤒 برای امروز — تو bf_daylog سینک می‌شه و مربی تو تلگرام می‌بینه و فرداش حالش رو می‌پرسه ---------- */
 (function(){
   const host=document.getElementById('daycard'); if(!host) return;
-  const F=[['gf','💑','دوست‌دخترم پیشمه','امروز روزِ استراحته، بدون عذابِ وجدان. فردا حالت رو می‌پرسم.'],
-           ['tired','😴','بد خوابیدم / منگم','اگه رفتی: حالتِ کوتاه و سبک، ستِ آخر رو تا ته نرو. نرفتی هم اشکال نداره.'],
-           ['sick','🤒','مریضم','امروز استراحت، آب و غذای سبک. اگه بدتر شد به دکتر بگو.']];
+  const F=[['gf','💑','دوست‌دخترم پیشمه','برنامه‌ی امروز: استراحت. فردا حالت رو می‌پرسم.'],
+           ['tired','😴','بد خوابیدم / منگم','برنامه‌ی امروز سبک و کوتاه شد.'],
+           ['sick','🤒','مریضم','برنامه‌ی امروز: استراحت.']];
   const load=()=>{ try{ return JSON.parse(localStorage.getItem('bf_daylog')||'{}')||{}; }catch(e){ return {}; } };
   function render(){ const on=load()[today()]||[];
-    host.querySelector('.dchips').innerHTML=F.map(f=>'<button type="button" class="dchip'+(on.indexOf(f[0])>=0?' on':'')+'" data-f="'+f[0]+'">'+f[1]+' '+f[2]+'</button>').join('');
+    host.querySelector('.dchips').innerHTML=F.map(f=>'<button type="button" class="dchip'+(on.indexOf(f[0])>=0?' on':'')+'" data-f="'+f[0]+'" title="'+f[2]+'" aria-label="'+f[2]+'">'+f[1]+'</button>').join('');
     host.querySelector('.dmsg').innerHTML=F.filter(f=>on.indexOf(f[0])>=0).map(f=>f[1]+' '+f[3]).join('<br>'); }
   host.addEventListener('click',e=>{ const b=e.target.closest('.dchip'); if(!b) return;
     const L=load(), d=today(), f=b.dataset.f; let on=L[d]||[];
     on=on.indexOf(f)>=0?on.filter(x=>x!==f):on.concat([f]); if(on.length) L[d]=on; else delete L[d];
     const ks=Object.keys(L).sort(); while(ks.length>60) delete L[ks.shift()];
-    localStorage.setItem('bf_daylog',JSON.stringify(L)); render(); });
+    localStorage.setItem('bf_daylog',JSON.stringify(L)); render(); setTimeout(function(){ location.reload(); },900); });   // برنامه‌ی امروز همون لحظه عوض شه (بعد از آپلود)
   render();
 })();
 /* ---------- 📸 تحلیلِ بدن با AI (آرمان ۲۶.۱۰): عکس → /body (Claude) → متنِ تحلیل تو bf_bodyai (سینک می‌شه)، سریِ بعد از روش ---------- */
