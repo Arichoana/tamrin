@@ -58,6 +58,11 @@
   .goalcard-top{font-size:13px; font-weight:700} .goalcard-top b{color:#34c759; font-size:15px}
   .gbar{height:9px; background:#0e1117; border-radius:6px; margin:9px 0 7px; overflow:hidden}
   .gbar>div{height:100%; width:0; background:linear-gradient(90deg,#34c759,#a3e635); transition:width .4s}
+  .daycard{margin:12px 16px 0; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 14px}
+  .daycard .dt{font-size:13px; font-weight:700; color:var(--txt)} .dchips{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+  .dchip{font:inherit; font-size:12.5px; padding:6px 11px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--txt); cursor:pointer}
+  .dchip.on{background:#23361f; border-color:#7fcf6a; color:#e6ffe0; font-weight:700}
+  .dmsg{margin-top:8px; font-size:12px; line-height:1.8; color:var(--mut)} .dmsg:empty{display:none}
   .bodycard{margin:12px 16px 0; background:linear-gradient(135deg,#1d1630,#15121f); border:1px solid #4b3a7a; border-radius:14px; padding:12px 14px}
   .bodycard .bt{font-size:13px; font-weight:700; color:#c9b6ff} .bodycard .bs{font-size:11.5px; color:var(--mut); margin-top:3px; line-height:1.7}
   .bodycard button{margin-top:8px; font:inherit; font-size:12.5px; font-weight:700; padding:8px 12px; border-radius:10px; border:1px solid #8b6fe0; background:#2a2045; color:#e5dcff; cursor:pointer}
@@ -356,6 +361,7 @@
       <span class="serbtns"><button class="serbtn" id="serPrev" type="button">📚 سری‌های قبلی</button><button class="serbtn ai" id="serAI" type="button">🤖 سریِ بعد با AI</button></span></div>
   </div>
 
+  <div class="daycard" id="daycard"><div class="dt">📝 امروز</div><div class="dchips"></div><div class="dmsg"></div></div>
   <div class="bodycard" id="bodycard">
     <div class="bt">📸 تحلیلِ بدن با AI</div>
     <div class="bs" id="bodylast">۱ تا ۳ عکس (جلو، بغل، پشت؛ صبح، با یه نور). عکس‌ها جایی ذخیره نمی‌شن؛ فقط متنِ تحلیل می‌مونه و سریِ بعدیِ برنامه از روش چیده می‌شه.</div>
@@ -1776,6 +1782,24 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
 })();
 
 
+
+/* ---------- 📝 امروز (آرمان ۱۱.۱۱): 💑 😴 🤒 برای امروز — تو bf_daylog سینک می‌شه و مربی تو تلگرام می‌بینه و فرداش حالش رو می‌پرسه ---------- */
+(function(){
+  const host=document.getElementById('daycard'); if(!host) return;
+  const F=[['gf','💑','دوست‌دخترم پیشمه','امروز روزِ استراحته، بدون عذابِ وجدان. فردا حالت رو می‌پرسم.'],
+           ['tired','😴','بد خوابیدم / منگم','اگه رفتی: حالتِ کوتاه و سبک، ستِ آخر رو تا ته نرو. نرفتی هم اشکال نداره.'],
+           ['sick','🤒','مریضم','امروز استراحت، آب و غذای سبک. اگه بدتر شد به دکتر بگو.']];
+  const load=()=>{ try{ return JSON.parse(localStorage.getItem('bf_daylog')||'{}')||{}; }catch(e){ return {}; } };
+  function render(){ const on=load()[today()]||[];
+    host.querySelector('.dchips').innerHTML=F.map(f=>'<button type="button" class="dchip'+(on.indexOf(f[0])>=0?' on':'')+'" data-f="'+f[0]+'">'+f[1]+' '+f[2]+'</button>').join('');
+    host.querySelector('.dmsg').innerHTML=F.filter(f=>on.indexOf(f[0])>=0).map(f=>f[1]+' '+f[3]).join('<br>'); }
+  host.addEventListener('click',e=>{ const b=e.target.closest('.dchip'); if(!b) return;
+    const L=load(), d=today(), f=b.dataset.f; let on=L[d]||[];
+    on=on.indexOf(f)>=0?on.filter(x=>x!==f):on.concat([f]); if(on.length) L[d]=on; else delete L[d];
+    const ks=Object.keys(L).sort(); while(ks.length>60) delete L[ks.shift()];
+    localStorage.setItem('bf_daylog',JSON.stringify(L)); render(); });
+  render();
+})();
 /* ---------- 📸 تحلیلِ بدن با AI (آرمان ۲۶.۱۰): عکس → /body (Claude) → متنِ تحلیل تو bf_bodyai (سینک می‌شه)، سریِ بعد از روش ---------- */
 function bodyNote(){ try{ const L=JSON.parse(localStorage.getItem('bf_bodyai')||'[]')||[]; const x=L[L.length-1]; if(!x||!x.r) return '';
   return (x.d+': '+(x.r.summary||'')+' | تمرکز: '+(x.r.focus||[]).join('؛ ')+' | '+(x.r.plan_hint||'')).slice(0,700); }catch(e){ return ''; } }
