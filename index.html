@@ -415,6 +415,17 @@
   </footer>
 </div>
 <script>
+/* 🕒 مُهرِ زمانِ سینک (آرمان ۱۱.۱۱): روی Storage.prototype و اولِ همه‌ی کدها. قبلاً `localStorage.setItem=…` بود که رو سافاریِ آیفون اثر نداشت
+   → همه‌ی کلیدهای گوشی ts=0 → سرور (آخرین مُهر برنده) هیچ‌کدوم رو قبول نمی‌کرد. نوشتن‌های موقعِ لود هم حالا مُهر می‌خورن. */
+(function(){ try{ const P=Storage.prototype, S=P.setItem, R=P.removeItem, G=P.getItem, LS=window.localStorage;
+  const st=k=>{ k=''+k; if(k.indexOf('bf_')!==0||k==='bf_ts'||k==='bf_t') return;
+    try{ const o=JSON.parse(G.call(LS,'bf_ts')||'{}')||{}; o[k]=Date.now(); S.call(LS,'bf_ts',JSON.stringify(o)); }catch(e){}
+    if(window.__bfSched) window.__bfSched(); };
+  window.__bfRaw={set:(k,v)=>S.call(LS,k,v), rem:k=>R.call(LS,k), get:k=>G.call(LS,k)};   // بی‌مُهر — فقط برای خودِ موتورِ سینک
+  P.setItem=function(k,v){ S.call(this,k,v); if(this===LS) st(k); };
+  P.removeItem=function(k){ R.call(this,k); if(this===LS) st(k); };                     // حذف = سنگِ‌قبر: کلید می‌ره ولی زمانش می‌مونه
+  ['setItem','removeItem'].forEach(n=>{ const v=G.call(LS,n); if(v!=null&&/function/.test(v)) R.call(LS,n); });   // آشغالِ override قدیمی که سافاری به‌جاش یه آیتم ذخیره کرده بود
+}catch(e){} })();
 const FA='۰۱۲۳۴۵۶۷۸۹', faNum=s=>(''+s).replace(/\d/g,d=>FA[+d]);
 const today=()=>{const d=new Date(),p=n=>(''+n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());};  // تاریخِ محلی (نه UTC) — نیمه‌شبِ آلمان روز عوض می‌شه
 let uiDay=today();
@@ -1861,7 +1872,8 @@ function bodyNote(){ try{ const L=JSON.parse(localStorage.getItem('bf_bodyai')||
 /* ---------- 🔄 سینک بین دستگاه‌ها (ادغامِ کلید‌به‌کلید — آخرین تغییرِ هر کلید برنده) ---------- */
 (function(){
  const U='arman', TS='bf_ts';
- const _set=localStorage.setItem.bind(localStorage), _rem=localStorage.removeItem.bind(localStorage), _get=localStorage.getItem.bind(localStorage);
+ const RAW=window.__bfRaw||{set:Storage.prototype.setItem.bind(localStorage),rem:Storage.prototype.removeItem.bind(localStorage),get:Storage.prototype.getItem.bind(localStorage)},
+       _set=RAW.set, _rem=RAW.rem, _get=RAW.get;
  const isBF=k=>!!k && k.indexOf('bf_')===0 && k!==TS && k!=='bf_t';
  const loadTS=()=>{ try{ return JSON.parse(_get(TS)||'{}'); }catch(e){ return {}; } };
  const saveTS=o=>_set(TS,JSON.stringify(o));
@@ -1886,9 +1898,7 @@ function bodyNote(){ try{ const L=JSON.parse(localStorage.getItem('bf_bodyai')||
    if(ok){ toast('✅ سینک شد — دیتات آپلود و هماهنگ شد',true); btnFlash('✅ شد'); }
    else { const why=neterr?'اینترنت/سرور در دسترس نیست':status===401?'کلید/نسخه قدیمیه (۴۰۱) — صفحه رو کامل رفرش کن':('خطای '+status); toast('⚠️ آپلود نشد: '+why,false); btnFlash('⚠️ نشد'); } }
  const sched=()=>{ if(!ready)return; clearTimeout(t); t=setTimeout(push,700); };
- const stamp=k=>{ if(isBF(k)){ ts=loadTS(); ts[k]=Date.now(); saveTS(ts); sched(); } };   // هر بار تازه بخون — دو تبِ باز زمانِ همو خراب نکنن
- localStorage.setItem=function(k,v){ _set(k,v); stamp(k); };
- localStorage.removeItem=function(k){ _rem(k); stamp(k); };          // حذف = سنگِ‌قبر: کلید می‌ره ولی زمانش می‌مونه
+ window.__bfSched=function(){ ts=loadTS(); sched(); };   // مُهر رو شیمِ اولِ اسکریپت می‌زنه؛ اینجا فقط آپلود زمان‌بندی می‌شه
  // فرمتِ ریموت رو به {data,ts} استاندارد کن (بلوکِ تختِ قدیمی رو هم می‌فهمه)
  function norm(r){ if(!r||typeof r!=='object') return {data:{},ts:{}};
    if(r.data && r.ts) return {data:r.data||{}, ts:r.ts||{}};
@@ -1909,6 +1919,7 @@ function bodyNote(){ try{ const L=JSON.parse(localStorage.getItem('bf_bodyai')||
      Object.keys(snap()).forEach(k=>{ if(ts[k]==null) ts[k]=base; }); saveTS(ts);
      let remote=null; try{ remote=await (await ftimeout(API+'/sync?u='+U,{},6000)).json(); }catch(e){}
      const R=norm(remote); let changed=false;
+     if(remote) Object.keys(snap()).forEach(k=>{ if(k!=='bf_cal' && !(+ts[k]>0) && !(+(R.ts[k]||0)>0)) ts[k]=Date.now(); });   // 🩹 ۱۱.۱۱: تیک‌های بی‌مُهرِ سافاری که سرور نداره → الان مُهر و آپلود
      const keys=new Set([].concat(Object.keys(snap()),Object.keys(R.data),Object.keys(ts),Object.keys(R.ts)));
      keys.forEach(k=>{ if(!isBF(k)) return;
        if(k==='bf_cal'){                                            // 🗓️ غذا: به‌جای کل‌کلید، روزبه‌روز ادغام شه
