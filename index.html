@@ -1631,10 +1631,13 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
   {n:'هیپ‌هاپ باحال',c:'RapCaviar · داغ‌ترین رپِ روز',id:'37i9dQZF1DX0XUsuxWHRQd'},
   {n:'امینم',c:'This Is Eminem · همه‌ی اساسی‌ها',id:'37i9dQZF1DZ06evO4gTUOY'},
   {n:'رپِ باشگاه',c:'Beast Mode Hip-Hop · مخصوصِ وزنه',id:'37i9dQZF1DX9oh43oAzkyx'},
-  {n:'رپ فارسی',c:'هیچکس، بهرام، فدایی، شایع…',id:'0TErhH1n9C8Fnd5OlduTzC'}
+  {n:'رپ فارسی',c:'هیچکس، بهرام، فدایی، شایع…',id:'0TErhH1n9C8Fnd5OlduTzC'},
+  {n:'اکسیژن',c:'ژان‌میشل ژار · Oxygène، کلِ آلبوم',t:'album',id:'3e7TxckusgnC1AYnAqbl2z'},   // آرمان ۱۱.۱۱: «اکسیژن و ترانس»
+  {n:'ترنس',c:'Trance Mission · ترنس و پراگرسیوِ تازه',id:'37i9dQZF1DX91oIci4su1D'},
+  {n:'ترنسِ کلاسیک',c:'Trance Classics · قدیمی‌های معروف',id:'5ZVb7epOzLwa1e3CUM0J2w'}
  ];
  host.insertAdjacentHTML('beforeend','<div class="tvmusic"><div class="dayhead">🎵 موزیک — بزنی تو اپِ اسپاتیفای باز می‌شه و آهنگ‌ها پشتِ‌سرِ‌هم پخش می‌شن (صفحه رو قفل کنی هم ادامه داره).</div><div class="mgrid">'+
-   MUSIC.map(m=>'<a class="mch" href="https://open.spotify.com/playlist/'+m.id+'" target="_blank" rel="noopener"><div class="tn">🎵 '+m.n+'</div><div class="tc">'+m.c+'</div></a>').join('')+
+   MUSIC.map(m=>'<a class="mch" href="https://open.spotify.com/'+(m.t||'playlist')+'/'+m.id+'" target="_blank" rel="noopener"><div class="tn">🎵 '+m.n+'</div><div class="tc">'+m.c+'</div></a>').join('')+
    '</div><div class="tvnote">پلی‌لیستِ دیگه‌ای خواستی، لینکِ اسپاتیفایش رو بفرست تا اضافه کنم.</div></div>');
 
  // 🎧 پادکستِ صوتیِ روانشناسی — فقط روانپزشک‌های معتبر؛ لیستِ قسمت‌ها تو podcasts.json (از RSSِ خودِ پادکست‌ها، ۰۷.۱۰.۲۰۲۶).
