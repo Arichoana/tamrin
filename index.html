@@ -113,7 +113,7 @@
   body.tvpfs{overflow:hidden}
   .tvbar{display:flex; gap:8px; margin-bottom:12px; display:none}
   .tvbar.on{display:flex}
-  .tvbar button{flex:1; background:var(--card); border:1px solid var(--line); color:var(--txt); font-family:inherit; font-size:12.5px; font-weight:700; padding:9px; border-radius:10px; cursor:pointer}
+  .tvbar button, .tvbar a#tvfb{flex:1; text-align:center; text-decoration:none; background:var(--card); border:1px solid var(--line); color:var(--txt); font-family:inherit; font-size:12.5px; font-weight:700; padding:9px; border-radius:10px; cursor:pointer}
   .tvbar .tvfull{background:#ef4444; border-color:#ef4444; color:#fff}
   .tvgrid{display:grid; grid-template-columns:1fr 1fr; gap:8px}
   .tvch{background:var(--card); border:1px solid var(--line); border-radius:13px; padding:11px 12px; cursor:pointer; font-family:inherit; color:var(--txt); text-align:right}
@@ -1613,7 +1613,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
 (function(){
  const host=document.getElementById('tv'); if(!host) return;
  const CH=[
-  {n:'ایران اینترنشنال',c:'📰 خبر · ۲۴/۷',m:'yt',id:'UCat6bC0Wrqq9Bcq7EkH_yQw'},
+  {n:'ایران اینترنشنال',c:'📰 خبر · ۲۴/۷',m:'hls',url:'https://hlspackager.akamaized.net/live/DB/IRAN_INTERNATIONAL/HLS/IRAN_INTERNATIONAL.m3u8',fb:'https://www.youtube.com/channel/UCat6bC0Wrqq9Bcq7EkH_yQw/live'},   // ۱۱.۱۱: امبدِ یوتیوب رو آیفونِ آرمان پخش نمی‌کرد → استریمِ مستقیم
   {n:'رادیو فردا',c:'📻 رادیو · خبر و موسیقی · زنده',m:'hls',url:'https://rferl-ingest.akamaized.net/hls/live/2121659/axia21/master.m3u8',fb:'https://www.radiofarda.com/live/audio/80'},
   {n:'دکتر آذرخش مکری',c:'🧠 سخنرانی · هر بار یه ویدیوی رندوم',m:'ytrand',list:'UULFcjn40kF25PEYNlmS8_3hdQ',max:100},
   {n:'انقلابِ ملیِ ایران',c:'📢 صدای انقلابِ ملی · پیام‌های شاهزاده رضا پهلوی',m:'hls',url:'https://hls.irannrtv.live/hls/stream.m3u8',fb:'https://iranopasmigirim.com/fa/iran-national-revolution-tv'},
@@ -1628,7 +1628,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  ];
  host.innerHTML='<div class="dayhead">📺 بزن رو کانال ← <b>بزرگ/افقی</b> پخش می‌شه. تو تمام‌صفحه: <b>↔ بکش</b> = کانالِ بعدی/قبلی · <b>تپ</b> = نوارِ دکمه‌ها (⟨ ⟩ و خروج ✕). بیرونِ تمام‌صفحه <b>🔳 شناور</b> هم داری.</div>'+
    '<div class="tvwrap" id="tvwrap"><video id="tvvideo" playsinline controls></video><iframe id="tvframe" src="about:blank" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin"></iframe><div class="tvhint" id="tvhint">↔ بکش: کانالِ بعدی/قبلی · تپ: دکمه‌ها</div><div class="tvover" id="tvover"></div><div class="tvctrl" id="tvctrl"><button type="button" id="tvprev">⟨</button><span id="tvname"></span><button type="button" id="tvnext">⟩</button><button type="button" id="tvexit">✕</button></div><button type="button" class="tvclose" id="tvclose" aria-label="بستن" title="بستن">✕</button></div>'+
-   '<div class="tvbar" id="tvbar"><button type="button" class="tvfull" id="tvfull">⛶ تمام‌صفحه</button><button type="button" id="tvfb" style="display:none;background:#3a2f14;border-color:#7a5a2a;color:#ffcf66">▶ پلیرِ اصلی</button><button type="button" id="tvpip">🔳 شناور</button><button type="button" id="tvstop">✕ قطع پخش</button></div>'+
+   '<div class="tvbar" id="tvbar"><button type="button" class="tvfull" id="tvfull">⛶ تمام‌صفحه</button><a id="tvfb" href="#" target="_blank" rel="noopener" style="display:none;background:#3a2f14;border-color:#7a5a2a;color:#ffcf66">▶ پلیرِ اصلی</a><button type="button" id="tvpip">🔳 شناور</button><button type="button" id="tvstop">✕ قطع پخش</button></div>'+
    '<div class="tvgrid">'+CH.map((ch,i)=>'<button type="button" class="tvch" data-i="'+i+'"><div class="tn">'+ch.n+'</div><div class="tc">'+ch.c+'</div></button>').join('')+'</div>'+
    '<div class="tvnote">🔗 پخش از پلیرِ رسمیِ خودِ کانال‌هاست. 🎬 کافه‌فیلم و انقلابِ ملی استریمِ مستقیمِ رایگانن و گاهی چند دقیقه لوس/قطع می‌شن — اون‌وقت دکمه‌ی <b style="color:#ffcf66">▶ پلیرِ اصلی</b> ظاهر می‌شه که تو تبِ جدا بازش می‌کنه. کانالِ دیگه‌ای خواستی، بگو.</div>';
  // 🎵 موزیک — پلی‌لیست‌های اسپاتیفای (آی‌دی‌ها با oEmbed خودِ اسپاتیفای چک شده). لینکِ open.spotify.com رو آیفون مستقیم تو اپِ اسپاتیفای باز می‌کنه:
@@ -1742,7 +1742,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    if(ch.m==='ytrand'){ showFrame(); const k=1+Math.floor(Math.random()*(ch.max||50));   // 🎲 یه ویدیوی رندوم از ویدیوهای بلندِ کانال (لیستِ UULF = بدونِ شورتس)
      fr.src='https://www.youtube-nocookie.com/embed/videoseries?list='+ch.list+'&index='+k+'&autoplay=1&playsinline=1&rel=0'; tc.textContent=ch.c; return; }
    if(ch.m==='site'){ showFrame(); fr.src=ch.url; return; }
-   if(ch.m==='hls'){ showVid(); tc.textContent='⏳ در حالِ اتصال…'; curFb=ch.fb||null;   // استریمِ مستقیم با hls.js
+   if(ch.m==='hls'){ showVid(); tc.textContent='⏳ در حالِ اتصال…'; curFb=ch.fb||null; fbBtn.href=curFb||'#';   // استریمِ مستقیم با hls.js
      vid.addEventListener('playing',function _ok(){ vid.removeEventListener('playing',_ok); clearTimeout(wd); fbBtn.style.display='none'; tc.textContent=ch.c; healN=0; startStall(); },{once:true});   // پخش راه افتاد → پزشکِ داخلی روشن + شمارنده صفر
      clearTimeout(wd); wd=setTimeout(()=>{ if(vid.videoWidth===0 && vid.readyState<3){ tc.textContent='😕 این استریمِ رایگان الان لوسه'; if(curFb) fbBtn.style.display='inline-block'; } },13000);   // واچ‌داگ: پخش نشد → دکمه‌ی پلیرِ رسمی
      await ensureHls();
@@ -1761,7 +1761,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    try{
      const d=await (await fetch(API+'/tv?ch='+ch.id)).json();
      if(d&&d.videoId){ fr.src='https://www.youtube-nocookie.com/embed/'+d.videoId+'?autoplay=1&playsinline=1'; tc.textContent=ch.c;
-       curFb='https://www.youtube.com/watch?v='+d.videoId; fbBtn.textContent='▶ پخش نشد؟ تو یوتیوب'; fbBtn.style.display='inline-block'; }   // آرمان ۱۱.۱۱: تو آیفون گاهی امبد پخش نمی‌کنه → همیشه راهِ یه‌ضربه‌ای به اپِ یوتیوب
+       curFb='https://www.youtube.com/watch?v='+d.videoId; fbBtn.href=curFb; fbBtn.textContent='▶ پخش نشد؟ تو یوتیوب'; fbBtn.style.display='inline-block'; }   // آرمان ۱۱.۱۱: تو آیفون گاهی امبد پخش نمی‌کنه → همیشه راهِ یه‌ضربه‌ای به اپِ یوتیوب
      else{ tc.textContent='😕 الان لایو نیست — تو یوتیوب باز می‌کنم'; window.open('https://www.youtube.com/channel/'+ch.id+'/live','_blank'); }
    }catch(e){ tc.textContent='❌ نت وصل نشد — دوباره بزن'; }
  }
@@ -1769,7 +1769,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    const b=ev.target.closest('.tvch');
    if(b){ const ch=CH[+b.dataset.i]; if(ch.m==='link'){ window.open(ch.url,'_blank'); return; } play(ch,b); goFull(); return; }   // اولش بزرگ؛ دکمه‌ی خروجِ خودِ پلیر → برمی‌گرده به کوچیکِ پرتره
    if(ev.target.closest('#tvfull')){ goFull(); return; }
-   if(ev.target.closest('#tvfb')){ if(curFb) window.open(curFb,'_blank'); return; }
+   if(ev.target.closest('#tvfb')){ if(!curFb) ev.preventDefault(); return; }   // لینکِ واقعی (نه window.open) — تو اپِ هوم‌اسکرینِ آیفون window.open کاری نمی‌کرد
    if(ev.target.closest('#tvpip')){ enterPip(); return; }
    if(ev.target.closest('#tvstop')){ stop(); return; }
  });
