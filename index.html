@@ -434,6 +434,11 @@
   P.removeItem=function(k){ R.call(this,k); if(this===LS) st(k); };                     // حذف = سنگِ‌قبر: کلید می‌ره ولی زمانش می‌مونه
   ['setItem','removeItem'].forEach(n=>{ const v=G.call(LS,n); if(v!=null&&/function/.test(v)) R.call(LS,n); });   // آشغالِ override قدیمی که سافاری به‌جاش یه آیتم ذخیره کرده بود
 }catch(e){} })();
+/* ۱۲۳ → 123 (آرمان ۱۱.۱۱: «عددِ فارسی نمی‌گیره»): ورودی‌های عددی text‌ان (type=number تو آیفون رقمِ فارسی رو خالی می‌کرد)؛
+   قبل از هر هندلری رقمِ فارسی/عربی → انگلیسی، «٫» و «,» → «.»، بقیه‌ی نویسه‌ها حذف. */
+(function(){ const fix=v=>v.replace(/[۰-۹]/g,d=>''+(d.charCodeAt(0)-1776)).replace(/[٠-٩]/g,d=>''+(d.charCodeAt(0)-1632)).replace(/[٫,]/g,'.').replace(/[^0-9.]/g,'');
+  const h=e=>{ const t=e.target; if(!t||t.tagName!=='INPUT'||!/^(numeric|decimal)$/.test(t.getAttribute('inputmode')||'')) return; const v=t.value, n=fix(v); if(n!==v) t.value=n; };
+  document.addEventListener('input',h,true); document.addEventListener('change',h,true); })();
 const FA='۰۱۲۳۴۵۶۷۸۹', faNum=s=>(''+s).replace(/\d/g,d=>FA[+d]);
 const today=()=>{const d=new Date(),p=n=>(''+n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());};  // تاریخِ محلی (نه UTC) — نیمه‌شبِ آلمان روز عوض می‌شه
 let uiDay=today();
@@ -823,8 +828,8 @@ function card(e){
       </details>
       <div class="logtitle">${lt}</div>
       <div class="log">
-        ${noW?'':`<label>${wlab}</label><input type="number" inputmode="numeric" data-k="${e.id}w" data-step="${e.step}" placeholder="${e.w}"><label>${U}</label>`}
-        <label>${noW?'چند تکرار':'× چند تکرار'}</label><input type="number" inputmode="numeric" data-k="${e.id}r"><span class="ok">✓ ذخیره</span>
+        ${noW?'':`<label>${wlab}</label><input type="text" inputmode="decimal" autocomplete="off" data-k="${e.id}w" data-step="${e.step}" placeholder="${e.w}"><label>${U}</label>`}
+        <label>${noW?'چند تکرار':'× چند تکرار'}</label><input type="text" inputmode="numeric" autocomplete="off" data-k="${e.id}r"><span class="ok">✓ ذخیره</span>
       </div>
       <div class="targets"><span class="last" id="last-${e.id}">${t.last}</span><span class="next" id="next-${e.id}">${t.next}</span></div>
       <details class="prog2"><summary>📈 روندِ این حرکت (بزن تا باز شه)</summary><div class="pg2body" id="pg2-${e.id}"></div></details>
@@ -1152,7 +1157,7 @@ function toJalali(gy,gm,gd){var g=[0,31,59,90,120,151,181,212,243,273,304,334];v
  const START=108, GOAL=85;   // ری‌استارت ۲۲.۰۸.۲۰۲۶ بعد از استانبول — وزنِ اعلامیِ خودش
  const getWt=()=>{try{return JSON.parse(localStorage.getItem('bf_wt')||'[]');}catch(e){return [];}};
  const getBad=()=>{try{return JSON.parse(localStorage.getItem('bf_bad')||'[]');}catch(e){return [];}};
- body.innerHTML='<div class="wtin"><label>وزن امروز:</label><input type="number" inputmode="decimal" id="wtval" placeholder="'+START+'"><label>kg</label><button id="wtsave" type="button">ثبت</button></div>'+
+ body.innerHTML='<div class="wtin"><label>وزن امروز:</label><input type="text" inputmode="decimal" autocomplete="off" id="wtval" placeholder="'+START+'"><label>kg</label><button id="wtsave" type="button">ثبت</button></div>'+
    '<div class="chartwrap"><svg id="wtsvg" viewBox="0 0 320 160" preserveAspectRatio="none"></svg></div>'+
    '<div class="progstat" id="pstat"></div>'+
    '<button class="badbtn" id="badbtn" type="button">🔻 امروز یه روز خراب بود (علامت بزن)</button>';
