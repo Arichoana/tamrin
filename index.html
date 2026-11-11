@@ -1799,7 +1799,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
  document.addEventListener('fullscreenchange',()=>{ if(wrap.classList.contains('pfs')) return; const fs=(document.fullscreenElement===wrap); wrap.classList.toggle('fs',fs);
    if(fs){ hint.classList.add('show'); setTimeout(()=>hint.classList.remove('show'),3500); flashCtrl(); }
    else{ try{ screen.orientation.unlock(); }catch(e){} ctrl.classList.remove('show'); hint.classList.remove('show'); } });
- document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ if(t.dataset.day!=='tv' && (fr.src!=='about:blank'||hls)) stop(); }));   // رفتی سراغِ تمرین؟ پخش قطع شه که صداش مزاحم نشه
+ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ if(t.dataset.day!=='tv' && (curCh||fr.src!=='about:blank'||hls||!vid.paused)) stop(); }));   // ۱۱.۱۱: پخشِ مستقیمِ آیفون (بی hls.js) هم قطع شه — «صدای کافه فیلم از یه جا میاد»   // رفتی سراغِ تمرین؟ پخش قطع شه که صداش مزاحم نشه
 })();
 
 
