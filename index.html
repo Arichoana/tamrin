@@ -1738,7 +1738,7 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    curIdx=CH.indexOf(ch); { const nm=document.getElementById('tvname'); if(nm) nm.textContent=ch.n; }
    stopStall(); if(ch!==curCh) healN=0; curCh=ch; curBtn=b;                     // کانالِ نو → شمارنده‌ی درمان از نو
    wrap.classList.add('on'); bar.classList.add('on'); wrap.scrollIntoView({behavior:'smooth',block:'nearest'});
-   killHls(); clearTimeout(wd); fbBtn.style.display='none'; fr.src='about:blank'; const tc=b.querySelector('.tc');
+   killHls(); clearTimeout(wd); fbBtn.style.display='none'; fbBtn.textContent='▶ پلیرِ اصلی'; curFb=null; fr.src='about:blank'; const tc=b.querySelector('.tc');
    if(ch.m==='ytrand'){ showFrame(); const k=1+Math.floor(Math.random()*(ch.max||50));   // 🎲 یه ویدیوی رندوم از ویدیوهای بلندِ کانال (لیستِ UULF = بدونِ شورتس)
      fr.src='https://www.youtube-nocookie.com/embed/videoseries?list='+ch.list+'&index='+k+'&autoplay=1&playsinline=1&rel=0'; tc.textContent=ch.c; return; }
    if(ch.m==='site'){ showFrame(); fr.src=ch.url; return; }
@@ -1760,7 +1760,8 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
    showFrame(); tc.textContent='⏳ در حالِ گرفتنِ پخشِ زنده…';                    // یوتیوب: آی‌دیِ لایوِ همین لحظه از Worker
    try{
      const d=await (await fetch(API+'/tv?ch='+ch.id)).json();
-     if(d&&d.videoId){ fr.src='https://www.youtube-nocookie.com/embed/'+d.videoId+'?autoplay=1&playsinline=1'; tc.textContent=ch.c; }
+     if(d&&d.videoId){ fr.src='https://www.youtube-nocookie.com/embed/'+d.videoId+'?autoplay=1&playsinline=1'; tc.textContent=ch.c;
+       curFb='https://www.youtube.com/watch?v='+d.videoId; fbBtn.textContent='▶ پخش نشد؟ تو یوتیوب'; fbBtn.style.display='inline-block'; }   // آرمان ۱۱.۱۱: تو آیفون گاهی امبد پخش نمی‌کنه → همیشه راهِ یه‌ضربه‌ای به اپِ یوتیوب
      else{ tc.textContent='😕 الان لایو نیست — تو یوتیوب باز می‌کنم'; window.open('https://www.youtube.com/channel/'+ch.id+'/live','_blank'); }
    }catch(e){ tc.textContent='❌ نت وصل نشد — دوباره بزن'; }
  }
