@@ -1743,18 +1743,23 @@ const API='https://tamrin-api.arichoana.workers.dev', APPKEY='bfk-arman-7q2m9x4t
      fr.src='https://www.youtube-nocookie.com/embed/videoseries?list='+ch.list+'&index='+k+'&autoplay=1&playsinline=1&rel=0'; tc.textContent=ch.c; return; }
    if(ch.m==='site'){ showFrame(); fr.src=ch.url; return; }
    if(ch.m==='hls'){ showVid(); tc.textContent='⏳ در حالِ اتصال…'; curFb=ch.fb||null; fbBtn.href=curFb||'#';   // استریمِ مستقیم با hls.js
+     // 🔇 آرمان ۱۱.۱۱: «کانال عوض می‌کنم یهو صدا موت می‌شه» — قبلاً اگه play() رد می‌شد بی‌صدا می‌شد و دیگه هیچ‌وقت صدا برنمی‌گشت.
+     vid.muted=false;
+     const playLoud=()=>vid.play().catch(()=>{ vid.muted=true; vid.play().catch(()=>{}); tc.textContent='🔇 بی‌صدا شروع شد — یه بار رو تصویر بزن تا صدا بیاد';
+       wrap.addEventListener('click',function un(){ vid.muted=false; vid.play().catch(()=>{}); tc.textContent=ch.c; },{once:true}); });
      vid.addEventListener('playing',function _ok(){ vid.removeEventListener('playing',_ok); clearTimeout(wd); fbBtn.style.display='none'; tc.textContent=ch.c; healN=0; startStall(); },{once:true});   // پخش راه افتاد → پزشکِ داخلی روشن + شمارنده صفر
      clearTimeout(wd); wd=setTimeout(()=>{ if(vid.videoWidth===0 && vid.readyState<3){ tc.textContent='😕 این استریمِ رایگان الان لوسه'; if(curFb) fbBtn.style.display='inline-block'; } },13000);   // واچ‌داگ: پخش نشد → دکمه‌ی پلیرِ رسمی
+     if(vid.canPlayType('application/vnd.apple.mpegurl') && /iPhone|iPad|iPod/.test(navigator.userAgent)){ vid.src=ch.url; playLoud(); return; }   // آیفون: پخشِ خودِ سافاری، همون لحظه‌ی زدن (با صدا)
      await ensureHls();
      if(window.Hls && Hls.isSupported()){
        hls=new Hls({liveSyncDurationCount:1,liveMaxLatencyDurationCount:8,manifestLoadingMaxRetry:3,lowLatencyMode:false}); hls.loadSource(ch.url); hls.attachMedia(vid);
-       hls.on(Hls.Events.MANIFEST_PARSED,()=>{ vid.play().catch(()=>{ vid.muted=true; vid.play().catch(()=>{}); }); });
+       hls.on(Hls.Events.MANIFEST_PARSED,playLoud);
        let rec=0; hls.on(Hls.Events.FRAG_LOADED,()=>{ rec=0; });                 // استریم دوباره سالمه → سهمیه‌ی ریکاوری پر شه
        hls.on(Hls.Events.ERROR,(e,d)=>{ if(!d||!d.fatal) return;
          if(d.type==='networkError'&&rec<5){ rec++; setTimeout(()=>{try{hls.startLoad()}catch(x){}},1000); }
          else if(d.type==='mediaError'&&rec<5){ rec++; try{hls.recoverMediaError()}catch(x){} }
          else{ clearTimeout(wd); selfHeal(); } });
-     } else if(vid.canPlayType('application/vnd.apple.mpegurl')){ vid.src=ch.url; vid.play().catch(()=>{}); }
+     } else if(vid.canPlayType('application/vnd.apple.mpegurl')){ vid.src=ch.url; playLoud(); }
      else{ clearTimeout(wd); tc.textContent='❌ مرورگرت HLS نداره'; if(curFb) fbBtn.style.display='inline-block'; }
      return; }
    showFrame(); tc.textContent='⏳ در حالِ گرفتنِ پخشِ زنده…';                    // یوتیوب: آی‌دیِ لایوِ همین لحظه از Worker
