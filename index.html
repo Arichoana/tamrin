@@ -285,6 +285,7 @@
   details.info>summary::-webkit-details-marker{display:none}
   .sr .rest{color:var(--mut); font-weight:400; font-size:12px}
   .why{font-size:12px; color:#b9c2d0; margin-bottom:4px}
+  .howto{font-size:12.5px; line-height:1.85; color:#d6dde8; background:#14171d; border-inline-start:3px solid #ff9a3d; border-radius:8px; padding:7px 10px; margin:2px 0 9px}
   .tip{font-size:12px; color:var(--mut); margin-bottom:8px}
   .deline{font-size:11.5px; color:#9aa3b2; margin-bottom:9px; line-height:1.85; background:#0e1117; border:1px solid var(--line); border-radius:9px; padding:7px 10px} .deline b{color:#cdd5e0}
   .swapbtn{display:block; width:100%; margin-bottom:9px; background:#0e1117; border:1px solid #2c5a8a; color:#7fb3e8; font-family:inherit; font-size:12px; font-weight:700; padding:9px 12px; border-radius:9px; cursor:pointer}
@@ -815,11 +816,10 @@ function card(e){
       <div class="badges"><span class="b zone">${e.zone}</span><span class="b mus">${e.mus}</span>${mb}</div>
       <div class="sr">${e.scheme} <span class="rest">· استراحت ${e.rest}</span></div>
       ${e.swap?'<div class="swapwk" id="swapwk-'+e.id+'"></div><button class="swapbtn" data-id="'+e.id+'" type="button">🔁 عوض کن با «'+e.swap.n+'»</button>':''}
-      <details class="info"><summary>ℹ️ چطوری بزنم · کدوم دستگاه · اگه شلوغ بود (بزن تا باز شه)</summary>
+      ${(e.adv||e.tip)?'<div class="howto">🧭 <b>چطوری بزنم:</b> '+[e.adv,e.tip].filter(Boolean).join(' ')+'</div>':''}
+      <details class="info"><summary>ℹ️ کدوم دستگاه · اگه شلوغ بود (بزن تا باز شه)</summary>
       ${e.why?'<div class="why">💡 '+e.why+'</div>':''}
-      ${e.tip?'<div class="tip">'+e.tip+'</div>':''}
       <div class="deline">🏷️ دستگاه: <b>${e.de}</b>${e.alt?'<br>🔁 شلوغ بود؟ '+altify(e.alt):''}</div>
-      ${e.adv?'<details class="adv"><summary>💡 نکته‌ی فرم (پیشرفته) — بزن تا باز شه</summary><div>'+e.adv+'</div></details>':''}
       </details>
       <div class="logtitle">${lt}</div>
       <div class="log">
